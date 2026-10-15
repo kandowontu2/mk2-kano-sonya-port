@@ -8894,6 +8894,11 @@
       "sha256": "AFADE5E546646A31CBEDD49285FA25D0B126FF32397BE0A2940A12F11FF9706B"
     },
     {
+      "path": "controllers/video_sonya_kitana_leg_bench_20261015_preparation/campaign.lua",
+      "bytes": 61251,
+      "sha256": "D1B86ABEC8F3700235C7AAA241181BA09CB4EE6DDDF5A6F8936AE9F0DA13E0EA"
+    },
+    {
       "path": "controllers/video_sonya_subzero_hk_20261015_preparation/campaign.lua",
       "bytes": 52500,
       "sha256": "D29AF0C4BA9EBE8BFA3C2BE4B8BF0DD94A354CFDB4DD2D916E053FF8F47EE42A"
@@ -20259,6 +20264,11 @@
       "sha256": "344D8931ACD3DFC1CC03E810F8E39424443DA292790A94757A5A256224853CF6"
     },
     {
+      "path": "tools/cleanup_failed_sonya_early_video_20261015.ps1",
+      "bytes": 1905,
+      "sha256": "301209C81D2F9638BD2CD6B9100AC8D8F48418B1EECEE51222E6AA91DD126AB4"
+    },
+    {
       "path": "tools/cleanup_failed_sonya_video_v2_20261015.ps1",
       "bytes": 1703,
       "sha256": "4BE992E597FDE09E5FAE235BF74A59B4D1C53A55D2BEF376051EB96423A35E5F"
@@ -26057,6 +26067,11 @@
       "path": "tools/prepare_sonya_full_video_20261015.py",
       "bytes": 4066,
       "sha256": "B68BB5D2E9D4E615F627D45436B2D34ABFC0057B9722E9FB8541D66D625B3E79"
+    },
+    {
+      "path": "tools/prepare_sonya_kitana_leg_video_bench_20261015.py",
+      "bytes": 3396,
+      "sha256": "DA1AB47C114324E16F0301624CB3081425FF0A1A7291AF07286366407FEB6DEF"
     },
     {
       "path": "tools/prepare_sonya_video_early_ladder_20261015.py",
@@ -37289,6 +37304,11 @@
       "sha256": "2F221816C54761C071C09A93E979846D2C78F0E1BFC66C4E61DC84ED5FD1CD79"
     },
     {
+      "path": "tools/run_sonya_kitana_leg_video_bench_20261015.py",
+      "bytes": 2759,
+      "sha256": "CA1AC89DA4CA1722567412830397E2C310B2DB8181E6B8AB570012CBE97CA5E1"
+    },
+    {
       "path": "tools/run_sonya_launch_audio_v1474.ps1",
       "bytes": 3895,
       "sha256": "2CA0BD7C864295FBA7623C6F24F000532A470E008A8CB10A8B38B8D6AC82FF45"
@@ -39359,6 +39379,11 @@
       "sha256": "E5180539FE7550C0A386FD808E9C65CBF599C2EEC82AD3F7DBB9F34F93729477"
     },
     {
+      "path": "tools/seal_showcase_delivery_20261015.py",
+      "bytes": 3478,
+      "sha256": "D6BBE3C19F2A828B05EA001225FA9A2DBDAEFAC12E2EC9B13F0F192F256FC066"
+    },
+    {
       "path": "tools/seal_stock_slideshow_row40_runtime.py",
       "bytes": 3896,
       "sha256": "171B4349E738ED444553FADD594DB012CCFDCDFF2EFCD779A0DE543727C30A20"
@@ -39477,6 +39502,11 @@
       "path": "tools/supersede_archive_checker_v2582.ps1",
       "bytes": 3081,
       "sha256": "53971680E63FA81B20AA6341AC87F0B1A04AC48275AB73F003D5DB2D6D7A513B"
+    },
+    {
+      "path": "tools/sync_public_video_sources_20261015.py",
+      "bytes": 1859,
+      "sha256": "D4EF4AEDE2D2AE3E028CF26C9DA56F93F90E48A0391413B4F30B805D2820F9CA"
     },
     {
       "path": "tools/test_active_launcher_v1537.ps1",
@@ -46634,8 +46664,8 @@
       "sha256": "ED5C395981D7BC83E475225ECE0C23A44C85F53C870799C00EBA43997BED0076"
     }
   ],
-  "codeFileCount": 9326,
-  "codeBytes": 70398954,
+  "codeFileCount": 9332,
+  "codeBytes": 70473602,
   "patchSHA256": "42D8BC43C4A1F875586B432779BED21A92A1843A4743984F8AC81EFC11FAB0C5",
   "currentEXESHA256": "EBDFEB6CCA3617308F1448A4A0F6778E3E787420CACF3D11E9B4F40358C87F6A",
   "currentPayloadSHA256": "A9A9DB228D4CF5FEA7E2A659AEF4D4407193FEE3D2F86E217F7F725D0D8E58D3",
