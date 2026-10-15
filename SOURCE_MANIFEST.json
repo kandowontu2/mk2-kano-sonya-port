@@ -8909,6 +8909,26 @@
       "sha256": "D1B86ABEC8F3700235C7AAA241181BA09CB4EE6DDDF5A6F8936AE9F0DA13E0EA"
     },
     {
+      "path": "controllers/video_sonya_late_leg_bench_20261015_preparation/campaign.lua",
+      "bytes": 60927,
+      "sha256": "2D846670A4EB297460C2347757298E22812A8CD6081AAC8C325DE9F675EDD3EB"
+    },
+    {
+      "path": "controllers/video_sonya_late_leg_bench_20261015_preparation/run.py",
+      "bytes": 2795,
+      "sha256": "19F0EF142FD9D92863CF11313ED6F66355FC5766FECA0005A0A32D80EBE52507"
+    },
+    {
+      "path": "controllers/video_sonya_raiden_leg_bench_20261015_preparation/campaign.lua",
+      "bytes": 60997,
+      "sha256": "B9EEA684364F21EAD53A730F3B3788E3C45CAA781745FC8D4BF195BBD2D0A019"
+    },
+    {
+      "path": "controllers/video_sonya_raiden_leg_bench_20261015_preparation/run.py",
+      "bytes": 2799,
+      "sha256": "9F92885AEB4783ACD4D4C1F95A3E4FBF41682068B266860E923E564B64C536FB"
+    },
+    {
       "path": "controllers/video_sonya_subzero_hk_20261015_preparation/campaign.lua",
       "bytes": 52500,
       "sha256": "D29AF0C4BA9EBE8BFA3C2BE4B8BF0DD94A354CFDB4DD2D916E053FF8F47EE42A"
@@ -20274,6 +20294,11 @@
       "sha256": "344D8931ACD3DFC1CC03E810F8E39424443DA292790A94757A5A256224853CF6"
     },
     {
+      "path": "tools/cleanup_failed_showcase_media_20261015.ps1",
+      "bytes": 1597,
+      "sha256": "3E5397D31AED70E92B7F676602137371C70151EED623677FD37325DDFCE21E10"
+    },
+    {
       "path": "tools/cleanup_failed_sonya_early_video_20261015.ps1",
       "bytes": 1905,
       "sha256": "301209C81D2F9638BD2CD6B9100AC8D8F48418B1EECEE51222E6AA91DD126AB4"
@@ -26079,6 +26104,11 @@
       "sha256": "683A30CFF8FB561920C49F4B153B4C65838C4C7D4BEFCA1C66AA6DC3EAB76923"
     },
     {
+      "path": "tools/prepare_sonya_final_video_20261015.py",
+      "bytes": 2867,
+      "sha256": "4F9253F70FF2427A84C9E41EDE2824167029A4EBF8F68CD4362F911DA95B767B"
+    },
+    {
       "path": "tools/prepare_sonya_full_video_20261015.py",
       "bytes": 4066,
       "sha256": "B68BB5D2E9D4E615F627D45436B2D34ABFC0057B9722E9FB8541D66D625B3E79"
@@ -26087,6 +26117,16 @@
       "path": "tools/prepare_sonya_kitana_leg_video_bench_20261015.py",
       "bytes": 3396,
       "sha256": "DA1AB47C114324E16F0301624CB3081425FF0A1A7291AF07286366407FEB6DEF"
+    },
+    {
+      "path": "tools/prepare_sonya_late_leg_video_bench_20261015.py",
+      "bytes": 1646,
+      "sha256": "3DE7003CB51032AC0E6B54087EC2CE189FB50AAE8A0B9389E71DFDF1D551F984"
+    },
+    {
+      "path": "tools/prepare_sonya_raiden_leg_video_bench_20261015.py",
+      "bytes": 1293,
+      "sha256": "1C087712BB3871DF909433180DD03FBDDBF938ADD08095AD40E3689D3133BCE1"
     },
     {
       "path": "tools/prepare_sonya_video_early_ladder_20261015.py",
@@ -26255,8 +26295,8 @@
     },
     {
       "path": "tools/publish_video_source_progress_20261015.py",
-      "bytes": 1412,
-      "sha256": "1AF80389FEB44562FEDFC5C1C5D9C7460FC848957E34D10BDEC20EE1ADE23369"
+      "bytes": 1780,
+      "sha256": "46926B689B5702EC76071436B16248CDD5116042B2C867C44F71FC7BE0999E9A"
     },
     {
       "path": "tools/qualify_actual_cpu_cycle_raster_boundary_v4742.py",
@@ -31892,6 +31932,11 @@
       "path": "tools/qualify_single_continue_controls_v6584.py",
       "bytes": 4726,
       "sha256": "A492F5C3BB82CA3A6FE92A903CC9485BF970513640EFD43F85A3D10340CCD0D5"
+    },
+    {
+      "path": "tools/qualify_sonya_complete_video_bench_20261015.py",
+      "bytes": 4233,
+      "sha256": "CE4F79C10E70D229ECB600F66C710600E127217C605D85D688790EBB39B3C43A"
     },
     {
       "path": "tools/qualify_sonya_kitana_video_bench_20261015.py",
@@ -46689,8 +46734,8 @@
       "sha256": "ED5C395981D7BC83E475225ECE0C23A44C85F53C870799C00EBA43997BED0076"
     }
   ],
-  "codeFileCount": 9337,
-  "codeBytes": 70544601,
+  "codeFileCount": 9346,
+  "codeBytes": 70684123,
   "patchSHA256": "42D8BC43C4A1F875586B432779BED21A92A1843A4743984F8AC81EFC11FAB0C5",
   "currentEXESHA256": "EBDFEB6CCA3617308F1448A4A0F6778E3E787420CACF3D11E9B4F40358C87F6A",
   "currentPayloadSHA256": "A9A9DB228D4CF5FEA7E2A659AEF4D4407193FEE3D2F86E217F7F725D0D8E58D3",

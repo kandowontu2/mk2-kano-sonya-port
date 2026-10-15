@@ -43,3 +43,11 @@ between those rounds. Four negative evidence mutations were rejected. This
 proves that encounter, not the whole ladder. The same controller is now being
 tested through the rest of the ladder before another large recording.
 It uses physical inputs, not health/AI/difficulty changes.
+
+The successor also cleared Mileena (native KO fields 121324 and 123128, same
+paid selection25) and Scorpion (143616 and 145291, same paid selection28;
+Scorpion won one preceding round). Actual next-match admissions were at123637
+and145799. That finite test stopped at its200000-field bound while facing
+Raiden, without an ending. The next controller changes only Raiden12/Shang14
+to the same guarded close-leg policy; it does not reset or rewrite game state.
+No unsuccessful scalar test is represented as a completed video.
