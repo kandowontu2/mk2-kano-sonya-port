@@ -1,0 +1,15 @@
+-- Entire existing earned controller and integer-renderer observer, RAM only.
+local handle=assert(io.open('mk2ks_jax_arms_native_scene_ram_v4073.lua','r'))
+local source=handle:read('a');handle:close()
+local function once(old,new)
+ local at=assert(source:find(old,1,true));assert(not source:find(old,at+#old,true))
+ source=source:sub(1,at-1)..new..source:sub(at+#old)
+end
+once("dofile('mk2ks_stock_extended_earned_ram_v3958.lua')","dofile('mk2ks_scorpion_secondary_state_ram_v4534.lua')")
+once("local move='jax_arms'","local move='scorpion_secondary'")
+once('local action_entry=0xff8be240','local action_entry=0xff8bbfe0')
+once('a.id==11 and victim.id==identity','a.id==10 and victim.id==identity')
+once('MK2_JAX_ARMS_NATIVE_SCENE_WRAPPER','MK2_SCORPION_SECONDARY_NATIVE_SCENE_WRAPPER')
+once('@mk2ks_native_tomb_display_v2062_Jax_arms_window_RAM_sinks','@mk2ks_native_tomb_display_v2062_Scorpion_secondary_window_RAM_sinks')
+assert(not source:match(':write_[%w_]+%s*%('))
+assert(load(source,'@whole4073_Scorpion_secondary_real_instruction_window_only_4558','t',_ENV))()

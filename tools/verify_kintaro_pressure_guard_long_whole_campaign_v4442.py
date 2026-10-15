@@ -1,0 +1,188 @@
+"""Retain whole native campaign/ending/boss grammar plus complete new physical-input replay.
+
+Requires the real terminal capture, never treats a prefix or a paid loss as a
+tower clear. Whole ending pixels/audio remain separate outstanding acceptance.
+"""
+import hashlib
+import inspect
+import json
+import subprocess
+import traceback
+from pathlib import Path
+import verify_sonya_zoning700_campaign_v4015 as base
+import verify_mirror_guard_zoning_prefix_v4194 as physical
+import verify_shang_jump_retry_prefix_v4306 as spacing
+import qualify_kintaro_pressure_guard_long_source_v4437 as boundary
+import run_kintaro_pressure_guard_long_campaign_v4439 as capture
+
+ROOT, need, sha, NAME = capture.ROOT, capture.need, capture.sha, capture.NAME
+FOLDER = ROOT / 'audit_v4440_sonya_kintaro_pressure_guard_long_p2_campaign'
+OUT = ROOT / 'audit_v4443_kintaro_pressure_guard_long_whole_campaign_checked'
+
+
+def guard_source_boundary():
+    # Full original boss source/driver checks are retained. Only declared
+    # non-boss controls and RAM sinks differ; physical replay below is separate.
+    base.ring.source_boundary()
+    return boundary.source_boundary()
+
+
+def clone(function, substitutions, additions):
+    text = inspect.getsource(function)
+    for before, after in substitutions:
+        need(text.count(before) == 1, 'Unique full original algorithm adaptation: ' + before)
+        text = text.replace(before, after)
+    scope = dict(vars(base))
+    scope.update(__file__=__file__, capture=capture, NAME=NAME, **additions)
+    exec(compile(text, __file__ + '::unweakened_' + function.__name__, 'exec'), scope)
+    return scope[function.__name__]
+
+
+ram_guest = clone(base.ram_guest,
+                  [('mk2ks_guarded_campaign_guest_ram_v4006.lua', capture.LUA)], {})
+matched = clone(base.matched,
+                [('transport_boundary()', 'guard_source_boundary()'),
+                 ("meta['strategy']=='zoning'and meta['boot_frame']==700",
+                  "meta['strategy']=='guard_punish'and meta['boot_frame']==600"),
+                 ("meta['seconds']==6000 and meta['observer_limit_seconds']==5900",
+                  "meta['seconds']==6000 and meta['observer_limit_seconds']==5900")],
+                dict(guard_source_boundary=guard_source_boundary))
+
+
+def ram_guest_checked(folder, pins, wanted, text, errors):
+    try:
+        return ram_guest(folder, pins, wanted, text)
+    except ValueError as error:
+        errors.append(str(error))
+        return wanted
+
+
+def adapt_kintaro_pressure_guard(source):
+    before="""            elif escape and f['gap']<preparation_gap:
+                if down_since is None:down_since=frame
+                expected={'Down'}
+                if stance and frame-down_since>=12 and f['gap']<jump_gap and f['cpu_height']<20 and frame-jump>=60:
+"""
+    after="""            elif escape and f['gap']<preparation_gap:
+                if down_since is None:down_since=frame
+                expected={'Down','Block'}
+                guard_ready=stance or(f['height']==0 and not f['flags']&0x0c and not f['body']&0x0c and f['human_action']in(0x700,0x701))
+                if guard_ready and frame-down_since>=12 and f['gap']<jump_gap and f['cpu_height']<20 and frame-jump>=60:
+"""
+    need(source.count(before)==1,'One exact original Kintaro pressure-input block; stomp/late kick/Shao/native grammar retained')
+    return source.replace(before,after,1)
+
+
+def make_native(expected):
+    factory=inspect.getsource(base.ring.make_verifier)
+    before='    namespace=dict(vars(old));namespace.update'
+    need(factory.count(before)==1,'Entire original native factory retained')
+    factory=factory.replace(before,'    source=base.adapt_guest_transport(source)\n    source=adapt_kintaro_pressure_guard(source)\n'+before,1)
+    namespace=dict(vars(base.ring));namespace.update(base=base,adapt_kintaro_pressure_guard=adapt_kintaro_pressure_guard)
+    exec(compile(factory,__file__+'::complete_factory_one_physical_kick_gate','exec'),namespace)
+    whole=namespace['make_verifier'](expected)
+    whole.__globals__.update(NAME=NAME, matched=matched, ram_guest_checked=ram_guest_checked)
+
+    def native(folder, text_override=None):
+        result = whole(folder, text_override=text_override)
+        text = (folder / 'run.log').read_text() if text_override is None else text_override
+        try:
+            actual = physical.replay(text)
+            need(actual['reasons'].get('leg_attempt', 0) > 0 and actual['actualNativeLegActivations'] > 0,
+                 'Actual native own Leg Grab tasks required, not just intended commands')
+            result['actualWholeGuardInputReplay'] = actual
+            actual_spacing = spacing.replay(text)
+            need(actual_spacing['actualNativeOwnRingTasks'] > 0,
+                 'Real own Ring task must activate, not only physical command attempts')
+            result['actualWholeRingSpacingInputReplay'] = actual_spacing
+        except ValueError as error:
+            result['passed'] = False
+            result['errors'].append(str(error))
+        return result
+    return native
+
+
+verify_original = clone(base.verify,
+    [("audit_v4009_{fighter}_zoning700_p2_campaign", "audit_v4440_{fighter}_kintaro_pressure_guard_long_p2_campaign"),
+     ("deadline[0][1]=='5900'and 5900<=float(deadline[0][0])<5900.03",
+      "deadline[0][1]=='5900'and 5900<=float(deadline[0][0])<5900.03")],
+    dict(make_native=make_native, matched=matched, ram_guest=ram_guest))
+
+
+def verify():
+    # Historical runner filenames are immutable, not authoritative name mappings.
+    mapping=ROOT/'mk2ks_stock_scorpion_secondary_inputs_v1210.lua'
+    need("local killer_id=assert(({scorpion=10})[killer])" in mapping.read_text(),
+         'Native Scorpion identity10; executed Shang filename is a historical mislabel')
+    result = verify_original('sonya')
+    text = (FOLDER / 'run.log').read_text()
+    positive = physical.replay(text)
+    rows = physical.parse(text)
+    frame = next(r['frame'] for r in rows if r['tag'] == 'GUARD_DECISION' and r['reason'] == 'leg_attempt')
+    f = next(r for r in rows if r['tag'] == 'GUARD_FIELD' and r['frame'] == frame)
+    faults = [('GUARD_FIELD', 'human_id', 0), ('GUARD_FIELD', 'human_roster', 0),
+              ('GUARD_FIELD', 'cpu_id', 0), ('GUARD_FIELD', 'human_owner', '01000000'),
+              ('GUARD_FIELD', 'health', '0,161'), ('GUARD_FIELD', 'reset', 1 - int(f['reset'])),
+              ('GUARD_FIELD', 'human_action', 0x500), ('GUARD_FIELD', 'cpu_action', 0x507),
+              ('GUARD_DECISION', 'reason', 'stance_guard'), ('INPUT', 'button', 'Up')]
+    rejected = []
+    for tag, key, value in faults:
+        try:
+            physical.replay(physical.change(text, tag, frame, key, value))
+        except ValueError as error:
+            rejected.append(dict(tag=tag, key=key, rejectedBy=str(error)))
+        else:
+            raise ValueError('Actual complete guard replay fault accepted')
+        need(physical.replay(text) == positive, 'Whole physical positive restored after each fault')
+    prefix_path = ROOT / 'audit_v4307_shang_jump_retry_actual_prefix_checked/report.json'
+    prefix = json.loads(prefix_path.read_text())
+    raw = (FOLDER / 'run.log').read_bytes()[:prefix['nativeLogPrefixBytes']]
+    need(prefix['passed'] and prefix['prefixProofOnly'] and hashlib.sha256(raw).hexdigest().upper() == prefix['nativeLogPrefixSHA256'],
+         'Frozen original non-boss prefix through59067 retained byte-for-byte; only later Kintaro guard/release inputs change')
+    # Extend the terminal bounded observation, never rewrite or synthesize it.
+    # The old host deadline and stop summaries are not native continuation events.
+    bounded_path=ROOT/'audit_v4431_kintaro_pressure_guard_whole_campaign_checked/report.json'
+    bounded=json.loads(bounded_path.read_text())
+    old_log=ROOT/'audit_v4428_sonya_kintaro_pressure_guard_p2_campaign/run.log'
+    raw_old=old_log.read_bytes()
+    marker=b'MK2_CAMPAIGN_HOST_DEADLINE '
+    need(raw_old.count(marker)==1 and bounded['passed'] and bounded['case']['passed'],
+         'Actually terminal original qualified bounded run, not elapsed observation alone')
+    retained=raw_old[:raw_old.index(marker)]
+    need((FOLDER/'run.log').read_bytes()[:len(retained)]==retained,
+         'Every original native record before the host-only deadline retained byte-for-byte')
+    result.update(qualifiedBoundedNativePrefixBytes=len(retained),
+        qualifiedBoundedNativePrefixSHA256=hashlib.sha256(retained).hexdigest().upper(),
+        physicalCampaignExactlyUnchanged=True,hostObservationOnlyExtended=True)
+    for path in (bounded_path,old_log):
+        result['inputHashes'][str(path.resolve())]=sha(path)
+    for path in (Path(__file__), Path(physical.__file__), Path(spacing.__file__), Path(boundary.__file__), prefix_path,mapping):
+        result['inputHashes'][str(path.resolve())] = sha(path)
+    result.update(actualWholeCampaignGrammarRetained=True, actualWholeGuardInputReplay=positive,
+                  rangeOpponentNames={5:'Mileena',10:'Scorpion'},
+                  historicalExecutedShangLabelSuperseded=True,
+                  actualAdditionalGuardReplayFaultsRejected=rejected,
+                  actualWholeRingSpacingInputReplay=spacing.replay(text),
+                  actualRingSpacingPrefixFaultsRejected=prefix['actualRowFaultsRejected'],
+                  onlyKintaroPhysicalPressureGuardChanged=True,
+                  endingPixelsAccepted=False, completeCampaignAudioAccepted=False, fullPortAcceptance=False)
+    return result
+
+
+if __name__ == '__main__':
+    need(not OUT.exists(), 'Fresh immutable whole-campaign qualifier output')
+    try:
+        result = verify()
+        report = dict(passed=True, case=result, actualNaturalSonyaP2TowerClearAccepted=result['unassisted_clear_proven'],
+                      endingPixelsAccepted=False, completeCampaignAudioAccepted=False, fullPortAcceptance=False)
+    except Exception as error:
+        report = dict(passed=False, error=repr(error), traceback=traceback.format_exc(), fullPortAcceptance=False)
+    OUT.mkdir()
+    need(subprocess.run(['compact.exe', '/C', '/I', '/Q', '/S:' + str(OUT)], capture_output=True).returncode == 0,
+         'Compress proof directory before writes')
+    (OUT / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
+    print(json.dumps({k: v for k, v in report.items() if k != 'case'}, indent=2), flush=True)
+    if report['passed']:
+        print(json.dumps(report['case']['actualWholeGuardInputReplay'], indent=2), flush=True)
+        print(json.dumps(report['case']['actualWholeRingSpacingInputReplay'], indent=2), flush=True)
+    raise SystemExit(0 if report['passed'] else 1)

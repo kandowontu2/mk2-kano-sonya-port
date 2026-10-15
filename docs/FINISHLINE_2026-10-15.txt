@@ -1,0 +1,51 @@
+MK2 Kano/Sonya original-scope finishline, 2026-10-15
+
+The original fourteen requirements remain authoritative. This is a root
+integration decision, not a new test or a claim of universal input coverage.
+
+Twelve feature groups are supported by explicit current runtime and preserved
+component evidence:
+1 selection; 2 selection/ladder teardown; 3 true native identities;
+4 native names and shadows; 5 eight human specials; 6 native CPU repertoire;
+7 ordinary combat; 8 grounding/floor shadows; 9 source-native audio/lifetimes;
+10 own/stock/transformed finishers and victims; 11 native stage finishers;
+12 campaigns, bosses, own endings, attract, joins and secret routes.
+
+Evidence decisions:
+- audit_current_original14_finishline_checked/report.json: original text and
+  explicit finite acceptance for selection/transition/identity/names/human
+  moves/ordinary combat/grounding. Its older incomplete classifications are
+  not silently edited; the successors below address the identified gaps.
+- audit_current_cpu_feature_composition_20261015_checked/report.json:
+  all eight real CPU entries, shared native bodies and changed dependencies.
+- audit_current_cinematic_feature_closure_map/report.json:
+  four original cinematic/audio groups, exact evidence pins and scope.
+- audit_current_human_laser_four_png_v3_checked/report.json and its runtime
+  root_visual_review.txt: actual earned laser phases and clean next selector.
+- audit_current_campaign_change_proof_matrix_v2_checked/report.json:
+  retained four campaigns plus current changed-dependency coverage; no need
+  to reinterpret bot losses as broken game transitions.
+- tools/verify_native_source_sync.py and current CMD --check both passed.
+
+Final deliverable groups also accepted:
+13 Final ZIP all85memberhashes/CRC and extracted standalone CMD/complete-ROM/
+   23sound check pass. Metadata-only promotion follows the actual portable
+   gate; all playable/checker/source members are identical to that tested set.
+   Final ZIP release_mk2_kano_sonya_20261015/MK2_Kano_Sonya_20261015.zip
+   Current SHA256 4B8288D0CC1E94D476D60D87C0EF4DF5B5BB22A0BD123D4943330A2CD223B9B2
+   FULL_MOVELIST_UPDATE.json supersedes the earlier archive hash only:
+   full finisher/Shang morph text added,84otherfiles unchanged,allhash/CRCpass.
+14 Scoped obsolete ROM/build/snapshot/staging cleanup completed with exact
+   dependency/SHA/containment guards. One Git worktree and only current game
+   EXE remain. Final bounded census:5254791679Ballocated/10081501913Blogical,
+   142142files. Net measured allocation reduction264753118B (252.49MiB),
+   including final deliverable; temporary extraction/intermediaryZIP removed.
+   Source/reconstruction inputs/accepted proof data retained; no archive.
+
+No known current gameplay defect is demonstrated by these reviews. That is
+not itself the acceptance basis: the named positive runtime/component tests
+are. No universal all-RNG/all-input-history or subjective hardware-hearing
+criterion is substituted for the requested native integration features.
+All fourteen original groups accepted; no required work remains.
+Authoritative final audit: audit_root_final_acceptance_20261015/report.json,
+also copied as release_mk2_kano_sonya_20261015/FINAL_ACCEPTANCE.json.

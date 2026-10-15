@@ -1,0 +1,45 @@
+param([Parameter(Mandatory=$true)][string]$CaseName,[ValidateSet('kano','sonya','cage','liu_kang')][string]$Winner='kano',
+ [ValidateSet(1,2)][int]$Side=1,[ValidateSet('positive','wrong_command','punch_used')][string]$CommandCase='positive',[switch]$NoSamples)
+$ErrorActionPreference='Stop';$root=Split-Path $PSScriptRoot -Parent
+if($CaseName -notmatch '^audit_v[0-9]+_[a-z0-9_]+$'){throw 'Versioned evidence name required'}
+$out=Join-Path $root $CaseName;$candidate=Join-Path $root 'diagnostic_v1836_ball_register_boundary'
+if(Test-Path -LiteralPath $out){throw 'Do not overwrite evidence'}
+$build=Get-Content -LiteralPath "$candidate/build-info.json" -Raw | ConvertFrom-Json
+$tracked=@($PSCommandPath,"$root/mk2ks_current_friendship_full_render_v2702.lua","$root/mk2ks_current_friendship_shadow_v2689.lua","$root/mk2ks_human_uppercut_full_render_v2166.lua","$root/mame-mkp/src/devices/cpu/tms34010/34010gfx.hxx","$root/mame-mkp/src/devices/cpu/tms34010/34010ops.hxx","$root/mk2ks_current_friendship_extended_wins_v2688.lua","$root/mk2ks_current_friendship_extended_audio_v2687.lua","$root/mk2ks_native_friendship_probe_v788.lua","$root/mk2ks_current_friendship_wins_v2651.lua","$root/mk2ks_native_friendship_audio_v790.lua","$root/mk2ks_native_friendship_probe_v784.lua","$candidate/mkport_candidate.exe",
+ "$candidate/roms/mk2ks/mk2ks.mdata","$candidate/build-info.json","$root/mk2/mk2-maincpu.bin")
+foreach($item in $build.input_hashes.PSObject.Properties){
+ if((Get-FileHash -LiteralPath $item.Name).Hash -ne $item.Value){throw "Build input changed: $($item.Name)"}
+ $tracked+=$item.Name
+}
+if((Get-FileHash -LiteralPath "$candidate/mkport_candidate.exe").Hash -ne $build.executable_sha256 -or
+ (Get-FileHash -LiteralPath "$candidate/roms/mk2ks/mk2ks.mdata").Hash -ne $build.payload_sha256){throw 'Matched candidate required'}
+$tracked+=Get-ChildItem -LiteralPath "$root/roms/mk2ks" -File | ForEach-Object {$_.FullName}
+$tracked+=Get-ChildItem -LiteralPath "$root/artwork" -File | ForEach-Object {$_.FullName}
+$tracked+=Get-ChildItem -LiteralPath "$root/samples/mk2ks" -File | ForEach-Object {$_.FullName}
+$tracked=@($tracked | Select-Object -Unique);$hashes=@{}
+New-Item -ItemType Directory -Path "$out/input_sources" | Out-Null
+$resolvedEvidence=(Get-Item -LiteralPath $out).FullName
+$resolvedRoot=(Get-Item -LiteralPath $root).FullName
+if(-not $resolvedEvidence.StartsWith($resolvedRoot+[IO.Path]::DirectorySeparatorChar,[StringComparison]::OrdinalIgnoreCase) -or (Get-Item -LiteralPath $out).Attributes -band [IO.FileAttributes]::ReparsePoint){throw 'Unsafe capture leaf'}
+& compact.exe /C /I /Q "/S:$resolvedEvidence" | Out-Null
+if($LASTEXITCODE -ne 0){throw 'Cannot compress fresh capture'}
+foreach($file in $tracked){$hashes[$file]=(Get-FileHash -LiteralPath $file).Hash;if([IO.Path]::GetExtension($file) -in '.lua','.ps1','.json'){Copy-Item -LiteralPath $file -Destination "$out/input_sources"}}
+$hashes | ConvertTo-Json | Out-File -LiteralPath "$out/inputs_before.json" -Encoding utf8
+$hashes | ConvertTo-Json | Out-File -LiteralPath "$out/input_hashes_before.json" -Encoding utf8
+$saved=@{};Get-ChildItem Env: | Where-Object {$_.Name -match '^(MK2KS_|MK2_TRACE_|MK2_RANGE_|MK2_P2_)'} | ForEach-Object {$saved[$_.Name]=$_.Value}
+Push-Location $root
+try{
+ Get-ChildItem Env: | Where-Object {$_.Name -match '^(MK2KS_|MK2_TRACE_|MK2_RANGE_|MK2_P2_)'} | Remove-Item
+ $env:MK2KS_FRIEND_SIDE="$Side";$env:MK2KS_FRIEND_WINNER=$Winner;$env:MK2KS_FRIEND_CASE=$CommandCase;$env:MK2KS_FRIEND_OUT=$out
+ $env:MK2KS_FRIEND_GAP="160";$env:MK2KS_FRIEND_OBSERVATION="1600"
+ $sampleOption=if($NoSamples){'-nosamples'}else{'-samples'}
+ & "$candidate/mkport_candidate.exe" mk2ks -rompath "$candidate/roms;$root/roms" -artpath "$root/artwork" -samplepath "$root/samples" $sampleOption -skip_gameinfo -nocheat -inipath "$out" -video none -sound none -samplerate 48000 -wavwrite "$out/native_mix.wav" -noautoframeskip -frameskip 0 -nothrottle -str 180 -snapsize 400x254 -cfg_directory "$out/cfg" -nvram_directory "$out/nvram" -snapshot_directory "$out/snap" -autoboot_script "$root/mk2ks_current_friendship_full_render_v2702.lua" 2>&1 | Out-File -LiteralPath "$out/run.log" -Encoding utf8
+ $code=$LASTEXITCODE
+ foreach($file in $tracked){if((Get-FileHash -LiteralPath $file).Hash -ne $hashes[$file]){throw "Executed input changed: $file"}}
+ [ordered]@{exit_code=$code;candidate='diagnostic_v1836_ball_register_boundary';executable_sha256=$build.executable_sha256;payload_sha256=$build.payload_sha256;winner=$Winner;side=$Side;command_case=$CommandCase;requested_gap=160;observation=1600;samples_enabled=(-not $NoSamples);cheats_enabled=$false;guest_writes=0;assistance='none';passed=$false;fullPortAcceptance=$false;scope='native Friendship consecutive rendering diagnostic; independent checks pending';mix_sha256=(Get-FileHash -LiteralPath "$out/native_mix.wav").Hash;input_hashes=$hashes} | ConvertTo-Json -Depth 4 | Out-File -LiteralPath "$out/result.json" -Encoding utf8
+ "$CaseName terminal exit=$code (verification pending)"
+}finally{
+ Pop-Location
+ Get-ChildItem Env: | Where-Object {$_.Name -match '^(MK2KS_|MK2_TRACE_|MK2_RANGE_|MK2_P2_)'} | Remove-Item
+ foreach($name in $saved.Keys){Set-Item -LiteralPath "Env:$name" -Value $saved[$name]}
+}

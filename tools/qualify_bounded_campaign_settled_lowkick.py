@@ -1,0 +1,25 @@
+"""Earned progression/identity gates plus unchanged prefix and native crouch LK."""
+from pathlib import Path
+import re
+import verify_native_source_sync as sync
+parent=Path(__file__).with_name('qualify_bounded_sonya_campaign_30000.py')
+wrapper=parent.read_text()
+marker="exec(compile(source,__file__,'exec'),dict(__file__=__file__,predecessor=predecessor))"
+assert wrapper.count(marker)==1
+context=dict(__file__=str(parent))
+exec(compile(wrapper.split(marker)[0],str(parent),'exec'),context)
+def prefix(path):
+    answer=[]
+    for line in path.read_text().splitlines():
+        match=re.search(r'\bframe=(\d+)',line)
+        if line.startswith('MK2_NAT_CAMPAIGN_') and match and int(match[1])<12472:answer.append(line)
+    return answer
+baseline=sync.ROOT/'audit_bounded_sonya_campaign_30000_p1_runtime/run.log'
+current=sync.ROOT/'audit_bounded_campaign_settled_lowkick_p1_runtime/run.log'
+assert prefix(baseline)==prefix(current)
+nativeCrouch=[line for line in current.read_text().splitlines() if line.startswith('MK2_NAT_CAMPAIGN_LIVE ') and re.search(r'actions=282,',line)]
+assert nativeCrouch, 'No sampled native crouch LK action282: do not claim successful policy binding'
+source=context['source'].replace('audit_bounded_sonya_campaign_30000_checked','audit_bounded_campaign_settled_lowkick_checked')
+source=source.replace('audit_bounded_sonya_campaign_30000_p{side}_runtime','audit_bounded_campaign_settled_lowkick_p{side}_runtime').replace('30000','24000')
+source=source.replace('report=dict(passed=True,results=results,','report=dict(passed=True,results=results,sampledNativeCrouchLKFields=len(nativeCrouch),unchangedPrefixFields=12471,baselineLogSHA256=sync.sha(baseline),physicalPolicyChange=\'settled lowkick from stage4 only\',')
+exec(compile(source,__file__,'exec'),dict(__file__=__file__,predecessor=context['predecessor'],baseline=baseline,nativeCrouch=nativeCrouch))

@@ -1,0 +1,5 @@
+"""Reuse chronology-scoped damage/identity ledger for groundspacing successor."""
+from pathlib import Path
+code=Path(__file__).with_name('classify_current_kano_kitana_attempt_scoped.py').read_text()
+code=code.replace("code=code.replace('audit_current_kano_kitana_attempt_classified','audit_current_kano_kitana_attempt_classified_scoped')","code=code.replace('audit_current_kano_kitana_attempt_classified','audit_current_kano_kitana_ground_spacing_classified')\ncode=code.replace('audit_current_kano_kitana_confirmed_jump_runtime','audit_current_kano_kitana_ground_spacing_runtime')\ncode=code.replace(\"len(rows.get('KANO_KITANA_CONFIRMED_JUMP_ATTEMPT',[]))\",\"len(rows.get('KANO_KITANA_SPACING_KNIFE',[]))\")\ncode=code.replace(\"jumpRequests=\",\"knifeRequests=\")\ncode=code.replace(\"jumpStartupAcceptances=len(rows.get('KANO_KITANA_JUMP_ACCEPTED',[]))\",\"nativeKnifeEntries=len([r for r in rows.get('SPECIAL',[]) if r.get('stage')=='3' and r.get('move')=='knife'])\")")
+exec(compile(code,__file__,'exec'))

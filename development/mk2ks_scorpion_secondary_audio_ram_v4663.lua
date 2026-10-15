@@ -1,0 +1,16 @@
+-- Entire existing audio observer; only native origin/ID and physical driver change.
+local file=assert(io.open('mk2ks_jax_arms_audio_routes_ram_v4210.lua','rb'))
+local source=file:read('a');file:close()
+local function once(before,after)
+ local first,last=assert(source:find(before,1,true))
+ assert(not source:find(before,last+1,true),'Unique audio role adapter')
+ source=source:sub(1,first-1)..after..source:sub(last+1)
+end
+once("dofile('mk2ks_stock_extended_earned_ram_v3958.lua')","dofile('mk2ks_scorpion_secondary_state_ram_v4534.lua')")
+once('0xff8be240,0xff8be24f','0xff8bbfe0,0xff8bbfef')
+once('actual native Jax arm-rip audio origin','actual native Scorpion secondary audio origin')
+once('at~=0xff8be240','at~=0xff8bbfe0')
+once('p:read_u16(a+0x1f0)~=11','p:read_u16(a+0x1f0)~=10')
+once('id=11','id=10')
+assert(not source:match(':write_[%w_]+%s*%('))
+assert(load(source,'@entire4210_audio_only_Scorpion_origin_and_4534_controls_4657','t',_ENV))()

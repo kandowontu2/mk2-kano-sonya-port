@@ -1,0 +1,72 @@
+MK2 KANO / SONYA - FULL MOVELIST FOR THIS PORT
+Includes fatalities, Friendships, Babalities, stage finishes and Shang morphs.
+
+Extract the entire release ZIP and run PLAY.cmd. In the working folder,
+PLAY_MK2_KANO_SONYA.cmd also launches the game. Tab opens input settings.
+
+NOTATION
+F = Forward, toward the opponent. B = Back, away from the opponent.
+D = Down. U = Up. Directions reverse when you switch sides.
+HP = High Punch. LP = Low Punch. HK = High Kick. LK = Low Kick.
+A comma means the next input in sequence; + means press together.
+Enter direction sequences quickly, then press the final attack button.
+These commands are specific to this port, not an unmodified MK3 movelist.
+
+KANO - SPECIAL MOVES
+Knife Throw:       D, B + HP.
+Blade Swipe:       D, F + HP. Close-range swipe, not a projectile.
+Choke:             D, F + LP. Close range.
+Cannonball:        Hold LK for about 1.5 seconds, then release LK.
+Choke cannot grab Kintaro or Shao Kahn.
+
+KANO - FINISHERS
+Skeleton Rip:      B, D, F + HK. Close range.
+Eye Laser:         LP, Block, Block, HK. Mid-range, roughly half-screen apart.
+                   Tap separately; RELEASE Block before the final HK.
+                   Do not hold other attack buttons with HK.
+Friendship:        LK, Block, Block, HK. Stand well away.
+Babality:          F, F, D, D + LK. Stand well away.
+Pit II / Tomb:     U, U, B + LK. Close, on the appropriate stage.
+
+SONYA - SPECIAL MOVES
+Energy Ring:       D, F + LP.
+Bicycle Kick:      B, B, D + HK.
+Leg Grab:          Hold D and press LP + Block together. Close range.
+Square Wave:       F, B + HP. Use against an AIRBORNE opponent.
+Leg Grab and Bicycle Kick cannot grab Kintaro or Shao Kahn.
+Square Wave does not damage a grounded opponent.
+
+SONYA - FINISHERS
+Kiss of Death:     B, F, D, D + LP. Close-to-mid range; burns the victim.
+Death Orb/Bubble:  HOLD BLOCK, then U, U, B, D + HK. Far apart.
+                   Keep Block held THROUGHOUT, including the final D + HK.
+                   Do not hold HP, LP or LK.
+Friendship:        B, F, B, D + Block. Stand well away.
+Babality:          D, D, F + LK. Stand well away.
+Pit II / Tomb:     F, F, D + HP. Close, on the appropriate stage.
+
+SHANG TSUNG - ADDED MORPHS
+Transform to Kano: B, D, B + LK.
+Transform to Sonya: D + LP + Block together.
+Enter while Shang is grounded and free to act, not jumping or recovering.
+Once transformed, use that character's commands above.
+
+SHARED BASIC CONTROLS
+Uppercut:          D + HP.
+Sweep:             B + LK.
+Roundhouse:        B + HK.
+Throw:             F + LP at touching distance.
+Standing Block:    Block.
+Crouching Block:   D + Block.
+Dead Pool finish:  During FINISH HIM/HER, uppercut at close range, then hold
+                   LP + LK through the launch into the acid.
+
+FINISHING RULES AND TIPS
+Fatalities, Friendships, Babalities and stage finishes require FINISH HIM/HER.
+For safe Friendship/Babality eligibility, win using kicks only: no HP or LP.
+There is NO Run button. Imported commands using Run are adapted to Block.
+For commands containing Up, Block can prevent an unwanted jump; Sonya's
+Death Orb specifically REQUIRES Block to remain held throughout its command.
+Range, blocking, target height and recovery matter: activation is not a hit.
+Against Jax's ground pound, jump; blocking while grounded does not stop it.
+No persistent hints or overlays are added to the game by this text file.

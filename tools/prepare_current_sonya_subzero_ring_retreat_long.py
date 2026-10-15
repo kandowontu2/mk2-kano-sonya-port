@@ -1,0 +1,12 @@
+"""Extend actual winning round policy through subsequent native match/stages."""
+import verify_native_source_sync as sync
+sync.verify()
+base=sync.ROOT/'audit_current_sonya_subzero_ring_retreat_preparation'
+out=sync.ROOT/'audit_current_sonya_subzero_ring_retreat_long_preparation'
+assert not out.exists()
+source=(base/'campaign.lua').read_text().replace('frame>=9000','frame>=18000').replace('maximum_fields=9000','maximum_fields=18000')
+out.mkdir();lua=out/'campaign.lua';lua.write_text(source)
+runner=(base/'run.ps1').read_text().replace(base.name+'/campaign.lua',out.name+'/campaign.lua').replace(sync.sha(base/'campaign.lua'),sync.sha(lua))
+runner=runner.replace('audit_current_sonya_subzero_ring_retreat_runtime','audit_current_sonya_subzero_ring_retreat_long_runtime')
+(out/'run.ps1').write_text(runner)
+print('Prepared18000fields same earned KO controller, native ladder progression only')

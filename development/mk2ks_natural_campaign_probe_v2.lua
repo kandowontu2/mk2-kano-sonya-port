@@ -1,0 +1,165 @@
+-- Cold campaign, genuine losses/paid continues. Inputs only, no guest writes.
+for _,key in ipairs({'MK2KS_DIAGNOSTIC_CPU_ID','MK2KS_DIAGNOSTIC_CPU_HEALTH',
+ 'MK2KS_DIAGNOSTIC_LADDER_INDEX','MK2KS_DIAGNOSTIC_P1_REGEN','MK2_P2_TOWER_HEALTH_ASSIST'})do
+ assert(not os.getenv(key),'No campaign assistance: '..key)
+end
+local fighter=assert(os.getenv('MK2KS_TEST_FIGHTER'))
+local identity=assert(({kano=17,sonya=18})[fighter])
+local side=assert(tonumber(os.getenv('MK2KS_CAMPAIGN_SIDE')))
+assert(side==1 or side==2)
+local opponent=3-side
+local boot=tonumber(os.getenv('MK2KS_TEST_BOOT_FRAME')or'600')
+local strategy=os.getenv('MK2KS_CAMPAIGN_STRATEGY')or'uppercut'
+assert(strategy=='uppercut' or strategy=='jumpkick')
+local p=manager.machine.devices[':maincpu'].spaces.program
+local cpu=manager.machine.devices[':maincpu'].state
+local screen=manager.machine.screens[':screen']
+local high,system,low=manager.machine.ioport.ports[':IN0'].fields,
+ manager.machine.ioport.ports[':IN1'].fields,manager.machine.ioport.ports[':IN2'].fields
+local buttons={}
+for _,key in ipairs({'Left','Right','Up','Down','Block','High Punch','High Kick'})do buttons[key]=high['P'..side..' '..key]end
+buttons['Low Punch']=low['P'..side..' Low Punch'];buttons['Low Kick']=low['P'..side..' Low Kick']
+buttons.Coin=system['Coin '..side];buttons.Start=system[side==1 and '1 Player Start' or '2 Players Start']
+local slots={{actor=0x01060220,main=0x01060260,roster=0x01060280,state=0x010601f0,hp=0x010602f0},
+ {actor=0x01060df0,main=0x01060e30,roster=0x01060e50,state=0x01060dc0,hp=0x01060ec0}}
+local frame,selections,losses,wins,live_fields=0,0,0,0,0
+local css,css_exit,loss_at,plan=nil,nil,nil,nil
+local last_state,first_live,last_fight,ending=nil,nil,nil,nil
+local seen,taps={},{}
+local function log(tag,value)
+ print(string.format('MK2_NAT_CAMPAIGN_%s frame=%d human_slot=%d fighter=%s writes=0 assistance=none %s',tag,frame,side,fighter,value or''))
+end
+local function valid(a)return a>=0x01000000 and a<0x01100000 end
+local function sample(n)
+ local s=slots[n];local a,m=p:read_u32(s.actor),p:read_u32(s.main)
+ if not valid(a) or not valid(m)then return end
+ return {actor=a,main=m,owner=p:read_u32(m+0xc0),id=p:read_u16(a+0x1f0),roster=p:read_u16(s.roster),
+  state=p:read_u16(s.state),hp=p:read_u16(s.hp),x=p:read_i16(a+0x90),y=p:read_i16(a+0xb0),
+  floor=p:read_i16(m+0x200),pose=p:read_u32(a+0x1d0),flags=p:read_u16(m+0x210),
+  body=p:read_u16(a+0x160),bank=p:read_u16(a+0x140),action=p:read_u16(m+0x1f0)}
+end
+local adjacency={Left=0xffff1400,Right=0xffff1600,Down=0xffff1200}
+local function route(start)
+ local queue={{start,{}}};local visited={[start]=true};local cursor=1
+ while queue[cursor]do
+  local current=queue[cursor];cursor=cursor+1
+  if current[1]==identity then return current[2]end
+  for _,button in ipairs({'Left','Right','Down'})do
+   local next_id=p:read_u16(adjacency[button]+current[1]*16)
+   if next_id<=18 and not visited[next_id]then
+    local steps={};for _,step in ipairs(current[2])do steps[#steps+1]=step end
+    steps[#steps+1]=button;queue[#queue+1]={next_id,steps};visited[next_id]=true
+   end
+  end
+ end
+ error('No native selection route to actual character')
+end
+local function press(button)
+ buttons[button]:set_value(1)
+ log('INPUT','button='..button:gsub(' ','_')..' selection='..selections)
+end
+for n,slot in ipairs(slots)do
+ taps[#taps+1]=p:install_write_tap(slot.hp,slot.hp+15,'natural campaign native health '..n,function(at,data,mask)
+  if mask==0xffff and first_live then
+   log('HEALTH',string.format('slot=%d at=%08X before=%d after=%d pc=%08X a8=%08X a13=%08X',n,at,p:read_u16(at),data&0xffff,cpu.PC.value,cpu.A8.value,cpu.A13.value))
+  end
+ end)
+end
+taps[#taps+1]=p:install_read_tap(0xfffef800,0xfffef800+19*32-1,'natural campaign native winner',function(at)
+ if not first_live or (at-0xfffef800)%32~=0 then return end
+ local winner=p:read_u16(0x01061b00)
+ if winner~=1 and winner~=2 then return end
+ wins=wins+1
+ log('WIN',string.format('slot=%d stage=%d id=%d entry=%08X pc=%08X health=%d,%d',winner,p:read_u16(0x01061b30),(at-0xfffef800)//32,at,cpu.PC.value,p:read_u16(slots[1].hp),p:read_u16(slots[2].hp)))
+end)
+emu.register_frame(function()
+ frame=frame+1
+ for _,field in pairs(buttons)do field:clear_value()end
+ if frame==1 then
+  log('BOOT','schema=2 strategy='..strategy..' boot='..boot)
+  local rom_table=p:read_u32(0xff8a11f0)
+  for order=0,5 do
+   local list=p:read_u32(rom_table+order*32);local ids={}
+   for stage=0,16 do ids[#ids+1]=p:read_u16(list+stage*16)end
+   log('ROM',string.format('table=%08X order=%d list=%08X ids=%s',rom_table,order,list,table.concat(ids,',')))
+  end
+ end
+ if frame>=300 and frame<304 then press('High Punch')end
+ local mode=p:read_u16(0x010601d0);local state=p:read_u16(slots[side].state)
+ local stage=p:read_u16(0x01061b30);local schedule=p:read_u32(0x01061b10)
+ local winner=p:read_u16(0x01061b00)
+ local key=string.format('%d:%d:%d:%d:%08X:%d:%d:%08X:%08X',mode,p:read_u16(slots[1].state),p:read_u16(slots[2].state),stage,schedule,p:read_u16(slots[1].roster),p:read_u16(slots[2].roster),p:read_u32(slots[1].actor),p:read_u32(slots[2].actor))
+ if key~=last_state or frame%120==0 then
+  log('STATE',string.format('mode=%d states=%d,%d stage=%d schedule=%08X roster=%d,%d actors=%08X,%08X health=%d,%d winner=%d',mode,p:read_u16(slots[1].state),p:read_u16(slots[2].state),stage,schedule,p:read_u16(slots[1].roster),p:read_u16(slots[2].roster),p:read_u32(slots[1].actor),p:read_u32(slots[2].actor),p:read_u16(slots[1].hp),p:read_u16(slots[2].hp),winner))
+  last_state=key
+ end
+ if first_live and not loss_at and mode==3 and state==2 and p:read_u16(slots[side].hp)==0 and p:read_u32(slots[side].actor)==0 then
+  losses=losses+1;loss_at=frame;css=nil;css_exit=nil
+  log('LOSS','number='..losses..' stage='..stage)
+  screen:snapshot(string.format('campaign_loss_%d.png',losses))
+ end
+ if loss_at and not css then
+  local age=frame-loss_at
+  if age>=20 and age<25 or age>=270 and age<275 then press('Coin')end
+  if age>=310 and age<315 then press('Start')end
+ end
+ if selections==0 and not css and frame>=boot then
+  local age=(frame-boot)%300
+  if age<4 then press('Coin')end
+  if age>=20 and age<24 then press('Start')end
+ end
+ local selection_roster=p:read_u16(slots[side].roster)
+ if not css and frame>700 and mode==4 and state==3 and selection_roster<=18 then
+  plan=route(selection_roster);css=frame;selections=selections+1
+  log('SELECT',string.format('number=%d initial=%d target=%d path=%s continue=%d stage=%d schedule=%08X',selections,p:read_u16(slots[side].roster),identity,table.concat(plan,','),loss_at or -1,stage,schedule))
+ end
+ if css and not css_exit then
+  local age=frame-css
+  for index,direction in ipairs(plan)do
+   local at=56+(index-1)*12
+   if age>=at and age<at+4 then press(direction)end
+  end
+  if age==130 or age==146 then
+   log('SELECT_ID',string.format('number=%d roster=%d state=%d',selections,p:read_u16(slots[side].roster),state))
+   screen:snapshot(string.format('campaign_selection_%d_%d.png',selections,age))
+  end
+  if age>=148 and age<156 then press('High Punch')end
+  if age>148 and mode~=4 then css_exit=frame;log('SELECT_EXIT','number='..selections)end
+ end
+ local human,other=sample(side),sample(opponent)
+ if mode==2 and state==1 and p:read_u16(slots[opponent].state)==0 and human and other and human.owner==human.actor and other.owner==other.actor then
+  if not first_live then first_live=frame end
+  local fight_key=string.format('%d:%d:%08X:%08X',selections,stage,human.actor,other.actor)
+  if fight_key~=last_fight then
+   last_fight=fight_key;loss_at=nil
+   log('FIGHT',string.format('selection=%d stage=%d schedule=%08X human=%d:%d cpu=%d:%d actors=%08X,%08X',selections,stage,schedule,human.roster,human.id,other.roster,other.id,human.actor,other.actor))
+   screen:snapshot(string.format('campaign_fight_selection%d_stage%d.png',selections,stage))
+  end
+  local seen_key=stage..':'..schedule
+  if not seen[seen_key]then seen[seen_key]=true;log('STAGE','stage='..stage..' schedule='..string.format('%08X',schedule))end
+  live_fields=live_fields+1
+  if live_fields<300 or frame%30==0 then
+   log('LIVE',string.format('selection=%d stage=%d schedule=%08X human=%d:%d cpu=%d:%d health=%d,%d human_actor=%08X human_main=%08X cpu_actor=%08X cpu_main=%08X hpos=%d,%d hfloor=%d cpos=%d,%d cfloor=%d poses=%08X,%08X actions=%d,%d flags=%04X,%04X banks=%04X,%04X',selections,stage,schedule,human.roster,human.id,other.roster,other.id,human.hp,other.hp,human.actor,human.main,other.actor,other.main,human.x,human.y,human.floor,other.x,other.y,other.floor,human.pose,other.pose,human.action,other.action,human.flags,other.flags,human.bank,other.bank))
+  end
+  if winner==0 and human.hp>0 and other.hp>0 then
+   local gap=math.abs(human.x-other.x)
+   if strategy=='uppercut' then
+    if gap>65 then press(human.x<other.x and'Right'or'Left')
+    else press('Down');if frame%22<4 then press('High Punch')end end
+   else
+    if gap>80 then press(human.x<other.x and'Right'or'Left')end
+    if frame%56<4 then press('Up')end
+    if frame%56>=12 and frame%56<20 then press('High Kick')end
+   end
+  end
+ end
+ if first_live and stage==16 and mode==11 and winner==side and p:read_u16(slots[side].roster)==identity then
+  ending=ending or frame
+  if (frame-ending)%120==0 then screen:snapshot('campaign_ending_'..(frame-ending)..'.png');log('ENDING','age='..(frame-ending))end
+ end
+end)
+emu.register_stop(function()
+ local count=0;for _ in pairs(seen)do count=count+1 end
+ log('RESULT',string.format('schema=2 selections=%d losses=%d native_win_reads=%d first_live=%d live_fields=%d seen_stages=%d ending=%d scope=unassisted_campaign_observation_independent_verification_pending',selections,losses,wins,first_live or -1,live_fields,count,ending or -1))
+ for _,tap in ipairs(taps)do tap:remove()end
+end)

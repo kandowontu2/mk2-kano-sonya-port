@@ -1,0 +1,163 @@
+"""Two real P1 Pit victims, native phases, cleanup and paid continuation.
+
+The ROM read tap is 16-bit: its value is the low HALF of the full stream
+pointer. Full runtime boot readouts and actual A9/group execution corroborate
+the pointer; do not describe value=1000 as a malformed full pointer.
+"""
+import argparse
+import hashlib
+import json
+import re
+from pathlib import Path
+
+from verify_native_pit_assets_v602 import verify as assets
+
+ROOT = Path(__file__).resolve().parents[1]
+NAME = 'diagnostic_v602_native_pit_position'
+EXE = '4656A193D165C47F1B5E6C9A1B746DE382CACF269941040A83B5A1884B12BF6A'
+PAYLOAD = '1367D5A0D42C661CF555F42231A20A650C28E107AB9C80BD821C0BEA7EB4D5EF'
+
+
+def need(ok, message):
+    if not ok: raise ValueError(message)
+
+
+def digest(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest().upper()
+def number(row, key): return int(row[key])
+def hexnum(row, key): return int(row[key], 16)
+
+
+def rows(log, tag):
+    return [dict(re.findall(r'([a-zA-Z_][a-zA-Z_0-9]*)=([^\s]+)', line))
+            for line in log.splitlines() if line.startswith('MK2_NAT_CAMPAIGN_'+tag+' ')]
+
+
+def verify_log(log, fighter, reference=None):
+    need(fighter in ('kano','sonya'), 'Declared own character')
+    identity = 17 if fighter=='kano' else 18
+    sequence = 0xFF181000 if identity==17 else 0xFF181200
+    first_group = 0xFF182000 + (identity-17)*6*64
+    first_frame = 0xFF184000 + (identity-17)*6*128
+    need(not re.search(r'\[LUA ERROR\]|fatal error|access violation|stack traceback|REENTRY',log,re.I), 'No observer/emulator error or reset reentry')
+    observations = [line for line in log.splitlines() if line.startswith('MK2_NAT_CAMPAIGN_')]
+    need(observations and all(f'human_slot=1 fighter={fighter} writes=0 assistance=none ' in line for line in observations), 'All observations are actual declared P1 and input-only')
+    result = rows(log,'RESULT')
+    need(len(result)==1, 'One complete terminal observer')
+    result = result[0]
+    need(number(result,'schema')==9 and number(result,'reset')==-1 and number(result,'ending')==-1 and
+         number(result,'pit_lookups')==2 and number(result,'frame')>=21000, 'Complete bounded no-reset run, not a tower clear')
+    need(not any(hexnum(r,'entry')==0xFFFFFFE0 for r in rows(log,'BOUNDARY')), 'No actual native reset-vector fetch')
+    operands=rows(log,'PIT_OPERANDS');positions=rows(log,'PIT_COORDINATES');rom=rows(log,'PIT_ROM')
+    need(len(operands)==1 and hexnum(operands[0],'first')==hexnum(operands[0],'second')==0xFF180800,'Both actual scene operands extended')
+    need(len(positions)==1 and tuple(hexnum(positions[0],k)for k in ('operand','kano','sonya'))==
+         (0xFF180C00,0x004000C0,0x004000C0),'Native constructor has own centered coordinate rows')
+    need(len(rom)==19 and {number(r,'id'):hexnum(r,'value')for r in rom}[identity]==sequence,'Full actual own runtime stream pointer')
+    lookups=rows(log,'PIT_LOOKUP')
+    need(len(lookups)==2,'Both actual fall and impact lookups executed')
+    actor,main=hexnum(lookups[0],'a8'),hexnum(lookups[0],'a13')
+    for r in lookups:
+        need((hexnum(r,'at'),hexnum(r,'value'),hexnum(r,'mask'),hexnum(r,'pc'),hexnum(r,'a1'),number(r,'id'),
+              number(r,'table_slot'),number(r,'mode'),hexnum(r,'a8'),hexnum(r,'a13'))==
+             (0xFF180800+identity*32,sequence&0xFFFF,0xFFFF,0xFF83B850,0xFF180800,identity,identity,9,actor,main),
+             'Actual native load low-half, true ID and same cinematic owner')
+    start,impact=number(lookups[0],'frame'),number(lookups[1],'frame')
+    draws=[r for r in rows(log,'DRAW') if hexnum(r,'entry')==0xFF838790 and
+           first_group<=hexnum(r,'a0')<=first_group+5*64]
+    need(len(draws)==21,'Twenty original-cadence falling groups and own impact')
+    components=rows(log,'COMPONENT')
+    for index,r in enumerate(draws):
+        phase=index%5 if index<20 else 5
+        expected_frame=start+1+index*3 if index<20 else impact
+        need((hexnum(r,'a0'),number(r,'frame'),number(r,'actor_id'),hexnum(r,'a8'),hexnum(r,'a13'),
+              number(r,'x'),number(r,'y'))==
+             (first_group+phase*64,expected_frame,identity,actor,main,192,64),'Native phase/cadence/identity/position, no proxy or clipped origin')
+        parts=[c for c in components if number(c,'frame')==expected_frame and hexnum(c,'a8')==actor and
+               first_group+phase*64<=hexnum(c,'source')<=first_group+phase*64+32]
+        need(len(parts)==2,'Complete bounded component and zero terminator observed')
+        need(tuple((hexnum(c,'source'),hexnum(c,'value'),hexnum(c,'dst'),hexnum(c,'a13'))for c in parts)==
+             ((first_group+phase*64,first_frame+phase*128,hexnum(r,'cache'),main),
+              (first_group+phase*64+32,0,hexnum(r,'cache')+112,main)), 'Native component-cache stride and stop; no overrun')
+    health=rows(log,'HEALTH')
+    sentinels={}
+    for r in health:
+        before,after=number(r,'before'),number(r,'after')
+        need(hexnum(r,'at') in (0x010602F0,0x01060EC0),'Actual physical HP cells')
+        if before>166 or after>166:
+            # Original FF9DEC90 writes FFFF to BOTH HP cells before the
+            # FF9DEEB0 bar-refill loop writes 4 in the SAME field. This is
+            # stock scene-init bookkeeping, not the Pit's 7E7E overrun.
+            need(65535 in (before,after) and number(r,'frame')<start or
+                 65535 in (before,after) and number(r,'frame')>impact+1,
+                 'No sentinel/corruption during actual Pit execution')
+            sentinels.setdefault(number(r,'frame'),[]).append(r)
+        else:
+            need(0<=before<=166 and 0<=after<=166,'Physical HP globals never corrupted')
+    for frame,values in sentinels.items():
+        actual=[(number(r,'slot'),hexnum(r,'at'),number(r,'before'),number(r,'after'),hexnum(r,'pc'))for r in values]
+        need(actual==[(1,0x010602F0,161,65535,0xFF9DECE0),(2,0x01060EC0,161,65535,0xFF9DED10),
+                      (1,0x010602F0,65535,4,0xFF9DEF40),(2,0x01060EC0,65535,4,0xFF9DEF70)],
+             'Exact original paired same-field FFFF-to-4 bar-refill sequence')
+    for r in rows(log,'STATE'):
+        need(0<=number(r,'mode')<=11 and all(0<=int(h)<=166 for h in r['health'].split(',')), 'No gameplay-global corruption')
+    exits=rows(log,'PIT_EXIT')
+    need(len(exits)==1 and (number(exits[0],'enter'),number(exits[0],'lookups'),number(exits[0],'mode'))==
+         (start,2,5),'Real native scene completion')
+    exit_at=number(exits[0],'frame')
+    need(any(hexnum(r,'at')==0x010601D0 and number(r,'before')==9 and number(r,'after')==5 and
+             hexnum(r,'pc')==0xFF820390 and number(r,'frame')==exit_at-1 for r in rows(log,'TRANSITION')),
+         'Original native mode9 completion, not observer exit or reset')
+    losses=[r for r in rows(log,'LOSS') if number(r,'frame')>exit_at]
+    selections=[r for r in rows(log,'SELECT') if number(r,'frame')>exit_at]
+    fights=[r for r in rows(log,'FIGHT') if number(r,'frame')>exit_at]
+    need(losses and selections and fights,'Loss, paid continue, reselection and actual next fight')
+    loss,selection,fight=losses[0],selections[0],fights[0]
+    need(number(selection,'continue')==number(loss,'frame') and number(selection,'target')==identity and
+         number(fight,'selection')==number(selection,'number') and fight['human']==f'{identity}:{identity}',
+         'Continued fight owns actual selected identity')
+    inputs=rows(log,'INPUT')
+    for button in ('Coin','Start'):
+        need(any(r['button']==button and number(loss,'frame')<number(r,'frame')<number(selection,'frame') for r in inputs),
+             'Genuine paid-continue button '+button)
+    live=[r for r in rows(log,'LIVE') if number(r,'selection')==number(selection,'number') and number(r,'frame')>=number(fight,'frame')]
+    need(len(live)>=10 and number(live[-1],'frame')-number(live[0],'frame')>=300 and
+         all(r['human']==f'{identity}:{identity}' for r in live),'Sustained actual post-Pit fight, not just intro')
+    if reference is not None:
+        for tag in ('INPUT','HEALTH','FIGHT','STATE'):
+            prefix=lambda text:[r for r in rows(text,tag) if number(r,'frame')<=start]
+            need(prefix(log)==prefix(reference),'Unchanged pre-Pit actual '+tag+' replay')
+    return dict(passed=True,fighter=fighter,human_slot=1,actual_id=identity,pit_enter=start,pit_impact=impact,
+                pit_exit=exit_at,native_falling_groups=20,native_impact_groups=1,bounded_component_reads=42,
+                next_fight=number(fight,'frame'),terminal_frame=number(result,'frame'),reset_observed=False,
+                scope='actual_P1_Pit_victim_phases_centered_origin_cache_cleanup_and_paid_continue_not_all_slots_visual_audio_or_full_campaign',
+                fullPortAcceptance=False)
+
+
+def verify(folder,fighter,reference_folder):
+    folder,reference_folder=Path(folder),Path(reference_folder)
+    metadata=json.loads((folder/'result.json').read_text(encoding='utf-8-sig'))
+    manifest=json.loads((folder/'input_hashes_before.json').read_text(encoding='utf-8-sig'))
+    build=json.loads((ROOT/NAME/'build-info.json').read_text(encoding='utf-8-sig'))
+    need((metadata['exit_code'],metadata['candidate'],metadata['executable_sha256'],metadata['payload_sha256'],
+          metadata['player'],metadata['human_slot'],metadata['assistance'])==(0,NAME,EXE,PAYLOAD,fighter,1,'none'), 'Exact terminal matched launch')
+    need(manifest==metadata['input_hashes'],'Input hashes checked before/after capture')
+    need((build['name'],build['executable_sha256'],build['payload_sha256'])==(NAME,EXE,PAYLOAD),'Exact compiled candidate')
+    for path,expected in {**manifest,**build['input_hashes']}.items(): need(digest(path)==expected,'Input changed: '+path)
+    need(digest(ROOT/NAME/'mkport_candidate.exe')==EXE and digest(ROOT/NAME/'roms/mk2ks/mk2ks.mdata')==PAYLOAD,'Actual executable/payload')
+    observer=(folder/'input_sources/mk2ks_natural_campaign_probe_v9.lua').read_text()
+    need(not re.search(r'write_u\d+|:write_|load_?state|\.value\s*=(?!=)|dofile\(',observer),'Observer supplies no guest state')
+    need('-nocheat' in (folder/'input_sources/run_natural_campaign_probe_v9.ps1').read_text(),'Cheat-disabled launch')
+    asset_proof=assets((ROOT/NAME/'roms/mk2ks/mk2ks.mdata').read_bytes(),
+                       (ROOT/'diagnostic_v545_native_roll_edge_clearance/roms/mk2ks/mk2ks.mdata').read_bytes(),
+                       (ROOT/'mk2/mk2-maincpu.bin').read_bytes())
+    proof=verify_log((folder/'run.log').read_text(encoding='utf-8-sig'),fighter,
+                     (reference_folder/'run.log').read_text(encoding='utf-8-sig'))
+    need((folder/'snap'/f"campaign_pit_post_{((proof['pit_exit']+2)//3)*3}.png").is_file(),'Post-impact rendered evidence retained')
+    proof['asset_integrity']=asset_proof
+    return proof
+
+
+if __name__=='__main__':
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('folder',type=Path);parser.add_argument('fighter',choices=('kano','sonya'))
+    parser.add_argument('reference',type=Path);args=parser.parse_args()
+    print(json.dumps(verify(args.folder,args.fighter,args.reference),indent=2))

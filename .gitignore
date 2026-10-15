@@ -1,0 +1,26 @@
+# Never commit game data, generated binaries, captures or credentials.
+roms/
+samples/
+artwork/
+mk2/
+mk3/
+build/
+dist/
+__pycache__/
+*.pyc
+*.exe
+*.dll
+*.zip
+*.7z
+*.bin
+*.mdata
+*.wav
+*.mp4
+*.avi
+*.png
+*.jpg
+*.log
+.env
+.env.*
+*.pem
+*.key
