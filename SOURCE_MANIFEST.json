@@ -8889,6 +8889,16 @@
       "sha256": "360ABD21740DEA3A04DB97C1A0EE3CDBE0A487E94A65EA21D6AD2EB0766FC691"
     },
     {
+      "path": "controllers/video_sonya_final_20261015_preparation/campaign.lua",
+      "bytes": 62744,
+      "sha256": "F3F4DFAEAC610EE6C75E593507B5904B1B965077F7710F0A39E9F00D9C93F9FB"
+    },
+    {
+      "path": "controllers/video_sonya_final_20261015_preparation/run.py",
+      "bytes": 11127,
+      "sha256": "D736E19AA32CF42B00F3D17BF635FE6E5E4214FEBAD558D0893994526131FD9B"
+    },
+    {
       "path": "controllers/video_sonya_full_20261015_preparation/campaign.lua",
       "bytes": 50197,
       "sha256": "9F45F0657C0D174C5DD99405189AEE450AF7D01ED37A4D70F8D3D2E81AB9AC35"
@@ -8927,6 +8937,16 @@
       "path": "controllers/video_sonya_raiden_leg_bench_20261015_preparation/run.py",
       "bytes": 2799,
       "sha256": "9F92885AEB4783ACD4D4C1F95A3E4FBF41682068B266860E923E564B64C536FB"
+    },
+    {
+      "path": "controllers/video_sonya_shao_counter_bench_20261015_preparation/campaign.lua",
+      "bytes": 61817,
+      "sha256": "511AC6DFE77FB0AEA6DD9F6F90091EF3C35431BB2F12A5336FF5FE0E9174B49A"
+    },
+    {
+      "path": "controllers/video_sonya_shao_counter_bench_20261015_preparation/run.py",
+      "bytes": 2803,
+      "sha256": "519C86BC337BC681922B01CF968D49F31B13DDB2DD025741A9F8109D500DBDFA"
     },
     {
       "path": "controllers/video_sonya_subzero_hk_20261015_preparation/campaign.lua",
@@ -26129,6 +26149,11 @@
       "sha256": "1C087712BB3871DF909433180DD03FBDDBF938ADD08095AD40E3689D3133BCE1"
     },
     {
+      "path": "tools/prepare_sonya_shao_counter_video_bench_20261015.py",
+      "bytes": 2663,
+      "sha256": "9B8030BA18DAD41D2CE66047FDD84FE9FD4B2EEBC7038037D49F715704A09E54"
+    },
+    {
       "path": "tools/prepare_sonya_video_early_ladder_20261015.py",
       "bytes": 3939,
       "sha256": "959FAC4EC5B15998C38D64D2005D74179B71C579EB6E51BF53C53C9A86037710"
@@ -26295,8 +26320,8 @@
     },
     {
       "path": "tools/publish_video_source_progress_20261015.py",
-      "bytes": 1780,
-      "sha256": "46926B689B5702EC76071436B16248CDD5116042B2C867C44F71FC7BE0999E9A"
+      "bytes": 1928,
+      "sha256": "E4542460C547E987984832526AAB43486A40E9ED8EB70B9C1DCFEE3108EDA19E"
     },
     {
       "path": "tools/qualify_actual_cpu_cycle_raster_boundary_v4742.py",
@@ -46734,8 +46759,8 @@
       "sha256": "ED5C395981D7BC83E475225ECE0C23A44C85F53C870799C00EBA43997BED0076"
     }
   ],
-  "codeFileCount": 9346,
-  "codeBytes": 70684123,
+  "codeFileCount": 9351,
+  "codeBytes": 70825425,
   "patchSHA256": "42D8BC43C4A1F875586B432779BED21A92A1843A4743984F8AC81EFC11FAB0C5",
   "currentEXESHA256": "EBDFEB6CCA3617308F1448A4A0F6778E3E787420CACF3D11E9B4F40358C87F6A",
   "currentPayloadSHA256": "A9A9DB228D4CF5FEA7E2A659AEF4D4407193FEE3D2F86E217F7F725D0D8E58D3",

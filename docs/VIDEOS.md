@@ -51,3 +51,12 @@ and145799. That finite test stopped at its200000-field bound while facing
 Raiden, without an ending. The next controller changes only Raiden12/Shang14
 to the same guarded close-leg policy; it does not reset or rewrite game state.
 No unsuccessful scalar test is represented as a completed video.
+
+The subsequent test cleared Raiden, Shang and Kintaro. A final-stage-only
+successor replaced the weak Ring policy with the charge-recovery uppercut
+controls used in Kano's successful video. It then earned Sonya's native Shao
+KO at170656, entered her ending at173747, completed both own pages at176489,
+and stopped at176789. It included30 actual paid losses/continues. Six missing
+completion/identity/boss/page mutations were rejected. This proves a complete
+current-build automated campaign; a separate fresh AV replay is being recorded
+and must independently pass before it is called a completed video.
