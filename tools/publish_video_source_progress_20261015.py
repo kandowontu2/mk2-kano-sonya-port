@@ -5,7 +5,7 @@ from pathlib import Path
 
 ROOT=Path(__file__).resolve().parent.parent
 OUT=ROOT/'public_source_mk2ks_20261015'
-NAMES=['qualify_sonya_kitana_video_bench_20261015.py','prepare_sonya_complete_video_bench_20261015.py','publish_video_source_progress_20261015.py','qualify_sonya_complete_video_bench_20261015.py','prepare_sonya_late_leg_video_bench_20261015.py','prepare_sonya_raiden_leg_video_bench_20261015.py','prepare_sonya_shao_counter_video_bench_20261015.py','prepare_sonya_final_video_20261015.py','cleanup_failed_showcase_media_20261015.ps1']
+NAMES=['qualify_sonya_kitana_video_bench_20261015.py','prepare_sonya_complete_video_bench_20261015.py','publish_video_source_progress_20261015.py','qualify_sonya_complete_video_bench_20261015.py','prepare_sonya_late_leg_video_bench_20261015.py','prepare_sonya_raiden_leg_video_bench_20261015.py','prepare_sonya_shao_counter_video_bench_20261015.py','prepare_sonya_final_video_20261015.py','cleanup_failed_showcase_media_20261015.ps1','correct_sonya_final_video_aspect_20261015.py','audit_finished_video_delivery_20261015.py','seal_finished_video_visuals_20261015.py']
 
 def main():
     path=OUT/'SOURCE_MANIFEST.json';manifest=json.loads(path.read_text());rows={r['path']:r for r in manifest['codeFiles']}

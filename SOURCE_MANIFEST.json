@@ -17119,6 +17119,11 @@
       "sha256": "BDEE5D1BB543C786950082BC870057EEDDBC978434AD9BEE67ACA131E10AB057"
     },
     {
+      "path": "tools/audit_finished_video_delivery_20261015.py",
+      "bytes": 5595,
+      "sha256": "287D36D17A3183D0F6E71DDF218FF069CC9504F695F06B30D3144A50B91C2B42"
+    },
+    {
       "path": "tools/audit_human_air_height.py",
       "bytes": 7995,
       "sha256": "10C37FFF9CFBEE16C807339EC3AEF67FA2D76603C6659E84A9E6D22BFB2738B4"
@@ -20757,6 +20762,11 @@
       "path": "tools/correct_normal_freeze_checkpoint_count_v5063.py",
       "bytes": 2389,
       "sha256": "A5B6C40A3E45A2DC17844418AC02EF8031C8DCC40450BFD8354784749B24F83B"
+    },
+    {
+      "path": "tools/correct_sonya_final_video_aspect_20261015.py",
+      "bytes": 539,
+      "sha256": "517817B4949B754E3870239F84577080A39181553F9FE82A08485BDA0F4CC219"
     },
     {
       "path": "tools/cpu_followup_contract_v1423.py",
@@ -26320,8 +26330,8 @@
     },
     {
       "path": "tools/publish_video_source_progress_20261015.py",
-      "bytes": 1928,
-      "sha256": "E4542460C547E987984832526AAB43486A40E9ED8EB70B9C1DCFEE3108EDA19E"
+      "bytes": 2061,
+      "sha256": "EBA93D7941446ABD3FEFA7006103F2409E6849DE9607DEECA1C16E68050DFA8B"
     },
     {
       "path": "tools/qualify_actual_cpu_cycle_raster_boundary_v4742.py",
@@ -39194,6 +39204,11 @@
       "sha256": "4DA554CB5BA33FA7E8E7357665C0C3389CAE0A6489F6880838E71C677AD0EBD2"
     },
     {
+      "path": "tools/seal_finished_video_visuals_20261015.py",
+      "bytes": 3841,
+      "sha256": "5A5289D16211866BDD39A2ED3049C6E2FB66E7DA729C6FA5D19E3E985BF5ABA5"
+    },
+    {
       "path": "tools/seal_inconclusive_block_freeze.py",
       "bytes": 1695,
       "sha256": "BC57A55DFD6A439B29463048E8FFEE730EB5461D6D0FA211A31E052D85FD9E35"
@@ -46759,8 +46774,8 @@
       "sha256": "ED5C395981D7BC83E475225ECE0C23A44C85F53C870799C00EBA43997BED0076"
     }
   ],
-  "codeFileCount": 9351,
-  "codeBytes": 70825425,
+  "codeFileCount": 9354,
+  "codeBytes": 70835533,
   "patchSHA256": "42D8BC43C4A1F875586B432779BED21A92A1843A4743984F8AC81EFC11FAB0C5",
   "currentEXESHA256": "EBDFEB6CCA3617308F1448A4A0F6778E3E787420CACF3D11E9B4F40358C87F6A",
   "currentPayloadSHA256": "A9A9DB228D4CF5FEA7E2A659AEF4D4407193FEE3D2F86E217F7F725D0D8E58D3",

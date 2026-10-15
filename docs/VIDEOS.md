@@ -33,10 +33,28 @@ These source tools retain historical local path assumptions described in
 
 ## Full campaigns are separate
 
-Kano's full current-build campaign recording is complete through both bosses
-and both own ending pages. Sonya's corresponding current-build full campaign
-recording is **not complete** at this snapshot. Failed attempts were not
-presented as clears; their large temporary video/audio files were deleted.
+Both full current-build campaign recordings are now complete through both
+bosses and both own ending pages:
+
+- Kano:22m58.55s,6 paid losses/continues. Current MP4 SHA-256
+  `A9B1F5D1AAA59D4506B5AA576796E32063A2097D0E87A863E08364E2E9EF6D75`.
+- Sonya:53m51.57s,30 paid losses/continues. Current MP4 SHA-256
+  `A43AA9F057AA08E18A2F3F9F49E123ECACEF994E1267BD53C77DA6DFF21F8B7A`.
+
+They are automated native-control runs, not represented as human play or
+lossless/no-continue clears. All failed rounds and paid continues remain in
+the full recordings. No health/AI/difficulty/RNG/state edits were used.
+All four actual MP4 files passed full video/audio decoding and have non-silent
+native audio. Final Sonya victory, both own ending pages and presentation
+samples were visually reviewed. Native full-game aspect metadata is exactly
+4:3; the SAR correction was stream-copy metadata only, with no gameplay cut
+or re-encoding. Temporary WAV/video-only files were removed after verification.
+
+## Development history of the recording controller
+
+Earlier failed attempts were not presented as clears; their large temporary
+video/audio files were deleted. The following is development history, not a
+statement that the final videos are still pending.
 A bounded scalar-only Kitana controller test passed: Sonya earned KOs at native
 fields 105535 and 107216, then entered Mileena at 107749 without a paid continue
 between those rounds. Four negative evidence mutations were rejected. This
@@ -58,5 +76,9 @@ controls used in Kano's successful video. It then earned Sonya's native Shao
 KO at170656, entered her ending at173747, completed both own pages at176489,
 and stopped at176789. It included30 actual paid losses/continues. Six missing
 completion/identity/boss/page mutations were rejected. This proves a complete
-current-build automated campaign; a separate fresh AV replay is being recorded
-and must independently pass before it is called a completed video.
+current-build automated campaign. The separate fresh AV recording subsequently
+passed independently:176789 actual encoded native frames, matching the
+benchmark's entire canonical native event log exactly (SHA-256
+`AB7F7992F49371DA2D97CD2B01FFC1B7C9CBC2EDEB97A25AD71F2F756113B4A4`).
+The completion-audit and sampled visual-review code is published alongside
+the controller; the media itself remains outside this source-only repository.
