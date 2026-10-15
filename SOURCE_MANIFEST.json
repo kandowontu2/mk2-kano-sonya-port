@@ -8869,6 +8869,16 @@
       "sha256": "FD0E23C44416A7D7D609F038844D7646A3FE29EE878169EAC2B996486A35BF0D"
     },
     {
+      "path": "controllers/video_sonya_complete_bench_20261015_preparation/campaign.lua",
+      "bytes": 60847,
+      "sha256": "FF69C31F26FB4F0C50AC3EBBD3DE6435FFEAE31A4822F48C66CE738E132E6AA1"
+    },
+    {
+      "path": "controllers/video_sonya_complete_bench_20261015_preparation/run.py",
+      "bytes": 2795,
+      "sha256": "62E1D20C354AA3C45543806A28487CF83FCBF977E46F0E4BCB93220C9506EE88"
+    },
+    {
       "path": "controllers/video_sonya_early_ladder_20261015_preparation/campaign.lua",
       "bytes": 60266,
       "sha256": "360CF4F2AFB65296445C11D4FFDC8ADE88A71747EEDA44592D43406708FBD051"
@@ -26064,6 +26074,11 @@
       "sha256": "EAC5F561A9458FD30A358C96FCF961788A1C14D717CF0F5A14E7310E822968F7"
     },
     {
+      "path": "tools/prepare_sonya_complete_video_bench_20261015.py",
+      "bytes": 2057,
+      "sha256": "683A30CFF8FB561920C49F4B153B4C65838C4C7D4BEFCA1C66AA6DC3EAB76923"
+    },
+    {
       "path": "tools/prepare_sonya_full_video_20261015.py",
       "bytes": 4066,
       "sha256": "B68BB5D2E9D4E615F627D45436B2D34ABFC0057B9722E9FB8541D66D625B3E79"
@@ -26237,6 +26252,11 @@
       "path": "tools/promote_verified_release_manifest_20261015.py",
       "bytes": 6574,
       "sha256": "9B9E7109589D317DF831AFF4884A608BB940A6A83AF316EBAB70D8075558C5C5"
+    },
+    {
+      "path": "tools/publish_video_source_progress_20261015.py",
+      "bytes": 1412,
+      "sha256": "1AF80389FEB44562FEDFC5C1C5D9C7460FC848957E34D10BDEC20EE1ADE23369"
     },
     {
       "path": "tools/qualify_actual_cpu_cycle_raster_boundary_v4742.py",
@@ -31872,6 +31892,11 @@
       "path": "tools/qualify_single_continue_controls_v6584.py",
       "bytes": 4726,
       "sha256": "A492F5C3BB82CA3A6FE92A903CC9485BF970513640EFD43F85A3D10340CCD0D5"
+    },
+    {
+      "path": "tools/qualify_sonya_kitana_video_bench_20261015.py",
+      "bytes": 3888,
+      "sha256": "81934F5190AED62D1F33923EE3CE6247DAF4EB31535A65A9CAF806D92C6154BD"
     },
     {
       "path": "tools/qualify_sonya_launch_ko_round.py",
@@ -46664,8 +46689,8 @@
       "sha256": "ED5C395981D7BC83E475225ECE0C23A44C85F53C870799C00EBA43997BED0076"
     }
   ],
-  "codeFileCount": 9332,
-  "codeBytes": 70473602,
+  "codeFileCount": 9337,
+  "codeBytes": 70544601,
   "patchSHA256": "42D8BC43C4A1F875586B432779BED21A92A1843A4743984F8AC81EFC11FAB0C5",
   "currentEXESHA256": "EBDFEB6CCA3617308F1448A4A0F6778E3E787420CACF3D11E9B4F40358C87F6A",
   "currentPayloadSHA256": "A9A9DB228D4CF5FEA7E2A659AEF4D4407193FEE3D2F86E217F7F725D0D8E58D3",

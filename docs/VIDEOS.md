@@ -37,5 +37,9 @@ Kano's full current-build campaign recording is complete through both bosses
 and both own ending pages. Sonya's corresponding current-build full campaign
 recording is **not complete** at this snapshot. Failed attempts were not
 presented as clears; their large temporary video/audio files were deleted.
-A bounded scalar-only Kitana controller test is being used before another
-large recording. It uses physical inputs, not health/AI/difficulty changes.
+A bounded scalar-only Kitana controller test passed: Sonya earned KOs at native
+fields 105535 and 107216, then entered Mileena at 107749 without a paid continue
+between those rounds. Four negative evidence mutations were rejected. This
+proves that encounter, not the whole ladder. The same controller is now being
+tested through the rest of the ladder before another large recording.
+It uses physical inputs, not health/AI/difficulty changes.
