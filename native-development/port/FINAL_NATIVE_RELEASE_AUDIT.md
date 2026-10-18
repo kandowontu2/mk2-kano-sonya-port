@@ -1,5 +1,10 @@
 # Native release audit in progress
 
+Historical audit checkpoints below are retained without relabeling their
+earlier evidence scopes. The completed publication/requirement record is
+NATIVE_RELEASE_COMPLETE.md; native-v1.0.0 is now public with all eight remote
+asset sizes and SHA256 hashes verified against local qualified files.
+
 Current native program remains221919459A4129FFDB37C8A3E9EC7F9AA6210D99AED00A35BC3256842C5E1F5A.
 No gameplay/ROM edit was needed for either earned campaign clear.
 

@@ -30,14 +30,15 @@ class PlayerBundleTests(unittest.TestCase):
         self.assertEqual(digest_stream(BoundedStream()), hashlib.sha256(b'x' * 200000).hexdigest().upper())
 
     def test_actual_bundle_manifest_and_payload(self):
-        folder = PORT / 'development_patches'
-        proof = json.loads((folder / 'PLAYER_PLAYTEST_QUALIFICATION.json').read_text())
-        path = Path(proof['file'])
+        folder = PORT / 'native_release'
+        release = json.loads((folder / 'RELEASE_QUALIFICATION.json').read_text())
+        proof = next(item for item in release['artifacts'] if item['file'] == 'MK2KS_NATIVE_WITH_STOCK_MAME.zip')
+        path = folder / proof['file']
         with path.open('rb') as stream:
             self.assertEqual(digest_stream(stream), proof['SHA256'])
         with zipfile.ZipFile(path) as archive:
             names = archive.namelist()
-            self.assertEqual(len(names), 33)
+            self.assertEqual(len(names), 34)
             self.assertEqual(len(names), len(set(names)))
             pins = json.loads(archive.read('FILES.json'))
             self.assertEqual(set(names), set(pins) | {'FILES.json'})
@@ -47,14 +48,15 @@ class PlayerBundleTests(unittest.TestCase):
                 with archive.open(name) as stream:
                     self.assertEqual(digest_stream(stream), expected, name)
             readme = archive.read('README_PATCHING.txt').decode('ascii')
-            self.assertIn('UNFINISHED NATIVE PLAYTEST', readme)
-            self.assertIn('SEPARATE', readme)
-            self.assertIn('FIRST BOOT:', readme)
+            self.assertIn('NATIVE ROM PORT', readme)
+            self.assertIn('separate MK2KS_NATIVE_SOURCE_AND_IPS.zip', readme)
+            self.assertIn('FIRST BOOT', readme)
             self.assertIn('P1 High Punch', readme)
             self.assertIn(b' -noreadconfig ',archive.read('PLAY.cmd'))
         self.assertTrue(proof['isolatedPatcherReproducedExactTestedROM'])
-        self.assertFalse(proof['releaseApproved'])
-        self.assertFalse(proof['fullPortVerified'])
+        self.assertTrue(release['releaseApproved'])
+        self.assertFalse(release['customDriver'])
+        self.assertFalse(release['gameROMsIncluded'])
 
 
 if __name__ == '__main__':
