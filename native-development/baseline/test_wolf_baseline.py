@@ -130,6 +130,10 @@ def main():
     ready_ranges=[arg.split('=',1)[1] for arg in sys.argv if arg.startswith('--campaign-kano-kintaro-ready-range=')]
     if '--campaign-kano-kintaro-early-counter' in sys.argv:
         assert '--campaign-kano-kintaro-ready-counter' in sys.argv
+    if '--campaign-kano-kintaro-varied' in sys.argv:
+        assert '--campaign-kano-boss-guard' in sys.argv and '--campaign-subzero-rfp-duck' in sys.argv
+        assert '--sonya' not in sys.argv
+        assert not any(arg.startswith('--campaign-kano-kintaro-') and arg!='--campaign-kano-kintaro-varied' for arg in sys.argv)
     assert len(ready_ranges)<=1 and (not ready_ranges or ready_ranges[0] in ('84','104','115'))
     assert not ready_ranges or '--campaign-kano-kintaro-ready-counter' in sys.argv
     if '--campaign-kano-sub-normal-throw' in sys.argv:
@@ -669,6 +673,9 @@ def main():
         environment['KS_CAMPAIGN_KANO_KINTARO_FAST_PULSE']='1' if '--campaign-kano-kintaro-fast-pulse' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_READY']='1' if '--campaign-kano-kintaro-ready-counter' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_EARLY_COUNTER']='1' if '--campaign-kano-kintaro-early-counter' in sys.argv else '0'
+        environment['KS_CAMPAIGN_KANO_KINTARO_VARIED']='1' if '--campaign-kano-kintaro-varied' in sys.argv else '0'
+        if '--campaign-kano-kintaro-varied' in sys.argv:
+            environment['KS_CAMPAIGN_BOSS_HITQ']=str(symbols['p2_hitq'])
         environment['KS_CAMPAIGN_KANO_KINTARO_READY_RANGE']=ready_ranges[0] if ready_ranges else '115'
         if '--campaign-ending-state' in sys.argv:
             for name in ('dlists','displayon','noflip','pageaddr','f_auto_erase','objlst','objlst2','scrntl','scrnlr'):
@@ -871,7 +878,21 @@ def main():
         probe_bytes+=b'\n'+(HERE.parent/'port/diagnostics/friend_lifecycle.lua').read_bytes()
     if '--normal-strike-trace' in sys.argv:
         probe_bytes+=b'\n'+(HERE.parent/'port/diagnostics/normal_strike_trace.lua').read_bytes()
+    campaign_streams=[arg.split('=',1)[1] for arg in sys.argv if arg.startswith('--campaign-stream-pipe=')]
+    assert len(campaign_streams)<=1
+    if campaign_streams:
+        assert game_candidate and '--campaign' in sys.argv and '--audio' in sys.argv and '--capture-move' not in sys.argv
+        assert re.fullmatch(r'\\\\\.\\pipe\\mk2ks-[0-9a-f]{32}',campaign_streams[0])
+        environment['KS_CAMPAIGN_STREAM_PIPE']=campaign_streams[0]
+        environment['KS_CAMPAIGN_STREAM_MAX_FIELDS']=environment['KS_CAMPAIGN_FIELDS']
+        probe_bytes+=b'\n'+(HERE.parent/'port/diagnostics/campaign_stream_capture.lua').read_bytes()
     if '--capture-move' in sys.argv:
+        capture_pipes=[arg.split('=',1)[1] for arg in sys.argv if arg.startswith('--capture-pipe=')]
+        assert len(capture_pipes)<=1
+        environment.pop('KS_CAPTURE_PIPE',None)
+        if capture_pipes:
+            assert re.fullmatch(r'\\\\\.\\pipe\\mk2ks-[0-9a-f]{32}',capture_pipes[0])
+            environment['KS_CAPTURE_PIPE']=capture_pipes[0]
         requested=[arg.split('=',1)[1] for arg in sys.argv if arg.startswith('--capture-action=')]
         assert len(requested)==1
         action=int(requested[0],0)
@@ -926,6 +947,7 @@ def main():
     if '--campaign-background-margin' in sys.argv: wall_limit=420
     if '--campaign-boss-endurance' in sys.argv: wall_limit=720
     if '--normal-soak' in sys.argv: wall_limit=120
+    if campaign_streams: wall_limit=720
     with (OUT/'mame.log').open('w') as log:
         try:
             p=subprocess.run(cmd,cwd=OUT,stdout=log,stderr=subprocess.STDOUT,timeout=wall_limit,env=environment,

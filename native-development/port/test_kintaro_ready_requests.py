@@ -6,7 +6,7 @@ class KintaroReadyRequestTests(unittest.TestCase):
         from pathlib import Path
         here=Path(__file__).parent
         source=(here/'diagnostics/campaign_probe.lua').read_text()
-        self.assertIn('(combat>60 or (subBallRecovery.kintaroEarlyCounter and target==17 and c2==12))',source)
+        self.assertIn('(combat>60 or ((subBallRecovery.kintaroEarlyCounter or subBallRecovery.kintaroVaried) and target==17 and c2==12))',source)
         wrapper=(here.parent/'baseline/test_wolf_baseline.py').read_text()
         setup=wrapper.split("if '--campaign-kano-kintaro-early-counter' in sys.argv:",1)[1].split('\n    assert ',1)[0]
         self.assertIn("assert '--campaign-kano-kintaro-ready-counter' in sys.argv",setup)

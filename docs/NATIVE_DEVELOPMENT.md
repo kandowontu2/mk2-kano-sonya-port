@@ -1,7 +1,7 @@
 # Native developer and test source snapshot
 
 [`native-development/`](../native-development/) contains the source-only native
-development tooling:678 files, approximately3MB, including its hash manifest.
+development tooling:697 files, approximately3MB, including its hash manifest.
 This is separate from the historical custom-driver tools elsewhere in this
 repository. It contains no complete ROMs, proprietary toolchain, runtime ROM
 archives, raw game assets, screenshots, recordings or bulk test-run dumps.
@@ -19,8 +19,8 @@ archives, raw game assets, screenshots, recordings or bulk test-run dumps.
   deliberately rejected cases and narrower scope limits.
 - [`FILES.json`](../native-development/FILES.json): exact snapshot hashes.
 
-The last complete local unittest run at this checkpoint passed413 test cases.
-That is not413 separately compiled builds or413 independent test suites.
+The last complete local unittest run at this checkpoint passed431 test cases.
+That is not431 separately compiled builds or431 independent test suites.
 Bundled standalone IPS-codec tests are a smaller five-case subset; see the
 native validation document. Runtime fixtures, source/build qualifications,
 unit tests and media comparisons establish different things. None alone is a
@@ -51,3 +51,10 @@ The port remains unfinished: Kano's earned boss clear/ending, final audiovisual
 acceptance and final release review are open. A controller losing is not by
 itself a game bug. Controllers/observers are test tools, never shipped gameplay
 logic or a replacement for the ROM implementation.
+
+This refresh includes bounded named-pipe video capture, native-audio muxing,
+the verified Sonya campaign recording workflow, and newer physical-input Kano
+boss trials. Sonya's full campaign recording is qualified locally; media and
+runtime dumps are not part of this source snapshot. The newer Kano spacing
+controller remains experimental, not a claimed campaign clear. No canonical
+game ASM or ROM patch changed in this developer-tool refresh.

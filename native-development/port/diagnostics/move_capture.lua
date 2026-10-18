@@ -28,7 +28,8 @@ do
   end
   local action=word(proc+0x1f0)
   if not raw and frame>=notBefore and action==wanted then
-   raw=assert(io.open('finisher_capture.bgra','wb'))
+   local pipe=os.getenv('KS_CAPTURE_PIPE')
+   raw=assert(io.open(pipe and pipe~='' and pipe or 'finisher_capture.bgra','wb'))
    log=assert(io.open('finisher_capture.csv','w'))
    log:write('frame,seconds,width,height,bytes\n')
   end

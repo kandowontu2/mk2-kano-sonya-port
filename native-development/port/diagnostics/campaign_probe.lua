@@ -82,6 +82,7 @@ local subBallRecovery={counter=os.getenv('KS_CAMPAIGN_KANO_SUB_RECOVERY_COUNTER'
  kintaroFastPulse=os.getenv('KS_CAMPAIGN_KANO_KINTARO_FAST_PULSE')=='1',
  kintaroReady=os.getenv('KS_CAMPAIGN_KANO_KINTARO_READY')=='1',
  kintaroEarlyCounter=os.getenv('KS_CAMPAIGN_KANO_KINTARO_EARLY_COUNTER')=='1',
+ kintaroVaried=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VARIED')=='1',
  readyRange=tonumber(os.getenv('KS_CAMPAIGN_KANO_KINTARO_READY_RANGE') or '115'),
  kintaroPrepare=os.getenv('KS_CAMPAIGN_KANO_KINTARO_PREPARE')=='1' or os.getenv('KS_CAMPAIGN_KANO_KINTARO_WIDE')=='1',
  kintaroWide=os.getenv('KS_CAMPAIGN_KANO_KINTARO_WIDE')=='1',
@@ -112,6 +113,10 @@ end
 if subBallRecovery.kintaroRetreatBall then
  subBallRecovery.bossBallLog=assert(io.open('boss_ball_charge.csv','w'))
  subBallRecovery.bossBallLog:write('frame,age,phase,action,flags,height,distance,ownHP,enemyHP,lk,up,away\n')
+end
+if subBallRecovery.kintaroVaried then
+ subBallRecovery.variedLog=assert(io.open('kintaro_variety.csv','w'))
+ subBallRecovery.variedLog:write('frame,history,kicks,punches,distance,ownAction,ownFlags,ownHeight,decision,ownHP,enemyHP\n')
 end
 local subBallCounterAt=-1000
 local subBallStart,subBallReleaseAt,subBallReleased=nil,nil,false
@@ -414,7 +419,7 @@ emu.register_frame_done(function()
      u16(0x010602f0)>0 and u16(0x01060ec0)>0 then
    set('P1 Block',1);set(away,1)
   end
-  if (combat>60 or (subBallRecovery.kintaroEarlyCounter and target==17 and c2==12)) and u16(0x010602f0)>0 and u16(0x01060ec0)>0 then
+  if (combat>60 or ((subBallRecovery.kintaroEarlyCounter or subBallRecovery.kintaroVaried) and target==17 and c2==12)) and u16(0x010602f0)>0 and u16(0x01060ec0)>0 then
    local enemyY=b~=0 and s16(b+0xb0) or 0
    local enemyGround=proc2~=0 and s16(proc2+0x200) or 0
    if defensive and u16(0x010602f0)<lastHealth then
@@ -1136,6 +1141,36 @@ emu.register_frame_done(function()
     else set('P1 Block',1) end
    elseif defensive and combat<defenseUntil then
     set('P1 Down',1);set('P1 Block',1)
+   elseif subBallRecovery.kintaroVaried and target==17 and c2==12 and not plan then
+    subBallRecovery.variedHistory={};subBallRecovery.variedKicks=0;subBallRecovery.variedPunches=0
+    for index=0,5 do
+     subBallRecovery.variedHistory[index+1]=u16(assert(tonumber(os.getenv('KS_CAMPAIGN_BOSS_HITQ')))+index*16)
+     if subBallRecovery.variedHistory[index+1]==0x200 then subBallRecovery.variedKicks=subBallRecovery.variedKicks+1 end
+     if subBallRecovery.variedHistory[index+1]==0x201 then subBallRecovery.variedPunches=subBallRecovery.variedPunches+1 end
+    end
+    subBallRecovery.variedWanted=subBallRecovery.variedKicks<2 and 'mixkick' or
+     (subBallRecovery.variedPunches<2 and 'mixpunch' or 'readyknife')
+    subBallRecovery.variedDecision='wait'
+    if s16(proc1+0x200)==s16(a+0xb0) and (u16(proc1+0x210)&0x1c)==0 then
+     if cpuProjectileActive() then set('P1 Down',1);set('P1 Block',1);subBallRecovery.variedDecision='guard'
+     elseif distance<175 or (subBallRecovery.variedRetreating and distance<220) then
+      subBallRecovery.variedRetreating=true;set(away,1);subBallRecovery.variedDecision='retreat'
+     elseif subBallRecovery.variedWanted~='readyknife' and distance>260 then set(toward,1);subBallRecovery.variedDecision='approach'
+     elseif subBallRecovery.variedWanted=='readyknife' and n-subBallRecovery.bossShotAt<48 then set('P1 Block',1);subBallRecovery.variedDecision='cooldown'
+     elseif u16(proc1+0x1f0)==0x303 and (renderedHeight(a) or -1)>=120 and
+        u32(assert(tonumber(os.getenv('KS_CAMPAIGN_P1_BUTTONS'))))==assert(tonumber(os.getenv('KS_CAMPAIGN_STANCE_BUTTONS'))) then
+      subBallRecovery.variedRetreating=false
+      plan=subBallRecovery.variedWanted;planAge=0;planToward=plan=='readyknife' and away or toward
+      subBallRecovery.variedDecision=plan
+      if plan=='readyknife' then subBallRecovery.bossShotAt=n end
+     end
+    else set('P1 Block',1) end
+    subBallRecovery.variedLog:write(string.format('%d,%04x:%04x:%04x:%04x:%04x:%04x,%d,%d,%d,%d,%d,%d,%s,%d,%d\n',
+     n,subBallRecovery.variedHistory[1],subBallRecovery.variedHistory[2],subBallRecovery.variedHistory[3],
+     subBallRecovery.variedHistory[4],subBallRecovery.variedHistory[5],subBallRecovery.variedHistory[6],
+     subBallRecovery.variedKicks,subBallRecovery.variedPunches,distance,u16(proc1+0x1f0),u16(proc1+0x210),
+     s16(proc1+0x200)-s16(a+0xb0),subBallRecovery.variedDecision,u16(0x010602f0),u16(0x01060ec0)))
+    subBallRecovery.variedLog:flush()
    elseif subBallRecovery.kintaroRetreatBall and target==17 and c2==12 and not plan and
       not (subBallRecovery.kintaroBallFinishKnife and u16(0x01060ec0)<=50) then
     plan=nil
@@ -1284,6 +1319,9 @@ emu.register_frame_done(function()
      if knifeGuard and c2==11 and plan=='knife' and planAge>9 then
       set('P1 Down',1);set('P1 Block',1)
      end
+    elseif plan=='mixkick' or plan=='mixpunch' then
+     if planAge<=3 then set('P1 Up',1);set(planToward,1) end
+     if planAge>=28 and planAge<=31 then set(plan=='mixkick' and 'P1 High Kick' or 'P1 High Punch',1) end
     elseif plan=='jumpkick' then
      if planAge<=3 then set('P1 Up',1);set(planToward,1) end
      local kickAt=kickOverride or ((style=='latekick' or style=='sweepjump') and 22 or 10)
@@ -1501,11 +1539,13 @@ emu.register_frame_done(function()
   if subBallRecovery.readyLog then subBallRecovery.readyLog:close() end
   if subBallRecovery.knifeReadyLog then subBallRecovery.knifeReadyLog:close() end
   if subBallRecovery.bossBallLog then subBallRecovery.bossBallLog:close() end
+  if subBallRecovery.variedLog then subBallRecovery.variedLog:close() end
   if fastChokeLog then fastChokeLog:close() end
   if rfpLog then rfpLog:close() end
   if recoveryCounterLog then recoveryCounterLog:close() end
   if guardLegLog then guardLegLog:close() end
   if subzeroObservationLog then subzeroObservationLog:close() end
+  if ks_stream_capture_close then ks_stream_capture_close(n) end
   continueLog:close();log:close();m:exit()
  end
 end)

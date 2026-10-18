@@ -1,5 +1,17 @@
 # Native demonstration videos
 
+## Earned current2219 Sonya campaign
+
+[Sonya full native campaign](C:/Users/kando/Documents/Codex/2026-08-29/i-ha/work/mk2port/romhack/port/generated_sonya_campaign_2219/MKII_SONYA_CAMPAIGN_NATIVE.mp4)
+is47:59, approximately400MiB, with native DCS audio and157503 contiguous
+captured frames. It includes paid continues, all opponents, both bosses,
+Sonya's own story pages, cast and credits. The native clear is independently
+qualified; the full game trace matches the earlier earned clear byte-for-byte.
+Full A/V decoding/count checks and sparse decoded visual review pass, not an
+all-frame subjective or exact audio-sync certificate. See
+`SONYA_CAMPAIGN_VIDEO_2219.md`. Its23 chapter markers are sidecars, not embedded.
+Kano's earned campaign video remains open.
+
 ## Chaptered current2219 showcases
 
 - Preferred [Kano -29 chapters](C:/Users/kando/Documents/Codex/2026-08-29/i-ha/work/mk2port/romhack/port/generated_showcases_2219_streamcopy/MKII_KANO_MOVES.mp4):9956189 bytes.

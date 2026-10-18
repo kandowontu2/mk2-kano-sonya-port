@@ -91,3 +91,52 @@ one native entry. Across18 Kintaro rounds the best remaining boss HP was49,
 with zero native round wins. This hybrid did not improve on the earlier Ball
 run's35-HP minimum. Do not treat its input activations as a boss clear or
 repeat it unchanged. No native gameplay change followed from the result.
+
+## Early crouch-ready counter result
+
+`stock_wolf_2219_kano_kintaro_early_ready104` removed the controller's60-field
+opening inactivity only for Kano versus Kintaro; native readiness/range gates
+and all ROM bytes remained unchanged. It completed at field164195 with exit0
+and no timeout. The terminal audit records155 ready requests,118 sampled
+native Uppercut entries and67 linked20-HP damage windows.
+
+Two native round wins occurred: attempt26 round2 (match counters1–1) and
+attempt27 round1 (1–0). These are **different paid attempts**, not one match
+clear. All18 observed Kintaro rounds are retained. The best boss HP minimum0
+does not override the missing same-attempt two-win result.
+
+The preceding65146 sampled trace rows match ready104 byte-for-byte up to
+Kintaro's first combat field; earlier human matchups were preserved. The ready
+log begins at field130294 with distance192 instead of the old first observation
+at130354/distance62. Earlier reaction therefore occurred, but full survival/
+campaign completion remains unproved. A bounded64-continue,300000-field trial
+of this now-round-winning policy is separate pending evidence, not a clear.
+
+The extended `stock_wolf_2219_kano_kintaro_early_ready104_endurance` trial
+subsequently completed at field286338 with exit0 and no timeout. Across82
+observed boss rounds it logged708 ready requests,517 native Uppercut entries
+and293 linked20-HP damage windows. Its only two native round wins are the same
+attempt26/27 results above; no additional round win or full Kintaro match clear
+was obtained in the extra continues. Do not repeat this policy unchanged or
+infer success from the greater number of sampled hits. Native ROMs/AI remain
+unchanged, and the failed extended controller is retained as finite evidence.
+
+## Native six-hit-queue variety result
+
+`stock_wolf_2219_kano_kintaro_varied` completed at field158819, exit0 without
+timeout. It reads Kintaro's actual six-word incoming hit queue; MKDRONE's
+`count_q_repeats` scans these six entries, and MKBOSS punishes three repeated
+flying kicks or punches. No queue, AI, hitbox or damage value was written.
+
+The terminal variety audit validates all logged queue counts/decisions. It
+records56 kick plans,52 punch plans and53 Knife plans; sampled native entries
+were53/49/49 respectively. Requested plans are not counted as successful hits.
+There are16 Kintaro rounds and zero native round wins. The best remaining
+boss health is6HP in attempt31 round2.
+
+That close round was not a healthy finishing opportunity: Kano had only1HP
+when Kintaro reached8HP. At field153685 the controller started another jump
+punch from116-pixel separation; Kintaro later remained at6HP when Kano lost.
+This does not support claiming a clear or simply adding more continues. The
+next useful investigation is safer grounded launch spacing/retreat and corner
+handling, rather than weakening native repeat punishment or damage rules.
