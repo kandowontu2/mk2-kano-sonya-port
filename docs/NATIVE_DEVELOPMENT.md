@@ -19,8 +19,8 @@ archives, raw game assets, screenshots, recordings or bulk test-run dumps.
   deliberately rejected cases and narrower scope limits.
 - [`FILES.json`](../native-development/FILES.json): exact snapshot hashes.
 
-The last complete local unittest run at this checkpoint passed443 test cases.
-That is not443 separately compiled builds or443 independent test suites.
+The last complete local unittest run at this checkpoint passed444 test cases.
+That is not444 separately compiled builds or444 independent test suites.
 Bundled standalone IPS-codec tests are a smaller five-case subset; see the
 native validation document. Runtime fixtures, source/build qualifications,
 unit tests and media comparisons establish different things. None alone is a
@@ -63,10 +63,12 @@ The stomp escape refresh and momentum trials also completed without a native
 boss round win. The refresh's new physical jumps were observed, but that is
 not campaign completion.
 
-The earned lethal-victim expansion passed its eight-case Kung Lao pilot:
-all four added lethal finishers on both sides, plus600 fresh-match fields.
-The exact-coverage/hash-bound pilot acceptance passes. Its full112-case
-victim/side matrix is still in progress, not claimed complete. The tooling
+The earned lethal-victim expansion now passes the full112-case matrix:
+all four added lethal finishers,14 selectable victims, both sides, plus600
+fresh-match fields per case. Exact-coverage/hash-bound family and full-matrix
+audits pass, including same-character matches and hardware palette restoration.
+This is finite victim/side coverage, not every edge/interruption/AI/audio path.
+The tooling
 also corrects a Death Orb checker that previously assumed Liu's animation
 table for every original victim; it now reads the actual linked native table.
 See `LETHAL_ROSTER_PROGRESS_2219.md`. No canonical game ASM or ROM patch changed

@@ -3,7 +3,9 @@ import json
 from pathlib import Path
 import zipfile
 import subprocess
+import sys
 from inspect_normal_runtime import PORT, sha
+from export_native_development_source import validate_previous
 
 
 def verify_staged(destination):
@@ -22,9 +24,10 @@ def verify_staged(destination):
     print('Verified all', len(paths), 'staged native files byte-for-byte')
 
 
-def export(destination):
+def export(destination, update=False):
     destination = Path(destination).resolve()
-    assert not destination.exists(), 'Never overwrite a source snapshot'
+    previous=validate_previous(destination) if update else {}
+    assert update or not destination.exists(), 'Never overwrite a source snapshot implicitly'
     assert (destination.parent / '.git').is_dir(), 'Expected existing source checkout'
     package = PORT / 'development_patches/MK2KS_NATIVE_DEVELOPMENT_IPS.zip'
     qualification = json.loads((package.parent / 'PACKAGE_QUALIFICATION.json').read_text())
@@ -46,14 +49,16 @@ def export(destination):
     assert set(files) == set(pins) | {'FILES.json'}
     import hashlib
     assert all(hashlib.sha256(files[name]).hexdigest().upper() == digest for name, digest in pins.items())
+    if update:assert set(previous)==set(pins), 'Native snapshot membership changed; review separately'
     for relative, content in files.items():
         target = destination / relative
         target.parent.mkdir(parents=True, exist_ok=True)
-        with target.open('xb') as stream:
+        with target.open('wb' if update else 'xb') as stream:
             stream.write(content)
         assert target.read_bytes() == content
     print('Exported', len(files), 'qualified native files;', sum(map(len, files.values())), 'bytes')
 
 
 if __name__ == '__main__':
-    export(PORT.parents[1] / 'public_source_mk2ks_20261015/native-rom')
+    assert sys.argv[1:] in ([], ['--update'])
+    export(PORT.parents[1] / 'public_source_mk2ks_20261015/native-rom',sys.argv[1:]==['--update'])

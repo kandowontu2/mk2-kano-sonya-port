@@ -75,6 +75,13 @@ pixel checks support observed page stability, not every possible frame.
 Current136-case normal/proximity contacts and the58-clip/29-chapter-per-actor
 move showcases add finite action/damage/recovery and recorded-media evidence.
 They do not substitute for campaigns or every-frame audiovisual acceptance.
+The112-case earned lethal-victim matrix also passes: four added fatalities,
+all14 selectable victims and both player sides, including same-character
+matches. Exact coverage and unchanged proof hashes bind native completion,
+current26 ROMs and600 fresh-match fields with hardware palette restoration
+per case. See LETHAL_ROSTER_PROGRESS_2219.md in the public developer snapshot;
+runtime dumps are intentionally not bundled in this patch/source package.
+This is finite victim/side coverage, not every interruption/edge/AI/audio path.
 Still open: Kano's earned boss clear/ending, final audiovisual acceptance,
 remaining full-scene audio and final release review.
 No full-port acceptance follows from this guide or the patch package.

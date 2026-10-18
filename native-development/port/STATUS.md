@@ -2,11 +2,23 @@
 
 ## Current authoritative summary
 
+The earned lethal-victim matrix is now complete:112 cases across four added
+fatalities x14 selectable victims x2 player sides. The independent full-set
+audit checks exact coverage and unchanged per-case proof hashes, including
+native completion/current26 ROMs and600 fresh-match fields with palette RGB
+restoration. See LETHAL_ROSTER_PROGRESS_2219.md and
+LETHAL_ROSTER_ACCEPTANCE_2219.json. This is finite victim/side acceptance,
+not every edge/interruption/audio path or full-port completion. No ROM code
+changed for this expansion; checker assumptions were corrected instead.
+
 The native program/graphics/audio are ROM-side, running on unmodified MAME
 0.289 using its existing Wolf hardware definition. The development IPS ZIP
-remains SHA256877B7537120B940E3719543230BB7EA0A2C89A77AA04E9CA65AAAF7004F316E8:
+is now SHA256E7B5F63D3EA2CB3A02AF9FBE3BC51660CCE8EB961172F32BB3A2A8278A46BF51:
 59 added ASM modules,40 original-source diffs,14 IPS files and12 unchanged
 graphics copies reconstruct the current26 chips. This is not a final release.
+The documentation refresh includes112-case lethal acceptance. All IPS/ASM
+and reconstructed ROM bytes are unchanged; roundtrip archive remains
+454772BC6831B6B2F672E59F23FC5456ADCEB886CBC98FE1D8DEC4559EFD0C38.
 
 The latest complete local unittest run passed431 cases (not431 builds or
 independent suites). Finite contact coverage includes136 normal/proximity

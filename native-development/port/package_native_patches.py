@@ -86,6 +86,11 @@ KNOWN OPEN GATES
   Current2219 finite checks cover all eight specials, four lethal finishers,
   Friendship/Babality eligibility, stage finishers and transformed specials/
   lethal finishers on both player sides, including tested fresh-match recovery.
+  Earned lethal victim coverage now passes112 cases: all four added fatalities,
+  all14 selectable victims, both player sides, including same-character matches.
+  Independent exact-coverage/hash audits verify native completion and600 fresh
+  combat fields with hardware palette restoration for every case. This does
+  not certify every interruption, edge, CPU behaviour or audio overlap.
   Normal/proximity contact checks cover136 finite cases:17 actual actions,
   both added characters/player sides, hit and appropriate block, native damage
   and recovery. These do not certify arbitrary ranges, victims or every frame.

@@ -32,5 +32,11 @@ class LethalVictimPlanTests(unittest.TestCase):
         with self.assertRaises(AssertionError):validate_coverage(cases+cases[:1],True)
         with self.assertRaises(AssertionError):validate_coverage(cases,False)
 
+    def test_completed_family_does_not_count_as_full_matrix(self):
+        cases=[dict(run=n,kind=k,victim=v,side=s) for n,k,v,s,_ in plan() if k=='extract']
+        validate_coverage(cases,False,'extract')
+        with self.assertRaises(AssertionError):validate_coverage(cases)
+        with self.assertRaises(AssertionError):validate_coverage(cases,False,'laser')
+
 
 if __name__=='__main__':unittest.main()
