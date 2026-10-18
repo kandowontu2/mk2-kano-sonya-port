@@ -85,8 +85,13 @@ local subBallRecovery={counter=os.getenv('KS_CAMPAIGN_KANO_SUB_RECOVERY_COUNTER'
  kintaroVaried=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VARIED')=='1',
  kintaroVariedCounter=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VARIED_COUNTER')=='1',
  kintaroVariedAdaptive=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VARIED_ADAPTIVE')=='1',
+ kintaroVariedReactive=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VARIED_REACTIVE')=='1',
  kintaroStompRefresh=os.getenv('KS_CAMPAIGN_KANO_KINTARO_STOMP_REFRESH')=='1',stompJumpRequested=false,
  kintaroStompMomentum=os.getenv('KS_CAMPAIGN_KANO_KINTARO_STOMP_MOMENTUM')=='1',
+ kintaroVertical=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VERTICAL_KICK')=='1',
+ verticalAttackAge=tonumber(os.getenv('KS_CAMPAIGN_KANO_KINTARO_VERTICAL_AGE') or '28'),
+ kintaroRecovery=os.getenv('KS_CAMPAIGN_KANO_KINTARO_RECOVERY_COUNTER')=='1',bossPunishAt=-1000,
+ kintaroRecoveryApproach=os.getenv('KS_CAMPAIGN_KANO_KINTARO_RECOVERY_APPROACH')=='1',
  readyRange=tonumber(os.getenv('KS_CAMPAIGN_KANO_KINTARO_READY_RANGE') or '115'),
  kintaroPrepare=os.getenv('KS_CAMPAIGN_KANO_KINTARO_PREPARE')=='1' or os.getenv('KS_CAMPAIGN_KANO_KINTARO_WIDE')=='1',
  kintaroWide=os.getenv('KS_CAMPAIGN_KANO_KINTARO_WIDE')=='1',
@@ -121,6 +126,19 @@ end
 if subBallRecovery.kintaroVaried then
  subBallRecovery.variedLog=assert(io.open('kintaro_variety.csv','w'))
  subBallRecovery.variedLog:write('frame,history,kicks,punches,distance,ownAction,ownFlags,ownHeight,decision,ownHP,enemyHP,airAttackAge\n')
+end
+if subBallRecovery.kintaroVertical then
+ assert(subBallRecovery.verticalAttackAge==10 or subBallRecovery.verticalAttackAge==28)
+ subBallRecovery.verticalLog=assert(io.open('kintaro_vertical.csv','w'))
+ subBallRecovery.verticalLog:write('frame,distance,ownAction,ownFlags,ownHeight,bodyHeight,buttonTable,stanceTable,decision,ownHP,enemyHP,attackAge\n')
+end
+if subBallRecovery.kintaroVariedReactive then
+ subBallRecovery.airTimingLog=assert(io.open('kintaro_air_timing.csv','w'))
+ subBallRecovery.airTimingLog:write('frame,requestFrame,plan,age,windup,ownHeight,attackAt,hp,hk\n')
+end
+if subBallRecovery.kintaroRecovery then
+ subBallRecovery.recoveryLog=assert(io.open('kintaro_recovery_counter.csv','w'))
+ subBallRecovery.recoveryLog:write('frame,ownAction,ownFlags,ownHeight,bodyHeight,buttonTable,duckTable,distance,enemyAction,enemyHeight,phase,hp,ownHP,enemyHP,enemyRecovery,enemyWake,toward,down,block\n')
 end
 local subBallCounterAt=-1000
 local subBallStart,subBallReleaseAt,subBallReleased=nil,nil,false
@@ -423,7 +441,7 @@ emu.register_frame_done(function()
      u16(0x010602f0)>0 and u16(0x01060ec0)>0 then
    set('P1 Block',1);set(away,1)
   end
-  if (combat>60 or ((subBallRecovery.kintaroEarlyCounter or subBallRecovery.kintaroVaried) and target==17 and c2==12)) and u16(0x010602f0)>0 and u16(0x01060ec0)>0 then
+  if (combat>60 or ((subBallRecovery.kintaroEarlyCounter or subBallRecovery.kintaroVaried or subBallRecovery.kintaroVertical or subBallRecovery.kintaroRecovery) and target==17 and c2==12)) and u16(0x010602f0)>0 and u16(0x01060ec0)>0 then
    local enemyY=b~=0 and s16(b+0xb0) or 0
    local enemyGround=proc2~=0 and s16(proc2+0x200) or 0
    if defensive and u16(0x010602f0)<lastHealth then
@@ -1159,6 +1177,50 @@ emu.register_frame_done(function()
     else set('P1 Block',1) end
    elseif defensive and combat<defenseUntil then
     set('P1 Down',1);set('P1 Block',1)
+   elseif subBallRecovery.kintaroRecovery and target==17 and c2==12 then
+    plan=nil;set('P1 Down',1);set('P1 Block',1)
+    subBallRecovery.bossRecovering=nativeRoutineActive(proc2,assert(tonumber(os.getenv('KS_KINTARO_RECOVERY_BEGIN'))),
+     assert(tonumber(os.getenv('KS_KINTARO_RECOVERY_END'))))
+    subBallRecovery.readyBody=renderedHeight(a) or 999
+    subBallRecovery.readyButton=u32(assert(tonumber(os.getenv('KS_CAMPAIGN_P1_BUTTONS'))))
+    subBallRecovery.readyDuck=assert(tonumber(os.getenv('KS_CAMPAIGN_DUCK_BUTTONS')))
+    subBallRecovery.readyPhase='guard'
+    if s16(proc1+0x200)==s16(a+0xb0) and (u16(proc1+0x210)&0x1c)==0 then
+     if n-subBallRecovery.bossPunishAt<3 then
+      set('P1 Block',0);set('P1 High Punch',1);subBallRecovery.readyPhase='pulse'
+     elseif subBallRecovery.kintaroRecoveryApproach and subBallRecovery.bossRecovering and
+        distance>104 and distance<=180 and s16(proc2+0x200)==s16(b+0xb0) and not cpuProjectileActive() then
+      set('P1 Down',0);set('P1 Block',0);set(toward,1);subBallRecovery.readyPhase='approach'
+     elseif subBallRecovery.bossRecovering and distance<=104 and s16(proc2+0x200)==s16(b+0xb0) and not cpuProjectileActive() then
+      set('P1 Block',0);subBallRecovery.readyPhase='prepare'
+      if subBallRecovery.readyBody<=96 and subBallRecovery.readyButton==subBallRecovery.readyDuck and n-subBallRecovery.bossPunishAt>=6 then
+       set('P1 High Punch',1);subBallRecovery.bossPunishAt=n;subBallRecovery.readyPhase='fire'
+      end
+     end
+    end
+    subBallRecovery.recoveryLog:write(string.format('%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,%s,%d,%d,%d,%d,%08x,%d,%d,%d\n',
+     n,u16(proc1+0x1f0),u16(proc1+0x210),s16(proc1+0x200)-s16(a+0xb0),subBallRecovery.readyBody,
+     subBallRecovery.readyButton,subBallRecovery.readyDuck,distance,u16(proc2+0x1f0),s16(proc2+0x200)-s16(b+0xb0),
+     subBallRecovery.readyPhase,commands['P1 High Punch'] or 0,u16(0x010602f0),u16(0x01060ec0),
+     subBallRecovery.bossRecovering and 1 or 0,u32(proc2+0xe0),commands[toward] or 0,
+     commands['P1 Down'] or 0,commands['P1 Block'] or 0));subBallRecovery.recoveryLog:flush()
+   elseif subBallRecovery.kintaroVertical and target==17 and c2==12 and not plan then
+    subBallRecovery.verticalDecision='wait'
+    subBallRecovery.verticalBody=renderedHeight(a) or -1
+    subBallRecovery.verticalButtons=u32(assert(tonumber(os.getenv('KS_CAMPAIGN_P1_BUTTONS'))))
+    subBallRecovery.verticalStance=assert(tonumber(os.getenv('KS_CAMPAIGN_STANCE_BUTTONS')))
+    if s16(proc1+0x200)==s16(a+0xb0) and (u16(proc1+0x210)&0x1c)==0 then
+     if cpuProjectileActive() then set('P1 Down',1);set('P1 Block',1);subBallRecovery.verticalDecision='guard'
+     elseif distance>115 then set(toward,1);subBallRecovery.verticalDecision='approach'
+     elseif u16(proc1+0x1f0)==0x303 and subBallRecovery.verticalBody>=120 and
+        subBallRecovery.verticalButtons==subBallRecovery.verticalStance then
+      plan='upkick';planAge=0;planToward=toward;subBallRecovery.verticalDecision='upkick'
+     end
+    else set('P1 Block',1) end
+    subBallRecovery.verticalLog:write(string.format('%d,%d,%d,%d,%d,%d,%d,%d,%s,%d,%d,%d\n',n,distance,
+     u16(proc1+0x1f0),u16(proc1+0x210),s16(proc1+0x200)-s16(a+0xb0),subBallRecovery.verticalBody,
+     subBallRecovery.verticalButtons,subBallRecovery.verticalStance,subBallRecovery.verticalDecision,
+     u16(0x010602f0),u16(0x01060ec0),subBallRecovery.verticalAttackAge));subBallRecovery.verticalLog:flush()
    elseif subBallRecovery.kintaroVaried and target==17 and c2==12 and not plan then
     if combat<3 then subBallRecovery.variedRetreatSince=nil;subBallRecovery.variedRetreating=false end
     subBallRecovery.variedHistory={};subBallRecovery.variedKicks=0;subBallRecovery.variedPunches=0
@@ -1200,6 +1262,7 @@ emu.register_frame_done(function()
       subBallRecovery.variedRetreating=false
       subBallRecovery.variedRetreatSince=nil
       plan=subBallRecovery.variedWanted;planAge=0;planToward=plan=='readyknife' and away or toward
+      subBallRecovery.variedRequestAt=n;subBallRecovery.reactiveAirAt=nil
       subBallRecovery.variedAirAttackAge=subBallRecovery.kintaroVariedAdaptive and
        math.max(10,math.min(28,math.floor((distance-80)/4))) or 28
       subBallRecovery.variedDecision=plan
@@ -1360,9 +1423,24 @@ emu.register_frame_done(function()
      if knifeGuard and c2==11 and plan=='knife' and planAge>9 then
       set('P1 Down',1);set('P1 Block',1)
      end
+    elseif plan=='upkick' then
+     if planAge<=3 then set('P1 Up',1) end
+     if planAge>=subBallRecovery.verticalAttackAge and planAge<=subBallRecovery.verticalAttackAge+3 then set('P1 High Kick',1) end
     elseif plan=='mixkick' or plan=='mixpunch' then
      if planAge<=3 then set('P1 Up',1);set(planToward,1) end
-     if planAge>=(subBallRecovery.variedAirAttackAge or 28) and planAge<=(subBallRecovery.variedAirAttackAge or 28)+3 then
+     if subBallRecovery.kintaroVariedReactive then
+      subBallRecovery.reactiveWindup=nativeRoutineActive(proc2,assert(tonumber(os.getenv('KS_KINTARO_UPPERCUT_BEGIN'))),
+       assert(tonumber(os.getenv('KS_KINTARO_UPPERCUT_END'))))
+      if not subBallRecovery.reactiveAirAt and ((planAge>=6 and subBallRecovery.reactiveWindup) or planAge>=28) then
+       subBallRecovery.reactiveAirAt=planAge
+      end
+      if subBallRecovery.reactiveAirAt and planAge>=subBallRecovery.reactiveAirAt and planAge<=subBallRecovery.reactiveAirAt+3 then
+       set(plan=='mixkick' and 'P1 High Kick' or 'P1 High Punch',1)
+      end
+      subBallRecovery.airTimingLog:write(string.format('%d,%d,%s,%d,%d,%d,%d,%d,%d\n',n,subBallRecovery.variedRequestAt,
+       plan,planAge,subBallRecovery.reactiveWindup and 1 or 0,s16(proc1+0x200)-s16(a+0xb0),
+       subBallRecovery.reactiveAirAt or -1,commands['P1 High Punch'] or 0,commands['P1 High Kick'] or 0));subBallRecovery.airTimingLog:flush()
+     elseif planAge>=(subBallRecovery.variedAirAttackAge or 28) and planAge<=(subBallRecovery.variedAirAttackAge or 28)+3 then
       set(plan=='mixkick' and 'P1 High Kick' or 'P1 High Punch',1)
      end
     elseif plan=='jumpkick' then
@@ -1583,6 +1661,9 @@ emu.register_frame_done(function()
   if subBallRecovery.knifeReadyLog then subBallRecovery.knifeReadyLog:close() end
   if subBallRecovery.bossBallLog then subBallRecovery.bossBallLog:close() end
   if subBallRecovery.variedLog then subBallRecovery.variedLog:close() end
+  if subBallRecovery.verticalLog then subBallRecovery.verticalLog:close() end
+  if subBallRecovery.recoveryLog then subBallRecovery.recoveryLog:close() end
+  if subBallRecovery.airTimingLog then subBallRecovery.airTimingLog:close() end
   if fastChokeLog then fastChokeLog:close() end
   if rfpLog then rfpLog:close() end
   if recoveryCounterLog then recoveryCounterLog:close() end

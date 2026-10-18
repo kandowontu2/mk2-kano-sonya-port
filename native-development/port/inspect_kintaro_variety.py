@@ -11,6 +11,22 @@ from kintaro_variety_policy import next_move, air_attack_age
 MOVES={'mixkick':0x200,'mixpunch':0x201,'readyknife':0x211}
 
 
+def reactive_attack_ages(rows):
+    states={}
+    for row in rows:
+        request=int(row['requestFrame']);age=int(row['age'])
+        state=states.setdefault(request,dict(age=0,attack=None,plan=row['plan']))
+        assert row['plan']==state['plan'] and age==state['age']+1
+        assert int(row['frame'])==request+age and row['windup'] in ('0','1')
+        if state['attack'] is None and ((age>=6 and row['windup']=='1') or age>=28):state['attack']=age
+        assert int(row['attackAt'])==(state['attack'] if state['attack'] is not None else -1)
+        pressed=state['attack'] is not None and state['attack']<=age<=state['attack']+3
+        assert row['hk']==('1' if pressed and row['plan']=='mixkick' else '0')
+        assert row['hp']==('1' if pressed and row['plan']=='mixpunch' else '0')
+        state['age']=age
+    return {frame:state['attack'] for frame,state in states.items()}
+
+
 def retreat_summary(rows):
     """Count contiguous logged retreat fields; gaps are not assumed observed."""
     longest=length=total=0
@@ -52,6 +68,10 @@ def main(name):
     requests=[row for row in decisions if validate_decision(row)]
     assert requests,'No native boss attack request observed'
     adaptive='--campaign-kano-kintaro-varied-adaptive' in receipt['testArguments']
+    reactive='--campaign-kano-kintaro-varied-reactive' in receipt['testArguments']
+    timing={}
+    if reactive:
+        with (run/'kintaro_air_timing.csv').open() as stream:timing=reactive_attack_ages(csv.DictReader(stream))
     for row in requests:
         if row['decision']!='readyknife':
             expected=air_attack_age(int(row['distance'])) if adaptive else 28
@@ -62,6 +82,12 @@ def main(name):
     for number,request in enumerate(requests):
         frame=int(request['frame']);kind=request['decision']
         attack_age=int(request.get('airAttackAge',28))
+        if reactive and kind!='readyknife':
+            assert frame in timing
+            attack_age=timing[frame]
+            if attack_age is None:
+                observed.append(dict(requestFrame=frame,requestedPlan=kind,nativeAction=MOVES[kind],sampledEntryFrame=None))
+                continue
         earliest=frame+(12 if kind=='readyknife' else max(0,attack_age-4))
         latest=min(frame+40,int(requests[number+1]['frame'])-1 if number+1<len(requests) else frame+40)
         entry=next((f for f in range(earliest,latest+1) if f in index and index[f]['mode']=='2' and
@@ -76,7 +102,9 @@ def main(name):
         cases=observed,allLoggedQueueCountsAndRequestsValidated=True,
         bossRounds=len(rounds),bestObservedBossHP=min(r['minimumCPUHP'] for r in rounds),
         nativeKintaroRoundWins=wins,retreat=retreat_summary(decisions),fullPortVerified=False,
-        pins={str(p):sha(p) for p in (run/'execution.json',run/'autoboot.lua',run/'campaign.csv',run/'kintaro_variety.csv')})
+        reactiveAttackAges=dict(Counter(age for age in timing.values() if age is not None)),
+        pins={str(p):sha(p) for p in (run/'execution.json',run/'autoboot.lua',run/'campaign.csv',run/'kintaro_variety.csv',
+            *((run/'kintaro_air_timing.csv',) if reactive else ()))})
     (run/'KINTARO_VARIETY_QUALIFICATION.json').write_text(json.dumps(report,indent=2)+'\n')
     print('Requested',report['requests'],'observed',report['observedActivations'],'native round wins',len(wins))
 

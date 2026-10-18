@@ -2,6 +2,13 @@
 
 ## Current authoritative summary
 
+Latest unit checkpoint:452 cases pass. Recent vertical, recovery-only,
+recovery-approach and windup-reactive controller trials all completed without
+a native Kintaro round win; aborted48-field vertical timing and corrected
+audit-offset assumptions are documented in KINTARO_POLICY_PROVENANCE_2219.md.
+They do not establish a native game defect. No emulator is running from
+those trials. Kano's earned boss clear/campaign video remains open.
+
 The earned lethal-victim matrix is now complete:112 cases across four added
 fatalities x14 selectable victims x2 player sides. The independent full-set
 audit checks exact coverage and unchanged per-case proof hashes, including

@@ -61,5 +61,28 @@ class VarietyPolicyTests(unittest.TestCase):
         self.assertIn('stompVelocity<0 and leftDistance>=128',branch)
         self.assertNotIn(':write_u',branch)
 
+    def test_vertical_kick_is_neutral_jump_not_flip_attack(self):
+        source=(Path(__file__).parent/'diagnostics/campaign_probe.lua').read_text()
+        branch=source.split("elseif plan=='upkick' then",1)[1].split("elseif plan=='mixkick'",1)[0]
+        self.assertIn("set('P1 Up',1)",branch)
+        self.assertIn('planAge>=subBallRecovery.verticalAttackAge',branch)
+        self.assertIn('planAge<=subBallRecovery.verticalAttackAge+3',branch)
+        self.assertNotIn('planToward',branch)
+        self.assertNotIn('set(toward',branch)
+
+    def test_vertical_timing_accounts_for_normal_fixture_pre_jump_delay(self):
+        source=(Path(__file__).parent/'diagnostics/normal_probe.lua').read_text()
+        self.assertIn("local jumpAge=requested~='' and 20 or 0",source)
+        self.assertIn("then attackAge=48 end",source)
+        self.assertEqual(48-20,28)
+
+    def test_reactive_air_attack_has_one_windup_trigger_and_bounded_fallback(self):
+        source=(Path(__file__).parent/'diagnostics/campaign_probe.lua').read_text()
+        self.assertIn('not subBallRecovery.reactiveAirAt and ((planAge>=6 and subBallRecovery.reactiveWindup) or planAge>=28)',source)
+        self.assertIn('subBallRecovery.reactiveAirAt=planAge',source)
+        self.assertIn('planAge<=subBallRecovery.reactiveAirAt+3',source)
+        self.assertIn('KS_KINTARO_UPPERCUT_BEGIN',source)
+        self.assertNotIn(':write_u',source)
+
 
 if __name__=='__main__':unittest.main()

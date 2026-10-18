@@ -1,8 +1,17 @@
 import unittest
-from inspect_kintaro_variety import validate_decision, retreat_summary
+from inspect_kintaro_variety import validate_decision, retreat_summary, reactive_attack_ages
 
 
 class VarietyAuditTests(unittest.TestCase):
+    def test_reactive_fire_waits_for_eligible_windup_then_pulses_once(self):
+        rows=[dict(frame=str(100+age),requestFrame='100',plan='mixkick',age=str(age),
+                   windup='1' if age==8 else '0',attackAt=str(8 if age>=8 else -1),
+                   hp='0',hk='1' if 8<=age<=11 else '0') for age in range(1,15)]
+        self.assertEqual(reactive_attack_ages(rows),{100:8})
+        bad=[dict(r) for r in rows];bad[5]['attackAt']='6';bad[5]['hk']='1'
+        with self.assertRaises(AssertionError):reactive_attack_ages(bad)
+        shifted=[dict(r,frame=str(int(r['frame'])-1)) for r in rows]
+        with self.assertRaises(AssertionError):reactive_attack_ages(shifted)
     def row(self):
         return dict(history='0200:0200:0000:0000:0000:0000',kicks='2',punches='0',
                     decision='mixpunch',ownAction='771',ownFlags='1',ownHeight='0',ownHP='161')

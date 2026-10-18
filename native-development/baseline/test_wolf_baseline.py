@@ -133,9 +133,28 @@ def main():
     if '--campaign-kano-kintaro-varied' in sys.argv:
         assert '--campaign-kano-boss-guard' in sys.argv and '--campaign-subzero-rfp-duck' in sys.argv
         assert '--sonya' not in sys.argv
-        assert not any(arg.startswith('--campaign-kano-kintaro-') and arg not in ('--campaign-kano-kintaro-varied','--campaign-kano-kintaro-varied-counter','--campaign-kano-kintaro-varied-adaptive','--campaign-kano-kintaro-stomp-refresh','--campaign-kano-kintaro-stomp-momentum') for arg in sys.argv)
-    if '--campaign-kano-kintaro-stomp-refresh' in sys.argv:
+        assert not any(arg.startswith('--campaign-kano-kintaro-') and arg not in ('--campaign-kano-kintaro-varied','--campaign-kano-kintaro-varied-counter','--campaign-kano-kintaro-varied-adaptive','--campaign-kano-kintaro-varied-reactive','--campaign-kano-kintaro-stomp-refresh','--campaign-kano-kintaro-stomp-momentum') for arg in sys.argv)
+    if '--campaign-kano-kintaro-varied-reactive' in sys.argv:
         assert '--campaign-kano-kintaro-varied' in sys.argv
+        assert '--campaign-kano-kintaro-varied-counter' not in sys.argv and '--campaign-kano-kintaro-varied-adaptive' not in sys.argv
+    if '--campaign-kano-kintaro-stomp-refresh' in sys.argv:
+        assert '--campaign-kano-boss-guard' in sys.argv and '--sonya' not in sys.argv
+    if '--campaign-kano-kintaro-vertical-kick' in sys.argv:
+        assert '--campaign-kano-boss-guard' in sys.argv and '--campaign-subzero-rfp-duck' in sys.argv
+        assert '--sonya' not in sys.argv
+        assert not any(arg.startswith('--campaign-kano-kintaro-') and arg not in (
+            '--campaign-kano-kintaro-vertical-kick','--campaign-kano-kintaro-vertical-early','--campaign-kano-kintaro-stomp-refresh',
+            '--campaign-kano-kintaro-stomp-momentum') for arg in sys.argv)
+    if '--campaign-kano-kintaro-vertical-early' in sys.argv:
+        assert '--campaign-kano-kintaro-vertical-kick' in sys.argv
+    if '--campaign-kano-kintaro-recovery-counter' in sys.argv:
+        assert '--campaign-kano-boss-guard' in sys.argv and '--campaign-subzero-rfp-duck' in sys.argv
+        assert '--sonya' not in sys.argv
+        assert not any(arg.startswith('--campaign-kano-kintaro-') and arg not in (
+            '--campaign-kano-kintaro-recovery-counter','--campaign-kano-kintaro-recovery-approach','--campaign-kano-kintaro-stomp-refresh',
+            '--campaign-kano-kintaro-stomp-momentum') for arg in sys.argv)
+    if '--campaign-kano-kintaro-recovery-approach' in sys.argv:
+        assert '--campaign-kano-kintaro-recovery-counter' in sys.argv
     if '--campaign-kano-kintaro-stomp-momentum' in sys.argv:
         assert '--campaign-kano-kintaro-stomp-refresh' in sys.argv
     if '--campaign-kano-kintaro-varied-counter' in sys.argv:
@@ -694,8 +713,13 @@ def main():
         environment['KS_CAMPAIGN_KANO_KINTARO_VARIED']='1' if '--campaign-kano-kintaro-varied' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_VARIED_COUNTER']='1' if '--campaign-kano-kintaro-varied-counter' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_VARIED_ADAPTIVE']='1' if '--campaign-kano-kintaro-varied-adaptive' in sys.argv else '0'
+        environment['KS_CAMPAIGN_KANO_KINTARO_VARIED_REACTIVE']='1' if '--campaign-kano-kintaro-varied-reactive' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_STOMP_REFRESH']='1' if '--campaign-kano-kintaro-stomp-refresh' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_STOMP_MOMENTUM']='1' if '--campaign-kano-kintaro-stomp-momentum' in sys.argv else '0'
+        environment['KS_CAMPAIGN_KANO_KINTARO_VERTICAL_KICK']='1' if '--campaign-kano-kintaro-vertical-kick' in sys.argv else '0'
+        environment['KS_CAMPAIGN_KANO_KINTARO_VERTICAL_AGE']='10' if '--campaign-kano-kintaro-vertical-early' in sys.argv else '28'
+        environment['KS_CAMPAIGN_KANO_KINTARO_RECOVERY_COUNTER']='1' if '--campaign-kano-kintaro-recovery-counter' in sys.argv else '0'
+        environment['KS_CAMPAIGN_KANO_KINTARO_RECOVERY_APPROACH']='1' if '--campaign-kano-kintaro-recovery-approach' in sys.argv else '0'
         if '--campaign-kano-kintaro-varied' in sys.argv:
             environment['KS_CAMPAIGN_BOSS_HITQ']=str(symbols['p2_hitq'])
         environment['KS_CAMPAIGN_KANO_KINTARO_READY_RANGE']=ready_ranges[0] if ready_ranges else '115'
@@ -708,6 +732,18 @@ def main():
             def boss_local(label):
                 return int(re.search(r'^\s+\d+\s+([0-9a-fA-F]{8})\s+(?:[0-9a-fA-F]{4,8}\s+)?'+label+r'\b',boss_listing,re.M)[1],16)
             boss_origin=symbols['kahn_start']-boss_local('kahn_start')
+            if '--campaign-kano-kintaro-varied-reactive' in sys.argv:
+                uppercut_begin=boss_origin+boss_local('goro_uppercut')
+                uppercut_end=boss_origin+boss_local('goro_kick')
+                assert 0xff800000<=uppercut_begin<uppercut_end<=0xffffffff and uppercut_end-uppercut_begin<0x1000
+                environment['KS_KINTARO_UPPERCUT_BEGIN']=str(uppercut_begin)
+                environment['KS_KINTARO_UPPERCUT_END']=str(uppercut_end)
+            if '--campaign-kano-kintaro-recovery-counter' in sys.argv:
+                recovery_begin=boss_origin+boss_local('goro_strike_missed')
+                recovery_end=boss_origin+boss_local('goro_block')
+                assert 0xff800000<=recovery_begin<recovery_end<=0xffffffff and recovery_end-recovery_begin<0x1000
+                environment['KS_KINTARO_RECOVERY_BEGIN']=str(recovery_begin)
+                environment['KS_KINTARO_RECOVERY_END']=str(recovery_end)
             charge_begin=boss_origin+boss_local('kahn_charge')
             charge_end=boss_origin+boss_local('kahn_post_dont_walk')
             assert 0xff800000<=charge_begin<charge_end<=0xffffffff and charge_end-charge_begin<=0x4000

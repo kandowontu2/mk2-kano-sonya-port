@@ -248,3 +248,152 @@ minimum boss HP was65 with zero native round wins. Mixed requests50/53/43
 yielded45/45/40 sampled native entries. It did not earn or improve a clear.
 Native ROM/gameplay remain unchanged. A separate earned-lethal victim pilot
 is now being run sequentially to close another actual acceptance-coverage gap.
+
+## Vertical jump-kick trial
+
+After completing all112 lethal-victim cases, the separate
+`stock_wolf_2219_kano_kintaro_vertical_kick` trial tests native vertical
+jump-up kick (act_jupkick=010eh), not diagonal0200h/0201h attacks. MKBOSS's
+explicit repeated-flip landing checks name only the diagonal tags; vertical
+stationary attacks still have their own native block/counter behaviour, so
+absence of that one repeat rule does not imply success. Physical Up is held
+for3 fields without horizontal input, then HK at48..51, using timing already
+verified for normal vertical-contact clips. Requests require real grounded
+eligible stance/button table/body>=120 at separation<=115; farther ground
+movement approaches physically. The controller retains opt-in stomp refresh
+and momentum direction, logs kintaro_vertical.csv, and changes no native
+recovery, damage, AI, health or game state.445 unit cases pass. Outcome pending.
+
+Timing correction: the first vertical controller incorrectly treated the
+normal-contact fixture's attackAge48 as jump-relative. That fixture starts
+its jump at age20, so the verified relative delay is28 fields, not48. The
+first run was deliberately stopped at the human ladder (last complete sampled
+field49746, map4/attempt10), with its frozen trace retained as an aborted
+controller experiment. It is not a completed campaign or a game failure.
+Only the exact identified trial emulator PID71048 was stopped.
+
+`stock_wolf_2219_kano_kintaro_vertical_kick_v2` uses physical Up at1..3 and
+HK at28..31, preserving the other profile and opt-in escape handling. The
+independent terminal auditor requires this timing in the frozen controller,
+actual ground/eligible/stance dispatch for each request, and samples native
+010eh actions separately from requested plans and native round counters.
+447 local unit cases pass, including relative-delay and unready-request
+rejections. Corrected runtime outcome remains pending.
+
+The corrected v2 trial completed at152469 fields, exit0/no timeout. Its
+terminal audit validates94 grounded/eligible/stance jump requests, with32
+sampled native010eh kick entries in the expected window. Across16 Kintaro
+rounds it obtained zero native round wins and minimum boss HP113. Seven
+logged old-air/ground/new-Up escape cases include five with subsequently
+observed airtime; a requested Up is not always a completed escape. Three
+sampled damage windows were preceded by stomp tags, not a complete causal
+stomp count. The vertical policy is substantially worse than prior mixed
+attacks and is rejected as an improvement. No emulator remains. A native
+move-activation observation is not a campaign clear or a reason to change
+ROM recovery, hitboxes, boss AI or damage.
+
+Read-only v2 postmortem separates missed requests from actual kicks:32 missed
+windows contain303h/30bh/503h (stance, vertical jump, hit reaction);6 contain
+303h/503h without sampled jump. Other missed windows include native507h boss
+grabs and407h stomp interruptions. These tag sets are sampled associations,
+not complete causal attribution. Several shown HP drops occur before age28.
+MOVES do_jumpup_kick gives the native attack16 strike frames. The distinct
+`stock_wolf_2219_kano_kintaro_vertical_kick_early` trial requests HK at10..13
+instead of28..31, keeping the same readiness/range, jump and escape policy.
+Each request logs its attackAge; the audit checks it against the explicit
+receipt flag and samples the matching entry window. Native strike duration,
+movement, damage and AI are unchanged.447 unit cases pass. Outcome pending.
+
+The early trial completed at152264 fields, exit0/no timeout. Its terminal
+audit validates79 ready requests at age10 and46 sampled native010eh kick
+entries, versus94/32 for age28. Nevertheless, across16 boss rounds, minimum
+boss HP worsened to129 and there were zero native round wins. Five logged
+old-air/new-Up escapes all show new airtime; three sampled damage windows
+were preceded by stomp tags. Thus recognition/activation improved without
+useful damage or survival. The vertical approach is rejected; no further
+unchanged repetition or ROM balance changes follow from this result.
+No emulator remains. All112 lethal victim cases have meanwhile been
+requalified from retained traces against current tools, and their exact full
+proof-hash audit passes without any additional emulator launch.
+
+## Guarded native-recovery counter trial
+
+`stock_wolf_2219_kano_kintaro_recovery_counter` tests physical crouch-block,
+releasing Block and requesting an uppercut only while the boss process/return
+stack is observed in the linked MKBOSS range goro_strike_missed..goro_block
+(missed/blocked strike recovery and roar). Addresses come from the actual LST
+relocated with the linked kahn_start symbol, with bounded ROM-range checks.
+Grounded eligible own flags, native duck table/body<=96, grounded opponent,
+distance<=104, no CPU projectile and minimum6-field request spacing remain
+required. Three-field HP pulses are physical input only; no native recovery
+is shortened. Early stomp escape/refresh/momentum takes precedence. Read-only
+kintaro_recovery_counter.csv includes the gate and enemy wake pointer, and
+the terminal auditor rejects requests lacking the recovery gate. This is a
+new timing/survival hypothesis, not a verified clear. No ROM balance edits.
+
+The recovery trial completed at158255 fields, exit0/no timeout. Terminal
+readiness/current-ROM/frozen-input checks pass:14 gated fire requests became
+14 native uppercuts and14 linked damage windows. Across16 boss rounds there
+were no native round wins, minimum boss HP121. The log contains2775 observed
+recovery-gate fields but only152 prepare/14 fire fields versus15010 guard
+fields, so verified contact alone leaves too few opportunities. No emulator
+remains.449 local unit cases pass. The full112 lethal cases were also rechecked
+from existing traces and their current exact-coverage/proof-hash audit passes;
+no second emulator or game-memory write was used.
+
+Recovery distance review found1528 gated fields at105..160 separation and
+732 beyond160, versus515 within104; only1337 gated fields were also own-grounded
+and eligible. The14 fire gaps were62..96. The new separate
+`stock_wolf_2219_kano_kintaro_recovery_counter_approach` trial releases Down
+and Block and walks toward only at105..180 separation, while both grounded,
+eligible, no CPU projectile and the same linked recovery gate remains active.
+At<=104 it stops walking, prepares real duck dispatch and uses the unchanged
+counter readiness gate. At loss of recovery it returns to guard immediately.
+Read-only logs add actual toward/Down/Block inputs; the terminal auditor
+rejects approach rows outside these limits.450 unit cases pass. Outcome
+pending; this is not a change to hit range, native movement or boss behaviour.
+
+The approach trial completed at155934 fields, exit0/no timeout. Its terminal
+audit validates all366 physical approach fields under the intended gate and
+16 ready fire requests. All16 become native uppercuts;14 linked damage windows
+are observed. Across16 boss rounds there are zero native round wins and best
+boss HP141, worse than stationary recovery-counter121. Phase counts are13050
+guard,366 approach,205 prepare,16 fire and16 pulse. The physical approach
+operates but does not provide a better strategy, so it is rejected rather
+than repeated or used to justify ROM balance changes. No emulator remains.
+
+## Windup-reactive mixed aerial trial
+
+A firsthand player tactic describes aerial attacks timed to Kintaro's
+uppercut attempt rather than a fixed jump age:
+https://www.trmk.org/forums/threads/how-to-beat-kintaro-and-shao-kahn-in-mk-ii.33180/
+This is a hypothesis lead, not proof for Kano or a claim of universal success.
+The separate `stock_wolf_2219_kano_kintaro_varied_reactive` trial keeps the
+six-hit-queue kick/punch/Knife selection, bounded spacing and refreshed
+momentum-aware stomp escape. For aerial plans it observes the linked native
+goro_uppercut..goro_kick process/return-stack range, requests the selected
+attack on the first observed windup at age>=6, or falls back at28. The input
+pulse lasts at most4 fields. It does not edit/shorten the enemy windup or
+change movement, attack physics, damage, AI or game memory.
+
+Read-only kintaro_air_timing.csv records each plan's request frame, age,
+windup flag, own height, first chosen attack age and actual HP/HK inputs.
+The independent auditor checks the first eligible trigger/fallback and exact
+pulse, then counts sampled native actions separately from requested attacks
+and native wins.452 local unit cases pass. Runtime outcome remains pending.
+
+The reactive trial completed at156849 fields, exit0/no timeout. The audit
+initially rejected its trace because it assumed plan age1 executes on the
+request field. The frozen controller's elseif chain executes new plans on
+the next field: first request130294, age1 at130295. Correcting that checker
+offset (and adding a shifted-trace rejection test) makes the unchanged trace
+pass exact trigger/fallback/input-pulse checks. No runtime was rerun/edited.
+
+There are50 kick/47 punch/25 Knife requests with47/42/21 sampled native
+entries.94 aerial plans reach a fire input:57 use the28-field fallback and
+37 trigger earlier at6..25; three other aerial plans are interrupted before
+fire. Across16 boss rounds, minimum boss HP87 with zero native round wins.
+The reactive policy actually ran but did not improve the earlier mixed
+results. It remains failed campaign evidence, not an AI/physics bug or a
+reason to modify native balance. No emulator remains. The112 lethal traces
+were requalified without another emulator, and their full hash audit passes.

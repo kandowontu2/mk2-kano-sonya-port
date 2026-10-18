@@ -1,7 +1,7 @@
 # Native developer and test source snapshot
 
 [`native-development/`](../native-development/) contains the source-only native
-development tooling:703 files, approximately3MB, including its hash manifest.
+development tooling:705 files, approximately3MB, including its hash manifest.
 This is separate from the historical custom-driver tools elsewhere in this
 repository. It contains no complete ROMs, proprietary toolchain, runtime ROM
 archives, raw game assets, screenshots, recordings or bulk test-run dumps.
@@ -19,8 +19,8 @@ archives, raw game assets, screenshots, recordings or bulk test-run dumps.
   deliberately rejected cases and narrower scope limits.
 - [`FILES.json`](../native-development/FILES.json): exact snapshot hashes.
 
-The last complete local unittest run at this checkpoint passed444 test cases.
-That is not444 separately compiled builds or444 independent test suites.
+The last complete local unittest run at this checkpoint passed452 test cases.
+That is not452 separately compiled builds or452 independent test suites.
 Bundled standalone IPS-codec tests are a smaller five-case subset; see the
 native validation document. Runtime fixtures, source/build qualifications,
 unit tests and media comparisons establish different things. None alone is a
@@ -62,6 +62,9 @@ Their retained provenance distinguishes requests, native entries and results.
 The stomp escape refresh and momentum trials also completed without a native
 boss round win. The refresh's new physical jumps were observed, but that is
 not campaign completion.
+Subsequent vertical-kick, guarded-recovery, recovery-approach and windup-reactive
+mixed trials also failed to earn a Kintaro round win. Their source and explicit
+failed/aborted provenance are included; no game balance change followed.
 
 The earned lethal-victim expansion now passes the full112-case matrix:
 all four added lethal finishers,14 selectable victims, both sides, plus600
