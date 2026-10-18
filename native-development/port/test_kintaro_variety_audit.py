@@ -1,8 +1,14 @@
 import unittest
-from inspect_kintaro_variety import validate_decision, retreat_summary, reactive_attack_ages
+from inspect_kintaro_variety import validate_decision, retreat_summary, reactive_attack_ages, compare_prefix
 
 
 class VarietyAuditTests(unittest.TestCase):
+    def test_prefix_comparison_detects_pre_override_drift(self):
+        rows=[dict(frame=str(f),value='same') for f in (1,2,3)]
+        self.assertTrue(compare_prefix(iter(rows),iter(rows),3)['matches'])
+        changed=[rows[0],dict(rows[1],value='different'),rows[2]]
+        self.assertFalse(compare_prefix(iter(rows),iter(changed),3)['matches'])
+        with self.assertRaises(AssertionError):compare_prefix(iter(rows),iter(rows),4)
     def test_reactive_fire_waits_for_eligible_windup_then_pulses_once(self):
         rows=[dict(frame=str(100+age),requestFrame='100',plan='mixkick',age=str(age),
                    windup='1' if age==8 else '0',attackAt=str(8 if age>=8 else -1),

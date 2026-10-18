@@ -1,7 +1,7 @@
 # Native developer and test source snapshot
 
 [`native-development/`](../native-development/) contains the source-only native
-development tooling:705 files, approximately3MB, including its hash manifest.
+development tooling:708 files, approximately3MB, including its hash manifest.
 This is separate from the historical custom-driver tools elsewhere in this
 repository. It contains no complete ROMs, proprietary toolchain, runtime ROM
 archives, raw game assets, screenshots, recordings or bulk test-run dumps.
@@ -19,8 +19,8 @@ archives, raw game assets, screenshots, recordings or bulk test-run dumps.
   deliberately rejected cases and narrower scope limits.
 - [`FILES.json`](../native-development/FILES.json): exact snapshot hashes.
 
-The last complete local unittest run at this checkpoint passed452 test cases.
-That is not452 separately compiled builds or452 independent test suites.
+The last complete local unittest run at this checkpoint passed455 test cases.
+That is not455 separately compiled builds or455 independent test suites.
 Bundled standalone IPS-codec tests are a smaller five-case subset; see the
 native validation document. Runtime fixtures, source/build qualifications,
 unit tests and media comparisons establish different things. None alone is a
@@ -76,3 +76,11 @@ also corrects a Death Orb checker that previously assumed Liu's animation
 table for every original victim; it now reads the actual linked native table.
 See `LETHAL_ROSTER_PROGRESS_2219.md`. No canonical game ASM or ROM patch changed
 in this developer-tool refresh.
+
+`NATIVE_PLAYER_BUNDLE_PLAN.md` and its audit verify the tested stock executable,
+font and upstream notices byte-for-byte against the official0.289 installer.
+The minimal player layout is planned separately from this developer/source
+snapshot; no final player ZIP or final release is implied. Corresponding
+emulator source asset/redistribution review remains an explicit gate.
+An original-spacing mixed-input finishing-choice trial is also experimental,
+with a pre-change trace comparison; no new campaign win is claimed here.

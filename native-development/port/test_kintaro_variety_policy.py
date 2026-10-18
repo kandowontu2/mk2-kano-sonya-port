@@ -4,6 +4,12 @@ from kintaro_variety_policy import next_move, air_attack_age
 
 
 class VarietyPolicyTests(unittest.TestCase):
+    def test_finishing_override_requires_explicit_mode_and_low_health(self):
+        history=[0x200,0x200,0x201,0x201,0,0]
+        self.assertEqual(next_move(history,13,True),'mixkick')
+        self.assertEqual(next_move(history,14,True),'readyknife')
+        self.assertEqual(next_move(history,13,False),'readyknife')
+        with self.assertRaises(AssertionError):next_move(history,None,True)
     def test_switches_before_three_native_queue_repeats(self):
         self.assertEqual(next_move([0]*6),'mixkick')
         self.assertEqual(next_move([0x200,0x200,0,0,0,0]),'mixpunch')
@@ -26,7 +32,7 @@ class VarietyPolicyTests(unittest.TestCase):
 
     def test_spacing_uses_retreat_hysteresis_without_block(self):
         source=(Path(__file__).parent/'diagnostics/campaign_probe.lua').read_text()
-        branch=source.split('elseif (distance<175 or (subBallRecovery.variedRetreating and distance<220)) and',1)[1].split('elseif',1)[0]
+        branch=source.split('elseif not subBallRecovery.kintaroVariedFinish and (distance<175 or (subBallRecovery.variedRetreating and distance<220)) and',1)[1].split('elseif',1)[0]
         self.assertIn('n-subBallRecovery.variedRetreatSince<48',branch)
         self.assertIn('variedRetreating=true',branch)
         self.assertIn('set(away,1)',branch)

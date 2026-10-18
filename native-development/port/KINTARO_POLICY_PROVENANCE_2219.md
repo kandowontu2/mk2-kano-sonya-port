@@ -397,3 +397,21 @@ The reactive policy actually ran but did not improve the earlier mixed
 results. It remains failed campaign evidence, not an AI/physics bug or a
 reason to modify native balance. No emulator remains. The112 lethal traces
 were requalified without another emulator, and their full hash audit passes.
+
+## Original mixed spacing with a low-HP finishing choice
+
+`stock_wolf_2219_kano_kintaro_varied_finish` explicitly restores the first
+variety controller's spacing: retreat only for Knife below175, no later
+aerial-retreat hysteresis, no later escape-refresh/momentum or reactive timing
+options. Normal six-hit queue selection remains unchanged while boss HP>13.
+At<=13 it requests the longer-active diagonal kick rather than punch/Knife,
+even when the queue would normally choose another move. The source threshold
+is a physical move-selection hypothesis, not changed damage, queue contents,
+AI, health or outcome. Native kick repeat punishment remains fully intact.
+
+The terminal audit validates the explicit low-HP exception, counts actual
+native entries and native results, and compares the earlier campaign trace
+to the original first-variety run up to the first changed move-selection
+request. A mismatching prefix will be reported rather than assumed preserved.
+455 unit cases pass. This experiment's result, prefix equivalence and any
+finishing hit remain pending; it is not a campaign-clear claim.
