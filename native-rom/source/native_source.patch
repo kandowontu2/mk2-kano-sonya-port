@@ -1,0 +1,3957 @@
+--- a/src/BGND.ASM
++++ b/src/BGND.ASM
+@@ -3532,7 +3532,13 @@
+ 	move	*a0(pwake),a1,l
+ 	cmpi	fatality_waiting,a1	; waiting for fatality ?
+ 	jrne	fis3			; nope
++	.if wunit
++* Current Wolf baseline's flight plus hidden80-field wait outlives136 fields.
++* Keep a bounded allowance; the native skeleton phase still declares completion.
++	movi	0100H,a2
++	.else
+ 	movi	088H,a2
++	.endif
+ 	move	a2,*a0(pa11),l		; yes, wait a little longer
+ 
+ fis3	calla	center_around_me
+--- a/src/JOY.ASM
++++ b/src/JOY.ASM
+@@ -880,6 +880,7 @@
+ 	.long	0
+ 	.long	0
+ 	.long	0
++	.long 0,0,0,0,0,0,0
+ 
+ **************************************************************************
+ *											     *
+@@ -1216,6 +1217,9 @@
+ 	move	a11,a0
+ 	jrn	psl2			; neg = dont check for collision
+ 	callr	strike_check_a0		; additional strike checks
++	jrnc	psl2
++	clr	a11
++	not	a11			; first late hit consumes this punch's collision window
+ 
+ psl2	callr	get_last_button
+ 	move	*a13(p_store3),a1,l	; a1 = old state
+@@ -1614,6 +1618,7 @@
+ 	.long	xlate_secret
+ 	.long	xlate_secret
+ 	.long	xlate_secret
++	.long 0,0
+ 
+ xlate_goro
+ 	srl	1,a10			; goro = half damage
+--- a/src/MAIN.ASM
++++ b/src/MAIN.ASM
+@@ -1,3 +1,4 @@
++; ks_ladder_difficulty: preserve original tiers around two new fighters
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -1744,6 +1745,8 @@
+ 	.long	pf_sm_win		; e
+ 	.long	pf_new_win		; 10
+ 	.long	pf_jd_win		; f
++; MK2KS native source extension
++	.long ks_pf_kano_win,ks_pf_sonya_win
+ 
+ 
+ 
+@@ -1767,6 +1770,17 @@
+ 	.word	012H
+ 	.word	05aH
+ 	.word	013H
++; MK2KS native source extension
++	.word 05dH,05eH ; own Kano/Sonya win announcements
++
++ks_pf_kano_win
++	mess_mac rd15font,2,200,038H,bpal_flash1*010000H,strcnrmos_scr,0
++	.byte "KANO WINS",0
++	.even
++ks_pf_sonya_win
++	mess_mac rd15font,2,200,038H,bpal_flash1*010000H,strcnrmos_scr,0
++	.byte "SONYA WINS",0
++	.even
+ 
+ pf_times_up
+ 	mess_mac rd15font,2,200,038H,bpal_flash1*010000H,strcnrmos_scr,0
+@@ -2241,19 +2255,19 @@
+ 	.long	diff_min_5
+ 
+ diff_min_1
+-	.word	0,0,0,1,1,2,2,2,2,2,2,3	; regular characters
++	.word 0,0,0,1,1,2,2,2,2,2,2,2,2,3	; regular characters
+ 	.word	5,5,5,5,5,5			; bosses
+ diff_min_2
+-	.word	0,0,1,2,2,2,2,2,3,3,4,4	; regular characters
++	.word 0,0,1,2,2,2,2,2,3,3,4,4,4,4	; regular characters
+ 	.word	5,5,5,5,5,5		   	; bosses
+ diff_min_3
+-	.word	0,1,1,2,2,2,3,3,3,3,5,5	; regular characters
++	.word 0,1,1,2,2,2,3,3,3,3,5,5,5,5	; regular characters
+ 	.word	6,6,6,6,6,6		   	; bosses
+ diff_min_4
+-	.word	1,2,3,3,3,4,5,6,6,6,7,7	; regular characters
++	.word 1,2,3,3,3,4,5,6,6,6,7,7,7,7	; regular characters
+ 	.word	7,8,8,8,8,8		   	; bosses
+ diff_min_5
+-	.word	4,4,4,5,5,5,6,7,7,8,8,8	; regular characters
++	.word 4,4,4,5,5,5,6,7,7,8,8,8,8,8	; regular characters
+ 	.word	8,8,8,8,8,8		   	; bosses
+ 
+ **************************************************************************
+@@ -2473,10 +2487,14 @@
+ 	movk	1,a0
+ adg4	move	a0,@p1_char,w		; player 1 = bio dude
+ 
+-	movk	12,a0
++	movk	14,a0
+ 	calla	randu
+ 	dec	a0
+-	move	a0,@p2_char,w		; random player 2
++	cmpi 12,a0
++	jrlo ks_demo_cpu_ready
++	addk 5,a0
++ks_demo_cpu_ready
++	move	a0,@p2_char,w		; random official roster CPU
+ 
+ 	calla	oinit
+ 	calla	clear_sound_ram
+--- a/src/MAINEQU.ASM
++++ b/src/MAINEQU.ASM
+@@ -718,6 +718,8 @@
+ ft_smoke		.set	14	; SMOKE the hidden ninja character
+ ft_noob		.set	15
+ ft_jade		.set	16	; jade the bitch
++ft_kano		.set	17
++ft_sonya	.set	18
+ 
+ 
+ *
+--- a/src/MAINEQUW.ASM
++++ b/src/MAINEQUW.ASM
+@@ -718,6 +718,8 @@
+ ft_smoke		.set	14	; SMOKE the hidden ninja character
+ ft_noob		.set	15
+ ft_jade		.set	16	; jade the bitch
++ft_kano		.set	17
++ft_sonya	.set	18
+ 
+ 
+ *
+--- a/src/MK2NEWW.CMD
++++ b/src/MK2NEWW.CMD
+@@ -1,8 +1,8 @@
+ /*	Game linker command file				*/
+ -e POWERUP		/* entry point of program		*/
+ -f 0xFFFF		/* fill unspecified memory with value	*/
+--o mk2neww.out		/* specify output file			*/
+--m mk2new.map		/* map file				*/
++-o MK2P.OUT		/* specify output file			*/
++-m MK2P.MAP		/* map file				*/
+ -s			/* Kill the symbol table		*/
+ 
+ /* Restructured link order! 					*/
+@@ -96,6 +96,66 @@
+ DIAGADJ.OBJ		/* GAME ADJUSTMENTS, LINK THIS LAST!!!	*/
+ 
+ 
++KANOMOV.OBJ
++KSCMD.OBJ
++KSNAV.OBJ
++SONYAMOV.OBJ
++KANOART.OBJ
++KSANIM.OBJ
++SONYAART.OBJ
++KANOANI.OBJ
++SONYAANI.OBJ
++KSROOT.OBJ
++KSUI.OBJ
++KSPROJ.OBJ
++KSPJANI.OBJ
++KSPJROOT.OBJ
++KSSHRED.OBJ
++KSNUTART.OBJ
++KSIMART.OBJ
++KSBLADE.OBJ
++KSBANI.OBJ
++KSBIKE.OBJ
++KSBIANI.OBJ
++KSCHOKE.OBJ
++KSCANI.OBJ
++KSLEG.OBJ
++KSLANI.OBJ
++KSPAIR.OBJ
++KSFART.OBJ
++KSFANI.OBJ
++KSEXANI.OBJ
++KSFATAL.OBJ
++KSKSANI.OBJ
++KSKISS.OBJ
++KSBUANI.OBJ
++KSBUBBLE.OBJ
++KSLAANI.OBJ
++KSLASER.OBJ
++KSBABART.OBJ
++KSNAMES.OBJ
++KSFRART.OBJ
++KSFRIEND.OBJ
++KSPITART.OBJ
++KSREACT.OBJ
++KSBKART.OBJ
++KSHDART.OBJ
++KSDCART.OBJ
++KSDRAIN.OBJ
++KSDRART.OBJ
++KSTRART.OBJ
++KSAI.OBJ
++KSTHANI.OBJ
++KSTHVIC.OBJ
++KSTHROW.OBJ
++KSICEPAL.OBJ
++KSARART.OBJ
++KSINFART.OBJ
++KSINART.OBJ
++KSPLART.OBJ
++KSMOART.OBJ
++KSENDART.OBJ
++
+ MEMORY        			/* set up memory for sdb board */
+ {
+  SCRATCH	: org = 0x01000000,	len = 0x138000
+--- a/src/MKAMODE.ASM
++++ b/src/MKAMODE.ASM
+@@ -387,13 +387,21 @@
+ 	movk	1,a0
+ 	move	a0,@f_doscore,w
+ 
+-	movk	12,a0
++	movk	14,a0
+ 	calla	randu
+ 	dec	a0
++	cmpi 12,a0
++	jrlo ks_demo_p1_ready
++	addk 5,a0
++ks_demo_p1_ready
+ 	move	a0,@p1_char,w
+-	movk	12,a0
++	movk	14,a0
+ 	calla	randu
+ 	dec	a0
++	cmpi 12,a0
++	jrlo ks_demo_p2_ready
++	addk 5,a0
++ks_demo_p2_ready
+ 	move	a0,@p2_char,w			; random characters
+ 
+ 	move	*a13(p_store1),a11,w
+--- a/src/MKBABY.ASM
++++ b/src/MKBABY.ASM
+@@ -66,6 +66,16 @@
+ 	.long	scom_nj_baby
+ 	.long	scom_nj_baby
+ 	.long	scom_jx_baby
++	.long 0,0,scom_nj_baby,scom_nj_baby,scom_fn_baby
++	.long ks_kano_baby_combo,ks_sonya_baby_combo
++ks_kano_baby_combo
++	.word 038H
++	.word sw_down,sw_down,sw_right,sw_right,0,0
++	.word sw_down,sw_down,sw_left,sw_left,0,0
++ks_sonya_baby_combo
++	.word 038H
++	.word sw_right,sw_down,sw_down,0,0,0
++	.word sw_left,sw_down,sw_down,0,0,0
+ 
+ ;*************************************************************************
+ ;*************************************************************************
+@@ -163,6 +173,9 @@
+ 	.long	SCBABE
+ 	.long	JXBABE
+ 
++; Bosses cannot be babality victims; retain explicit empty boss rows.
++	.long 0,0,SZBABE,SCBABE,KTBABE,ks_kano_baby,ks_sonya_baby
++	.ref ks_kano_baby,ks_sonya_baby
+ SZBABE	.word   28,44,0,0
+ 	.long   054c7254H
+ 	.word   06080H
+--- a/src/MKBLOOD.ASM
++++ b/src/MKBLOOD.ASM
+@@ -1,3 +1,4 @@
++	.def GUSHER1
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -131,8 +132,20 @@
+ 	die
+ 
+ arm_spawn_drip
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jreq ks_ar_drip_k
++	cmpi 18,a0
++	jreq ks_ar_drip_s
+ 	movi	arm_flow_lineups,a0
+ 	calla	get_char_long
++	jruc ks_ar_drip_ready
++ks_ar_drip_k
++	movi 00018001aH,a0
++	jruc ks_ar_drip_ready
++ks_ar_drip_s
++	movi 000180018H,a0
++ks_ar_drip_ready
+ 	move	a0,a4
+ 
+ 	movi	050000H,a0		; x vel range
+@@ -189,7 +202,35 @@
+ 
+ 
+ gush_lineup
+-	calla	get_char_long
++	push a2
++	move a0,a2
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jreq ks_ar_own_gush
++	cmpi 18,a0
++	jreq ks_ar_own_gush
++	move a2,a0
++	calla get_char_long
++	jruc ks_ar_gush_ready
++ks_ar_own_gush
++	cmpi 17,a0
++	jrne ks_ar_sonya_gush
++	cmpi right_gush_lineups,a2
++	jreq ks_ar_k_right_gush
++	movi 000510000H,a0
++	jruc ks_ar_gush_ready
++ks_ar_k_right_gush
++	movi 0005bffd9H,a0
++	jruc ks_ar_gush_ready
++ks_ar_sonya_gush
++	cmpi right_gush_lineups,a2
++	jreq ks_ar_right_gush
++	movi 00052fffeH,a0
++	jruc ks_ar_gush_ready
++ks_ar_right_gush
++	movi 00057ffddH,a0
++ks_ar_gush_ready
++	pull a2
+ 	push	a0
+ 	move	a8,a11
+ 	callr	get_tg_blood
+--- a/src/MKBOSS.ASM
++++ b/src/MKBOSS.ASM
+@@ -1,3 +1,4 @@
++	.def ks_boss_category
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -637,7 +638,7 @@
+ 	callr	drone_get_his_action		; a1
+ 	move	a1,a1
+ 	jreq	boss_return_to_beware
+-	srl	8,a1				; just use the catagory part
++	callr ks_boss_category		; native own-projectile classification
+ 	sll	5,a1
+ 	addi	goro_catagory_jumps,a1
+ 	move	*a1,a1,l
+@@ -1257,7 +1258,7 @@
+ 	callr	drone_get_his_action		; a1
+ 	move	a1,a1
+ 	jreq	boss_return_to_beware
+-	srl	8,a1				; just use the catagory part
++	callr ks_boss_category		; native own-projectile classification
+ 	sll	5,a1
+ 	addi	kahn_catagory_jumps,a1
+ 	move	*a1,a1,l
+@@ -1461,5 +1462,34 @@
+ 
+ ;*************************************************************************
+ 
++	.text
++
++; Return action category in A1; preserve original action stored in the process.
++; Only matching true identities can reinterpret the two own launch tags.
++ks_boss_category
++	push a0
++	cmpi 0211h,a1
++	jrne ks_boss_ring_category
++	move *a13(p_otherguy),a0,l
++	move *a0(ochar),a0,w
++	cmpi 17,a0
++	jrne ks_boss_old_category
++	clr a1
++	jruc ks_boss_category_done
++ks_boss_ring_category
++	cmpi 0212h,a1
++	jrne ks_boss_old_category
++	move *a13(p_otherguy),a0,l
++	move *a0(ochar),a0,w
++	cmpi 18,a0
++	jrne ks_boss_old_category
++	clr a1
++	jruc ks_boss_category_done
++ks_boss_old_category
++	srl 8,a1
++ks_boss_category_done
++	pull a0
++	rets
++
+ 	.end
+ 
+--- a/src/MKCANNED.ASM
++++ b/src/MKCANNED.ASM
+@@ -112,6 +112,8 @@
+ 	.long	smoke_victory	; e
+ 	.long	generic_victory	; f
+ 	.long	generic_victory	; 10
++; MK2KS native source extension
++	.long generic_victory,generic_victory
+ 
+ 
+ kahn_victory
+--- a/src/MKDEATH.ASM
++++ b/src/MKDEATH.ASM
+@@ -1,3 +1,7 @@
++	.def ks_ground_own_legs
++	.ref ks_kano_arms_ripped,ks_sonya_arms_ripped,ks_kano_arm_fly,ks_sonya_arm_fly
++	.ref ks_kano_statue_palette,ks_sonya_statue_palette
++	.def ks_superfreeze_own_ice,ks_shatter_own_legs
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -10,6 +14,11 @@
+ *											     *
+ **************************************************************************
+ 	.file	"mkdeath.asm"
++	.ref ks_kano_extract
++	.ref ks_sonya_flame_kiss
++	.ref ks_sonya_bubble
++	.ref ks_kano_laser
++	.def disable_repell
+ 	.width	132
+ 	.option	b,d,l,t
+ 	.mnolist
+@@ -39,6 +48,8 @@
+ 	.long	do_tongue		;  9 - reptile toungue thing
+ 	.long	do_scortch		; 10 - scorpion scortch
+ 	.long	do_clap			; 11 - jax head clap
++	.long null_death_blow,null_death_blow,null_death_blow,null_death_blow,null_death_blow
++	.long ks_kano_extract,ks_sonya_flame_kiss
+ 
+ db2_table
+ 	.long	do_hat_decap		;  0 - hat head
+@@ -53,6 +64,8 @@
+ 	.long	do_inviso_kill		;  9 - 
+ 	.long	do_spear_swipe		; 10	-
+ 	.long	do_arm_rip		; 11	-
++	.long null_death_blow,null_death_blow,null_death_blow,null_death_blow,null_death_blow
++	.long ks_kano_laser,ks_sonya_bubble
+ 
+ **************************************************************************
+ 
+@@ -181,6 +194,7 @@
+ 	move	a10,a8				; a8 = him
+ 	calla	match_ani_points
+ 	pull	a8
++	callr ks_ground_own_legs
+ 
+ 	calla	insobja8
+ 	movk	7,a0
+@@ -376,6 +390,7 @@
+ 	move	a10,a8				; a8 = him
+ 	calla	match_ani_points
+ 	pull	a8
++	callr ks_ground_own_legs
+ 
+ 	calla	insobja8
+ 	movk	7,a0
+@@ -577,8 +592,21 @@
+ 	calla	takeover_him
+ 
+ 	push	a8
++	move *a13(p_otherguy),a0,l
++	move *a0(ochar),a0,w
++	cmpi 17,a0
++	jreq ks_ar_fly_k
++	cmpi 18,a0
++	jreq ks_ar_fly_s
+ 	movi	ochar_flyin_arms,a0
+ 	calla	get_his_char_long
++	jruc ks_ar_fly_ready
++ks_ar_fly_k
++	movi ks_kano_arm_fly,a0
++	jruc ks_ar_fly_ready
++ks_ar_fly_s
++	movi ks_sonya_arm_fly,a0
++ks_ar_fly_ready
+ 	move	a0,a11
+ 	callr	get_arm_object
+ 
+@@ -685,16 +713,40 @@
+ 
+ 
+ r_arms_ripped
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jreq ks_ar_pose_k
++	cmpi 18,a0
++	jreq ks_ar_pose_s
+ 	movi	ochar_arm_ripped_ani,a0
+ 	calla	get_char_long
++	jruc ks_ar_pose_ready
++ks_ar_pose_k
++	movi ks_kano_arms_ripped,a0
++	jruc ks_ar_pose_ready
++ks_ar_pose_s
++	movi ks_sonya_arms_ripped,a0
++ks_ar_pose_ready
+ 	move	a0,a9
+ 	calla	do_next_a9_frame
+ 	calla	match_me_with_him
+ 	calla	flip_multi
+ 	calla	change_to_bloody_pal
+ 
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jreq ks_ar_line_k
++	cmpi 18,a0
++	jreq ks_ar_line_s
+ 	movi	arm_ripped_adjust,a0
+ 	calla	get_char_long
++	jruc ks_ar_line_ready
++ks_ar_line_k
++	movi 00008ff70H,a0
++	jruc ks_ar_line_ready
++ks_ar_line_s
++	movi 00007ff70H,a0
++ks_ar_line_ready
+ 	move	a0,a1
+ 	zext	a0,w
+ 	srl	16,a1
+@@ -1125,8 +1177,17 @@
+ 	move	a1,*a13(p_action),w
+ 
+ 	calla	face_opponent
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jreq ks_superfreeze_own_stun
++	cmpi 18,a0
++	jreq ks_superfreeze_own_stun
+ 	movi	frozen_stunned,a0
+ 	calla	get_char_word
++	jruc ks_superfreeze_stun_ready
++ks_superfreeze_own_stun
++	clr a0
++ks_superfreeze_stun_ready
+ 	move	a0,a7
+ 	movi	028H,a9
+ 	calla	get_char_ani
+@@ -1146,6 +1207,10 @@
+ 	move	a1,*a8(oflags2),w		; turn off my shadow
+ 
+ 	move	*a8(ochar),a9,w
++	cmpi 17,a9
++	jreq ks_superfreeze_own_ice
++	cmpi 18,a9
++	jreq ks_superfreeze_own_ice
+ 	cmpi	ft_jax,a9
+ 	jrls	rsupf5
+ 	movi	ft_jax,a9			; in case of fire
+@@ -1155,6 +1220,12 @@
+ 	movi	FREEZE_P,a0
+ 	calla	player_swpal
+ 
++	jruc rsup9
++ks_superfreeze_own_ice
++	movi 028H,a9
++	calla get_char_ani
++	calla do_next_a9_frame
++	callr ks_own_statue_palette
+ rsup9	sleep	40
+ super_frozen
+ 	jruc	rsup9
+@@ -1220,6 +1291,11 @@
+ 
+ 	create	pid_fx,super_freeze_bang
+ 
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jreq ks_shatter_own_legs
++	cmpi 18,a0
++	jreq ks_shatter_own_legs
+ 	movi	FREEZE_P,a0
+ 	calla	player_swpal
+ 	move	*a8(ochar),a9,w
+@@ -1227,6 +1303,41 @@
+ 	addi	frozen_legs,a9
+ 	calla	do_next_a9_frame
+ 	jauc	wait_forever
++ks_shatter_own_legs
++	movi 039H,a9
++	calla get_char_ani
++	movk 6,a14
++	calla find_part_a14
++	calla do_next_a9_frame
++	callr ks_ground_own_legs
++	callr ks_own_statue_palette
++	jauc wait_forever
++ks_own_statue_palette
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jrne ks_statue_sonya_palette
++	movi ks_kano_statue_palette,a0
++	jauc player_swpal
++ks_statue_sonya_palette
++	movi ks_sonya_statue_palette,a0
++	jauc player_swpal
++
++; Only the own detached-leg consumers call this helper. Their art has an
++; opaque lower extent of141 from the animation pivot; preserve every other ID.
++ks_ground_own_legs
++	push a0
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jreq ks_ground_own_legs_apply
++	cmpi 18,a0
++	jrne ks_ground_own_legs_done
++ks_ground_own_legs_apply
++	move @ground_y,a0,w
++	subi 08dH,a0
++	move a0,*a8(oypos),w
++ks_ground_own_legs_done
++	pull a0
++	rets
+ 
+ 
+ frozen_legs
+@@ -1290,8 +1401,21 @@
+ 
+ 	calla	match_me_with_him
+ 	calla	flip_multi
++	move *a13(p_otherguy),a0,l
++	move *a0(ochar),a0,w
++	cmpi 17,a0
++	jreq ks_ar_st_burst_k
++	cmpi 18,a0
++	jreq ks_ar_st_burst_s
+ 	movi	burst_distance_offset,a0
+ 	calla	get_his_char_long
++	jruc ks_ar_st_burst_ready
++ks_ar_st_burst_k
++	movi 00010005fH,a0
++	jruc ks_ar_st_burst_ready
++ks_ar_st_burst_s
++	movi 0000d0058H,a0
++ks_ar_st_burst_ready
+ 	move	a0,a1
+ 	zext	a0,w
+ 	sra	16,a1
+@@ -1881,6 +2005,10 @@
+ 	.word	-060H,000H
+ 	.word	-060H,000H
+ 	.word	-060H,000H
++; MK2KS native source extension
++	.word -060h,0 ; Jade: native standard horizontal lineup
++	.word -060h,8 ; Kano: Jax139 minus own131
++	.word -060h,7 ; Sonya: Jax139 minus own132
+ 
+ **************************************************************************
+ *											     *
+@@ -2129,6 +2257,9 @@
+ 	.word	-0b8H,-005H,010H,020H
+ 	.word	-0b8H,-005H,010H,020H
+ 	.word	-0b8H,-005H,010H,020H
++	.word -0b8h,-5,010h,020h ; Jade
++	.word -0bbh,0,010h,020h ; Kano, visual calibration pending
++	.word -0bbh,-1,010h,020h ; Sonya132 vs Reptile131 ground offset
+ 
+ **************************************************************************
+ *											     *
+@@ -2193,6 +2324,7 @@
+ 	move	*a13(p_otherguy),a8,l	; a8 = him
+ 	calla	match_ani_points
+ 	pull	a8
++	callr ks_ground_own_legs
+ 
+ 	calla	insobja8
+ 
+@@ -2518,8 +2650,21 @@
+ *
+ * tug him towards me
+ *
++	move *a13(p_otherguy),a0,l
++	move *a0(ochar),a0,w
++	cmpi 17,a0
++	jreq ks_ar_kiss_xy_k
++	cmpi 18,a0
++	jreq ks_ar_kiss_xy_s
+ 	movi	kissed_coor_adj,a0
+ 	calla	get_his_char_word
++	jruc ks_ar_kiss_xy_ready
++ks_ar_kiss_xy_k
++	movi -04cH,a0
++	jruc ks_ar_kiss_xy_ready
++ks_ar_kiss_xy_s
++	movi -04cH,a0
++ks_ar_kiss_xy_ready
+ 	move	a0,a11
+ 
+ 	callr	disable_repell
+@@ -2552,7 +2697,20 @@
+ 	calla	get_his_char_ani
+ 	pull	a0
+ 
++	push a1
++	move *a13(p_otherguy),a1,l
++	move *a1(ochar),a1,w
++	cmpi 17,a1
++	jreq ks_kiss_own_stop
++	cmpi 18,a1
++	jreq ks_kiss_own_stop
++	pull a1
+ 	calla	get_his_char_word
++	jruc ks_kiss_stop_ready
++ks_kiss_own_stop
++	pull a1
++	movi 32*5,a0 ; own seven-pose dizzy loop, after fifth pose
++ks_kiss_stop_ready
+ 	add	a0,a9 
+ 	move	a9,a10			; a10 = where he should stop stunned ani
+ 	
+@@ -2823,13 +2981,26 @@
+ *  Dudes getting split in half								     *
+ *											     *
+ **************************************************************************
++	.ref ks_kano_split,ks_sonya_split,ks_kano_split_other,ks_sonya_split_other
+ r_split_in_2
+ 	movk	9,a0
+ 	calla	create_blood_proc
+ 
+ 	calla	change_to_bloody_pal
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jreq ks_ar_split_k
++	cmpi 18,a0
++	jreq ks_ar_split_s
+ 	movi	split_in_2_tab,a0	
+ 	calla	get_char_long
++	jruc ks_ar_split_ready
++ks_ar_split_k
++	movi ks_kano_split,a0
++	jruc ks_ar_split_ready
++ks_ar_split_s
++	movi ks_sonya_split,a0
++ks_ar_split_ready
+ 	move	a0,a9
+ 	calla	do_next_a9_frame
+ 
+@@ -2872,6 +3043,16 @@
+ 	calla	insobj			; put on object list
+ 	mmfm	sp,a8,a9
+ 	move	a9,a11
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jreq ks_sp_other_k
++	cmpi 18,a0
++	jrne ks_sp_other_ready
++	movi ks_sonya_split_other,a11
++	jruc ks_sp_other_ready
++ks_sp_other_k
++	movi ks_kano_split_other,a11
++ks_sp_other_ready
+ 
+ ;	create	pid_blood,split_blood2
+ 
+--- a/src/MKDIE.ASM
++++ b/src/MKDIE.ASM
+@@ -10,6 +10,7 @@
+ *											     *
+ **************************************************************************
+ 	.file	"mkdie.asm"
++	.def explode,exp_burst,bone_land
+ 	.width	132
+ 	.option	b,d,l,t
+ 	.mnolist
+@@ -61,6 +62,7 @@
+ 	jauc	wait_forever
+ 
+ 
++	.ref ks_kano_ingested,ks_sonya_ingested
+ r_body_suck
+ 	movi	000040004H,a0
+ 	movk	3,a1
+@@ -70,8 +72,20 @@
+ 	calla	match_me_with_him
+ 	calla	flip_multi
+ 
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jreq ks_ar_ingest_k
++	cmpi 18,a0
++	jreq ks_ar_ingest_s
+ 	movi	sucked_in_anis,a0
+ 	calla	get_char_long
++	jruc ks_ar_ingest_ready
++ks_ar_ingest_k
++	movi ks_kano_ingested,a0
++	jruc ks_ar_ingest_ready
++ks_ar_ingest_s
++	movi ks_sonya_ingested,a0
++ks_ar_ingest_ready
+ 	move	a0,a9
+ 	movk	4,a0
+ 	jsrp	mframew
+@@ -718,12 +732,38 @@
+ 	jauc	wait_forever
+ 
+ 
++	.ref ks_kano_inflated,ks_sonya_inflated
++	.ref ks_kano_primary_palette,ks_sonya_primary_palette
+ inflate_pose
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jreq ks_ar_inf_ani_k
++	cmpi 18,a0
++	jreq ks_ar_inf_ani_s
+ 	movi	inflate_animations,a0
+ 	calla	get_char_long
++	jruc ks_ar_inf_ani_ready
++ks_ar_inf_ani_k
++	movi ks_kano_inflated,a0
++	jruc ks_ar_inf_ani_ready
++ks_ar_inf_ani_s
++	movi ks_sonya_inflated,a0
++ks_ar_inf_ani_ready
+ 	move	a0,a9
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jreq ks_ar_inf_pal_k
++	cmpi 18,a0
++	jreq ks_ar_inf_pal_s
+ 	movi	inflate_palettes,a0
+ 	calla	get_char_long
++	jruc ks_ar_inf_pal_ready
++ks_ar_inf_pal_k
++	movi ks_kano_primary_palette,a0
++	jruc ks_ar_inf_pal_ready
++ks_ar_inf_pal_s
++	movi ks_sonya_primary_palette,a0
++ks_ar_inf_pal_ready
+ 
+ 	movi	ft_st,a1
+ 	move	*a8(ochar),a2,w
+@@ -754,8 +794,20 @@
+ 
+ 
+ get_pop_pal
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jreq ks_ar_pop_pal_k
++	cmpi 18,a0
++	jreq ks_ar_pop_pal_s
+ 	movi	pop_palettes,a0
+ 	calla	get_char_long
++	jruc ks_ar_pop_pal_ready
++ks_ar_pop_pal_k
++	movi ks_kano_primary_palette,a0
++	jruc ks_ar_pop_pal_ready
++ks_ar_pop_pal_s
++	movi ks_sonya_primary_palette,a0
++ks_ar_pop_pal_ready
+ 	rets
+ 
+ pop_palettes
+--- a/src/MKDISP.ASM
++++ b/src/MKDISP.ASM
+@@ -506,7 +506,10 @@
+ 	rets
+ 
+ 
++	.ref ks_pair_boundary
+ gravity_n_bounds
++	calla ks_pair_boundary
++	jrc kib7
+ 	move	*a2(oxpos),a3,w
+ 	cmp	a0,a3			; within left edge ?
+ 	jrgt	kib4			; yes
+@@ -695,6 +698,9 @@
+ 	.long	BAR_SMOKE,0001e001dH	 	; 14
+ 	.long	BAR_NOOB,0001d001dH	 	; 15
+ 	.long	BAR_NULL,0001e001dH	 	; 16
++; MK2KS native source extension
++	.long ks_bar_kano,0001e001dh
++	.long ks_bar_sonya,0001e001dh
+ 
+ p2_powerbar_names
+ 	.long	BAR_KUNGLAO,0001e0128H	; 0
+@@ -714,6 +720,10 @@
+ 	.long	BAR_SMOKE,0001e0140H	 	; 14
+ 	.long	BAR_NOOB,0001d0110H	 	; 15
+ 	.long	BAR_NULL,0001e0149H	 	; 16
++; MK2KS native source extension
++	.long ks_bar_kano,0001e0149h
++	.long ks_bar_sonya,0001e0140h
++	.ref ks_bar_kano,ks_bar_sonya
+ 
+ 
+ BAR_NULL
+@@ -1929,7 +1939,35 @@
+ 	movk	4,b3
+  	setf	8,0,0	 	; field 0 is 8 bits (zero extend)
+ 
+-shad7	move	*a10+,a8,w	; grab a BYTE !!
++shad7
++	.if wunit
++; A10 includes MKII's02000000h CPU-read bias. Wolf uses8MiB CPU banks.
++; Preserve DMA helper registers and every original system-control bit.
++	mmtm	sp,a0,a1,a2
++	setf	16,0,0
++	move	@sysctrl,a2,w
++	move	a10,a0
++	subi	02000000h,a0
++	move	a0,a1
++	srl	26,a1
++	andi	3,a1
++	sll	8,a1
++	move	a2,a8
++	andni	0300h,a8
++	or	a1,a8
++	move	a8,@sysctrl,w
++	andi	03ffffffh,a0
++	addi	02000000h,a0
++	setf	8,0,0
++	move	*a0,a8,w
++	setf	16,0,0
++	move	a2,@sysctrl,w
++	setf	8,0,0
++	addk	8,a10
++	mmfm	sp,a0,a1,a2
++	.else
++	move	*a10+,a8,w	; original T-unit byte read
++	.endif
+ 
+ 	move	a8,a13
+ 	sll	32-4,a13
+@@ -1947,7 +1985,11 @@
+ 	add	a8,a10
+ 	sll	1,a8  		; + 4x = 6 bits per pixel
+ 	add	a8,a10		; a10 ---> sag for next line
++	.if wunit
++	dsj	b3,shad7
++	.else
+ 	dsjs	b3,shad7
++	.endif
+ 
+ 	setf	16,1,0		; field 0 is back to 16 bits
+ 	jruc	shad4
+--- a/src/MKDRONE.ASM
++++ b/src/MKDRONE.ASM
+@@ -1,3 +1,21 @@
++	.def ks_own_counter_lookup
++	.def ochar_drone_start
++	.def rt_special_start
++	.def ochar_propells
++	.def zap_offsets
++	.def ochar_superk_sd
++	.def angle_towards_reactions
++	.def close_out_of_air
++	.def med_out_of_air
++	.def ochar_avoid_pro
++	.def skull_escape
++	.def ochar_fatality_distances
++	.ref ks_ai_kano_propell
++	.ref ks_ai_kano_projectile
++	.ref ks_ai_kano_special
++	.ref ks_ai_sonya_air
++	.ref ks_ai_sonya_projectile
++	.ref ks_ai_sonya_special
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -9,6 +27,8 @@
+ *  copyright (c) 1993 Midway Manufacturing							*
+ *											     *
+ **************************************************************************
++        .def backflipper_x_dist,rh_air_distances,divesd_x_dist
++        .def fntele_heights,superkang_zap_dist
+ 	.file	"mkdrone.asm"
+ 	.width	132
+ 	.option	b,d,l,t
+@@ -228,6 +248,8 @@
+ 	.long	smoke_start
+ 	.long	drone_entry
+ 	.long	drone_entry
++	.long generic_drone_start ; MK2KS17
++	.long generic_drone_start ; MK2KS18
+ 
+ 
+ shang_start
+@@ -277,6 +299,8 @@
+ 	.long	drone_zap_jsrp
+ 	.long	drone_zap_jsrp
+ 	.long	drone_zap_jsrp
++	.long ks_ai_kano_special ; MK2KS17
++	.long ks_ai_sonya_special ; MK2KS18
+ 
+ 
+ smoke_start
+@@ -327,6 +351,12 @@
+ 	jreq	bew8				; yes, we had our chance before
+ 	move	a1,*a13(p_otheract),w 	; no ---> new latest act !!
+ 
++	callr ks_own_counter_lookup
++	jrnc ks_counter_original_lookup
++	move a2,a1
++	jruc ks_counter_dispatch_ready
++ks_counter_original_lookup
++
+ 	move	a1,a2
+ 	srl	8,a2
+ 	jrne	bew5			; non-projectile move
+@@ -344,6 +374,8 @@
+ 	sll	5,a1
+ 	add	a2,a1
+ 	move	*a1,a1,l
++ks_counter_dispatch_ready
++	move a1,a1
+ 	jreq	bew8	 		; no reaction ---> skip
+ 
+ 	push	a1
+@@ -686,6 +718,10 @@
+ 	.word	0d0H,050H		; reptile
+ 	.word	0a0H,050H		; scorpion
+ 	.word	050H,060H		; jax
++	.word 0,0,0,0 ; reserved boss slots12/13
++	.word 0a0h,050h,0a0h,050h,04ah,04ah ; hidden native families14..16
++	.word 040h,0c0h ; Kano extraction / eye laser
++	.word 0c0h,0e0h ; Sonya flame kiss / death orb
+ 
+ drone_bf_jsrp
+ 	calla	face_opponent
+@@ -1211,6 +1247,8 @@
+ 	.long	drone_zap_jump
+ 	.long	drone_zap_jump
+ 	.long	drone_zap_jump
++	.long ks_ai_kano_propell ; MK2KS17
++	.long ks_ai_sonya_air ; MK2KS18
+ 
+ jax_zap_or_quake
+ 	movi	200,a0
+@@ -1446,6 +1484,15 @@
+ 	jauc	do_zap
+ 
+ drone_reverse_zap_jump
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jrne ks_ai_zrev_s
++	jauc ks_ai_kano_projectile
++ks_ai_zrev_s
++	cmpi 18,a0
++	jrne ks_ai_zrev_o
++	jauc ks_ai_sonya_projectile
++ks_ai_zrev_o
+ 	movk	1,a10
+ 	movi	zap_offsets,a0
+ 	calla	get_char_word		; my ochar zap offset
+@@ -1463,6 +1510,15 @@
+ * jsrp to this one if you want to return
+ *
+ drone_zap_jsrp
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jrne ks_ai_zap_s
++	jauc ks_ai_kano_projectile
++ks_ai_zap_s
++	cmpi 18,a0
++	jrne ks_ai_zap_o
++	jauc ks_ai_sonya_projectile
++ks_ai_zap_o
+ 	clr	a10
+ 	movi	zap_offsets,a0
+ 	calla	get_char_word		; my ochar zap offset
+@@ -1495,6 +1551,8 @@
+ 	.word	00cH	; 14 - scorpion
+ 	.word	00cH	; 15 - scorpion
+ 	.word	6	;
++	.word -1 ; MK2KS17
++	.word -1 ; MK2KS18
+ 
+ **************************************************************************
+ *											     *
+@@ -2154,6 +2212,8 @@
+ 	.long	drone_uppercut_jump
+ 	.long	drone_uppercut_jump
+ 	.long	drone_uppercut_jump
++	.long drone_uppercut_jump ; MK2KS17
++	.long drone_uppercut_jump ; MK2KS18
+ 
+ ;*************************************************************************
+ 
+@@ -2297,6 +2357,9 @@
+ 	.word	050H
+ 	.word	050H
+ 	.word	050H
++; MK2KS own-identity common AI thresholds
++	.word 050H ; 17 - Kano
++	.word 050H ; 18 - Sonya
+ 
+ ;***************************************************************************
+ 
+@@ -2387,6 +2450,8 @@
+ 	.long	simple_angle
+ 	.long	simple_angle
+ 	.long	simple_angle
++	.long simple_angle ; MK2KS17
++	.long ks_ai_sonya_air ; MK2KS18
+ 
+ simple_angle
+ 	callr	where_will_he_land		; a0 = his landing x
+@@ -2485,6 +2550,8 @@
+ 	.long	quick_flip_attack
+ 	.long	quick_flip_attack
+ 	.long	quick_flip_attack
++	.long quick_flip_attack ; MK2KS17
++	.long ks_ai_sonya_air ; MK2KS18
+ 
+ ;*************************************************************************
+ 
+@@ -2614,6 +2681,9 @@
+ 	.word	040H
+ 	.word	040H
+ 	.word	040H
++; MK2KS own-identity common AI thresholds
++	.word 040H ; 17 - Kano
++	.word 040H ; 18 - Sonya
+ 
+ ;*******************************************************************
+ 
+@@ -2637,6 +2707,8 @@
+ 	.long	rh_ooa
+ 	.long	rh_ooa
+ 	.long	hk_ooa
++	.long rh_ooa ; MK2KS17
++	.long ks_ai_sonya_air ; MK2KS18
+ 
+ drone_cage_zaphi
+ 	movk	10,a10
+@@ -3333,6 +3405,8 @@
+ 	.long	0
+ 	.long	0
+ 	.long	0
++	.long ks_ai_kano_propell ; MK2KS17
++	.long 0 ; MK2KS18
+ 
+ 
+ skull_lk_zaplo
+@@ -3435,6 +3509,8 @@
+ 	.long	drone_flip_kick		; 11
+ 	.long	drone_flip_kick		; 11
+ 	.long	drone_flip_kick		; 11
++	.long ks_ai_kano_propell ; MK2KS17
++	.long ks_ai_sonya_projectile ; MK2KS18
+ 
+ ;************************************************************************
+ 
+@@ -3580,6 +3656,9 @@
+ 	.word	090H
+ 	.word	090H
+ 	.word	010H
++; MK2KS own-identity common AI thresholds
++	.word 080H ; 17 - Kano
++	.word 080H ; 18 - Sonya
+ 
+ ;************************************************************************
+ 
+@@ -3660,6 +3739,9 @@
+ 	.word	060H
+ 	.word	060H
+ 	.word	070H
++; MK2KS own-identity common AI thresholds
++	.word 070H ; 17 - Kano
++	.word 070H ; 18 - Sonya
+ 
+ ;************************************************************************
+ 
+@@ -3996,6 +4078,9 @@
+ 	.word	0d0H
+ 	.word	0d0H
+ 	.word	0d0H
++; MK2KS own-identity common AI thresholds
++	.word 0d0H ; 17 - Kano
++	.word 0d0H ; 18 - Sonya
+ 
+ ;************************************************************************
+ 
+@@ -4768,5 +4853,126 @@
+ 	rets
+ 
+ 
++	.text
++
++; A1=actual opponent action. Carry=handled own action, A2=reaction (possibly0).
++; No stored action/identity changes. Original fighters and ordinary own normals
++; continue through the original tables exactly as before.
++ks_own_counter_lookup
++	push a0
++	move *a13(p_otherguy),a0,l
++	move *a0(ochar),a0,w
++	cmpi 17,a0
++	jrne ks_counter_check_sonya
++	movi ks_kano_counter_rows,a2
++	jruc ks_counter_scan
++ks_counter_check_sonya
++	cmpi 18,a0
++	jrne ks_counter_not_owned
++	movi ks_sonya_counter_rows,a2
++ks_counter_scan
++	move *a2+,a0,w
++	cmpi 0,a0
++	jreq ks_counter_not_owned
++	cmp a0,a1
++	jreq ks_counter_found
++	addi 32,a2
++	jruc ks_counter_scan
++ks_counter_found
++	move *a2,a2,l
++; Preserve the original Jade projectile-immunity reaction exception.
++	cmpi 0211h,a1
++	jreq ks_counter_jade_check
++	cmpi 0212h,a1
++	jrne ks_counter_owned_done
++ks_counter_jade_check
++	move *a8(ochar),a0,w
++	cmpi ft_jade,a0
++	jrne ks_counter_owned_done
++	clr a2
++ks_counter_owned_done
++	pull a0
++	setc
++	rets
++ks_counter_not_owned
++	pull a0
++	clrc
++	rets
++
++ks_counter_projectile
++; Count the real own action in the native history/difficulty policy.
++	callr drone_get_his_action
++	movk 3,a7
++	callr react_jump_table
++	.long duck_under_proj,pro_avoid_projectile
++
++ks_counter_body
++	callr drone_get_his_action
++	movk 3,a7
++	callr react_jump_table
++	.long drone_block,drone_block
++
++ks_counter_grab
++	calla get_x_dist
++	cmpi 0b0h,a3
++	jrhi ks_counter_far
++	callr drone_get_his_action
++	movk 3,a7
++	callr react_jump_table
++	.long drone_duck,drone_duck_upcut
++ks_counter_far
++	jauc return_to_beware
++
++ks_counter_recovery
++	callr rtb_nail_sd
++	callr sweep_if_u_can
++	jauc return_to_beware
++
++ks_kano_counter_rows
++	.word 0020bh
++	.long ks_counter_body
++	.word 00211h
++	.long ks_counter_projectile
++	.word 00117h
++	.long ks_counter_grab
++	.word 00216h
++	.long ks_counter_grab
++	.word 00217h
++	.long 0
++	.word 00215h
++	.long 0
++	.word 00218h
++	.long 0
++	.word 0021bh
++	.long 0
++	.word 00618h
++	.long ks_counter_recovery
++	.word 0061ah
++	.long ks_counter_recovery
++	.word 0
++	.long 0
++
++ks_sonya_counter_rows
++	.word 00207h
++	.long ks_counter_body
++	.word 00212h
++	.long ks_counter_projectile
++	.word 00219h
++	.long ks_counter_grab
++	.word 0021ah
++	.long 0
++	.word 00214h
++	.long 0
++	.word 00215h
++	.long 0
++	.word 00218h
++	.long 0
++	.word 0021bh
++	.long 0
++	.word 0061bh
++	.long ks_counter_recovery
++	.word 0
++	.long 0
++
+ 	.end
+ 
+--- a/src/MKEND.ASM
++++ b/src/MKEND.ASM
+@@ -191,9 +191,20 @@
+ 
+ msg_rise
+ 	move	a1,*a13(p_store1),w
++	cmpi 17,a0
++	jrne ks_end_not_kano
++	movi ks_end_kano,a0
++	jruc ks_end_name_ready
++ks_end_not_kano
++	cmpi 18,a0
++	jrne ks_end_old_name
++	movi ks_end_sonya,a0
++	jruc ks_end_name_ready
++ks_end_old_name
+ 	sll	5,a0
+ 	addi	end_winner_text,a0
+ 	move	*a0,a0,l
++ks_end_name_ready
+ 
+ 	push	a0
+ 	push	a2
+@@ -250,6 +261,11 @@
+ 	.byte	0
+ 	.even
+ 
++
++ks_end_kano .string "KANO WINS",0
++	.even
++ks_end_sonya .string "SONYA WINS",0
++	.even
+ 
+ end_winner_text
+ 	.long	ew_hh
+@@ -792,6 +808,12 @@
+ 	.even
+ 
+ 
++; Performers verified against the original donor program cast strings.
++ks_cast_kano .string "RICHARD DIVIZIO\nAS\nKANO",0
++	.even
++ks_cast_sonya .string "KERRI HOSKINS\nAS\nSONYA",0
++	.even
++
+ cast_table
+ 	.word	ft_sa,070H
+ 	.word	ft_kang,0120H
+@@ -823,6 +845,12 @@
+ 	.long	txt_rp
+ 	.long	txt_sc
+ 
++; Own roster pair follows the original six cast pairs.
++	.word 17,070H
++	.word 18,0120H
++	.long ks_cast_kano
++	.long ks_cast_sonya
++
+ 	.word	0
+ 
+ 
+--- a/src/MKFALL.ASM
++++ b/src/MKFALL.ASM
+@@ -1,3 +1,4 @@
++	.ref ks_pit_kano_sequence,ks_pit_sonya_sequence
+ **************************************************************************
+ *											     *
+ *  video game project:	mortal kombat 2							*
+@@ -174,6 +175,8 @@
+ 	.long	0004000c0H
+ 	.long	0004000c0H
+ 	.long	0004000c0H
++; MK2KS explicit nineteen-row native Pit table.
++	.long 0,0,0004000c0h,0004000c0h,0003600c0h,0004000c0h,0004000c0h
+ 
+ 
+ 
+@@ -440,6 +443,8 @@
+ 	.long	a_nj_fall
+ 	.long	a_nj_fall
+ 	.long	a_jx_fall
++; MK2KS explicit nineteen-row native Pit table.
++	.long 0,0,a_nj_fall,a_nj_fall,a_fn_fall,ks_pit_kano_sequence,ks_pit_sonya_sequence
+ 
+ 
+ a_hh_fall
+--- a/src/MKFN.ASM
++++ b/src/MKFN.ASM
+@@ -1,3 +1,8 @@
++	.def KTGETFLIPPED2
++	.def KTGETFLIPPED3
++	.def KTGETFLIPPED4
++	.def KTKNOCKDOWN1
++	.def KTSTUMBLE1
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -716,6 +721,8 @@
+ 
+ KTSTUMBLE1
+ 	.long	KTSTUMBLE1A,KTSTUMBLE1B,KTSTUMBLE1C,0
++        .def ks_ex_fn_ktstumble2
++ks_ex_fn_ktstumble2
+ KTSTUMBLE2
+ 	.long	KTSTUMBLE2A,KTSTUMBLE2B,KTSTUMBLE2C,0
+ KTSTUMBLE3
+@@ -2088,24 +2095,34 @@
+ 
+ 
+ 
++        .def ks_ex_fn_ktdecap1
++ks_ex_fn_ktdecap1
+ KTDECAP1
+ 	.long	KTDECAPLEG1A
+ 	.long	KTDECAPTORSO1A,0
++        .def ks_ex_fn_ktdecap2
++ks_ex_fn_ktdecap2
+ KTDECAP2
+ 	.long	KTDECAPLEG2A
+ 	.long	KTDECAPTORSO2A,0
+ KTDECAP3
+ 	.long	KTDECAPLEG3A,KTDECAPLEG3B
+ 	.long	KTDECAPTORSO3A,0
++        .def ks_ex_fn_ktdecap4
++ks_ex_fn_ktdecap4
+ KTDECAP4
+ 	.long	KTDECAPLEG4A,KTDECAPLEG4B
+ 	.long	KTDECAPTORSO4A,0
+ KTDECAP5
+ 	.long	KTDECAPLEG5A,KTDECAPLEG5B
+ 	.long	KTDECAPTORSO5A,0
++        .def ks_ex_fn_ktdecap6
++ks_ex_fn_ktdecap6
+ KTDECAP6
+ 	.long	KTDECAPLEG6A,KTDECAPLEG6B
+ 	.long	KTDECAPTORSO6A,KTDECAPTORSO6B,0
++        .def ks_ex_fn_ktdecap7
++ks_ex_fn_ktdecap7
+ KTDECAP7
+ 	.long	KTDECAPLEG7A,KTDECAPLEG7B
+ 	.long	KTDECAPTORSO7A,0
+--- a/src/MKFRIEND.ASM
++++ b/src/MKFRIEND.ASM
+@@ -1,3 +1,4 @@
++	.ref ks_kano_friend,ks_sonya_friend,button_mask,button_look_lr
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -28,6 +29,7 @@
+ 
+ ;*************************************************************************
+ *FF880770
++        .def friendship_start,friendship_end,fs_get_tsl
+ fs_check
+ 	move	@winner_status,a0,w
+ 	cmpi	3,a0
+@@ -40,6 +42,51 @@
+ 	callr	fs_get_tsl
+ 	jrne	fsno
+ 
++
++; Added actors keep native eligibility/transfer; Kano uses button history,
++; Sonya uses direction history with a live Block ending.
++	move *a8(ochar),a0,w
++	cmpi ft_goro,a0
++	jreq fsno
++	cmpi ft_final_boss,a0
++	jreq fsno
++	cmpi 17,a0
++	jreq ks_fs_kano
++	cmpi 18,a0
++	jrne ks_fs_original_history
++	calla is_he_a_boss
++	jrc fsno
++	calla get_x_dist
++	cmpi 0a0h,a3
++	jrlo fsno
++	movi f1b2,a0
++	movi f2b2,a1
++	calla button_mask
++	jreq fsno
++	movi f1b0|f1b1|f1b3|f1b4,a0
++	movi f2b0|f2b1|f2b3|f2b4,a1
++	calla button_mask
++	jrne fsno
++	jruc ks_fs_original_history
++ks_fs_kano
++	calla is_he_a_boss
++	jrc fsno
++	calla get_x_dist
++	cmpi 0a0h,a3
++	jrlo fsno
++	movi f1b3,a0
++	movi f2b3,a1
++	calla button_mask
++	jreq fsno
++	movi f1b0|f1b1|f1b2|f1b4,a0
++	movi f2b0|f2b1|f2b2|f2b4,a1
++	calla button_mask
++	jrne fsno
++	movi ks_fs_kano_buttons,a11
++	calla button_look_lr
++	jrnc fsno
++	jruc ks_fs_found
++ks_fs_original_history
+ 	movi	ochar_friendship_combos,a0
+ 	calla	get_char_long
+ 	move	a0,a11
+@@ -48,6 +95,7 @@
+ 	calla	combo_look_lr
+ 	jrnc	fsno	  		; no
+ 
++ks_fs_found
+ 	pull	a0
+ 	movi	do_friendship,a7
+ 	jauc	restricted_xfer
+@@ -78,6 +126,16 @@
+ 	.long	scom_nj_friend
+ 	.long	scom_jx_friend
+ 
++	.long 0,0,scom_nj_friend,scom_nj_friend,scom_fn_friend
++	.long ks_fs_kano_buttons,ks_fs_sonya_directions
++ks_fs_kano_buttons
++	.word 050h
++	.word sw_hi_kick,sw_block,sw_block,sw_lo_kick,0,0
++ks_fs_sonya_directions
++	.word 038h
++	.word sw_down,sw_left,sw_right,sw_left,0,0
++	.word sw_down,sw_right,sw_left,sw_right,0,0
++
+ 
+ friendship_start
+ 	movk	1,a0				; fade = yes
+@@ -111,6 +169,8 @@
+ 	.long	nj_friend
+ 	.long	nj_friend
+ 	.long	jx_friend
++	.long sucide,sucide,nj_friend,nj_friend,fn1_friend
++	.long ks_kano_friend,ks_sonya_friend
+ 
+ hh_friend
+ 	jsrp	friendship_start
+--- a/src/MKFX.ASM
++++ b/src/MKFX.ASM
+@@ -536,6 +536,8 @@
+ 
+ 
+ 
++        .ref ks_kano_drain_shrink,ks_sonya_drain_shrink
++        .ref ks_kano_primary_palette,ks_sonya_primary_palette
+ drain_table
+ 	.long	a_hhdrained
+ 	.long	a_lkdrained
+@@ -557,7 +559,9 @@
+ 	.long	a_hhdrained
+ 	.long	a_hhdrained
+ 
++	.long a_fn1drained,ks_kano_drain_shrink,ks_sonya_drain_shrink
+ a_hhdrained
++; Own victim pointers are appended to drain_table above, not this stream.
+ 	.long	HHDRAIN1
+ 	.long	HHDRAIN2
+ 	.long	HHDRAIN3
+@@ -730,6 +734,8 @@
+ 	.long	JXR_SK_P
+ 
+ 
++	.long TMG_SK_P,TMG_SK_P,TMG_SK_P,TMG_SK_P,TMG_SK_P
++	.long ks_kano_primary_palette,ks_sonya_primary_palette
+ TMG_SK_P:
+    .word   60 
+    .word   00000h,06b5ah,04e73h,04210h,0318ch,01ce7h,014a5h,07796h
+--- a/src/MKGUYS.ASM
++++ b/src/MKGUYS.ASM
+@@ -1,3 +1,8 @@
++	.ref ks_kano_frozen_palette,ks_sonya_frozen_palette
++	.ref ks_kano_anitab1,ks_sonya_anitab1
++	.ref ks_kano_anitab2,ks_sonya_anitab2
++	.ref ks_kano_primary_palette,ks_sonya_primary_palette
++	.ref ks_kano_alternate_palette,ks_sonya_alternate_palette
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -157,6 +162,9 @@
+ 	.word	2	; ??
+ 	.word	2	; ??
+ 	.word	2	; ??
++; MK2KS native source extension
++	.word 2
++	.word 2
+ 
+ get_char_ani2
+ 	movi	character_anitabs2,a14	; a14 ---> proper anitab
+@@ -193,6 +201,9 @@
+ 	.long	sm_anitab1
+ 	.long	sm_anitab1
+ 	.long	fn3_anitab1
++; MK2KS native source extension
++	.long ks_kano_anitab1
++	.long ks_sonya_anitab1
+ 
+ 
+ character_anitabs2
+@@ -214,6 +225,9 @@
+ 	.long	sm_anitab2
+ 	.long	sm_anitab2
+ 	.long	fn3_anitab1
++; MK2KS native source extension
++	.long ks_kano_anitab2
++	.long ks_sonya_anitab2
+ 
+ *FF906590
+ stance_setup 
+@@ -244,6 +258,9 @@
+ 	.word	6	; smoke
+ 	.word	6
+ 	.word	6
++; MK2KS native source extension
++	.word 5
++	.word 5
+ 
+ **************************************************************************
+ 
+@@ -271,6 +288,8 @@
+ 	.word	3
+ 	.word	10
+ 	.word	7
++; MK2KS native source extension
++	.word 17,18
+ 
+ **************************************************************************
+ *											     *
+@@ -330,6 +349,9 @@
+ 	.word	3,04800H	; smoke
+ 	.word	5,04000H	;
+ 	.word	3,04800H	; smoke
++; MK2KS native source extension
++	.word 5,02800h
++	.word 5,02800h
+ 
+ walk_backward_info
+ 	.word	6,02400H	; hh
+@@ -349,6 +371,9 @@
+ 	.word	4,03000H	;
+ 	.word	4,03000H	;
+ 	.word	4,03000H	;
++; MK2KS native source extension
++	.word 6,02000h
++	.word 6,02000h
+ 
+ **************************************************************************
+ *											     *
+@@ -448,6 +473,8 @@
+ 	.word	3
+ 	.word	10
+ 	.word	7
++; MK2KS native source extension
++	.word 17,18
+ 
+ **************************************************************************
+ *											     *
+@@ -534,6 +561,9 @@
+ 	.long	smoke_p
+ 	.long	noob_p
+ 	.long	JADE_P
++; MK2KS native source extension
++	.long ks_kano_primary_palette
++	.long ks_sonya_primary_palette
+ 
+ character_palettes_2
+ 	.long	tmgold_p
+@@ -554,6 +584,9 @@
+ 	.long	smoke_p
+ 	.long	noob_p
+ 	.long	JADE_P
++; MK2KS native source extension
++	.long ks_kano_alternate_palette
++	.long ks_sonya_alternate_palette
+ 
+ ;***********************************************************************
+ 
+@@ -616,6 +649,9 @@
+ 	.word	083H
+ 	.word	083H
+ 	.word	085H
++; MK2KS native source extension
++	.word 131
++	.word 132
+ 
+ death_fade_excludes
+ 	.long	boonpal
+@@ -903,6 +939,11 @@
+ 	.long	TMBLOOD_P,TMBLOOD_P	; smoke
+ 	.long	noob_p,noob_p
+ 	.long	TMBLOOD_P,TMBLOOD_P	; bbq
++	.long noob_p,noob_p ; ID15, valid native normal colors
++	.long JADE_P,JADE_P ; ID16, valid native normal colors
++; Own authored wounds are already painted into the body palette indices.
++	.long ks_kano_primary_palette,ks_kano_alternate_palette
++	.long ks_sonya_primary_palette,ks_sonya_alternate_palette
+ 
+ 
+ RDBLUD2_P:
+@@ -1100,6 +1141,7 @@
+ 	.long	NJFREZ_P	; 14
+ 	.long	noob_froze_p	; 15
+ 	.long	KTFREZ_P	; 16
++	.long ks_kano_frozen_palette,ks_sonya_frozen_palette
+ 
+ 
+ BGFREZ_P:
+--- a/src/MKHH.ASM
++++ b/src/MKHH.ASM
+@@ -1,3 +1,8 @@
++	.def TMFLIPPED1
++	.def TMFLIPPED2
++	.def TMFLIPPED4
++	.def TMKNOCKDOWN1
++	.def TMSTUMBLE4
+ **************************************************************************
+ *											     *
+ *  video game project:	mortal kombat 2							*
+@@ -936,6 +941,8 @@
+ 
+ TMSTUMBLE1
+ 	.long	TMSTUMBLE1A,TMSTUMBLE1B,0
++        .def ks_ex_hh_tmstumble2
++ks_ex_hh_tmstumble2
+ TMSTUMBLE2
+ 	.long	TMSTUMBLE2A,TMSTUMBLE2B,0
+ TMSTUMBLE3
+@@ -1511,12 +1518,22 @@
+ 	.long	HHDECAP7
+ 	.long	0
+ 
++        .def ks_ex_hh_hhdecap1
++ks_ex_hh_hhdecap1
+ HHDECAP1	.long	TMDEADLEG1A,TMDEADLEG1B,TMDEADTORSO1A,0
++        .def ks_ex_hh_hhdecap2
++ks_ex_hh_hhdecap2
+ HHDECAP2	.long	TMDEADLEG2A,TMDEADLEG2B,TMDEADTORSO2A,0
+ HHDECAP3	.long	TMDEADLEG3A,TMDEADLEG3B,TMDEADTORSO3A,0
++        .def ks_ex_hh_hhdecap4
++ks_ex_hh_hhdecap4
+ HHDECAP4	.long	TMDEADLEG4A,TMDEADLEG4B,TMDEADTORSO4A,0
+ HHDECAP5	.long	TMDEADLEG5A,TMDEADLEG5B,TMDEADTORSO5A,0
++        .def ks_ex_hh_hhdecap6
++ks_ex_hh_hhdecap6
+ HHDECAP6	.long	TMDEADLEG6A,TMDEADLEG6B,TMDEADTORSO6A,0
++        .def ks_ex_hh_hhdecap7
++ks_ex_hh_hhdecap7
+ HHDECAP7	.long	TMDEADLEG7A,TMDEADTORSO7A,TMDEADTORSO7B,0
+ 
+ a_head
+--- a/src/MKJC.ASM
++++ b/src/MKJC.ASM
+@@ -1,3 +1,8 @@
++	.def JCFLIPPED1
++	.def JCFLIPPED2
++	.def JCFLIPPED3
++	.def JCFLIPPED4
++	.def JCKNOCKDOWN1
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -916,6 +921,8 @@
+ 
+ JCSTUMBLE1
+ 	.long	JCSTUMBLE1A,JCSTUMBLE1B,0
++        .def ks_ex_jc_jcstumble2
++ks_ex_jc_jcstumble2
+ JCSTUMBLE2
+ 	.long	JCSTUMBLE2A,0
+ JCSTUMBLE3
+@@ -1747,24 +1754,34 @@
+ 
+ 
+ 
++        .def ks_ex_jc_jcdecap1
++ks_ex_jc_jcdecap1
+ JCDECAP1
+ 	.long	JCDEADLEG1A
+ 	.long	JCDEADTORSO1A,0
++        .def ks_ex_jc_jcdecap2
++ks_ex_jc_jcdecap2
+ JCDECAP2
+ 	.long	JCDEADLEG2A
+ 	.long	JCDEADTORSO2A,0
+ JCDECAP3
+ 	.long	JCDEADLEG3A,JCDEADLEG3B
+ 	.long	JCDEADTORSO3A,0
++        .def ks_ex_jc_jcdecap4
++ks_ex_jc_jcdecap4
+ JCDECAP4
+ 	.long	JCDEADLEG4A,JCDEADLEG4B,JCDEADLEG4C
+ 	.long	JCDEADTORSO4A,0
+ JCDECAP5
+ 	.long	JCDEADLEG5A,JCDEADLEG5B,JCDEADLEG5C
+ 	.long	JCDEADTORSO5A,JCDEADTORSO5B,0
++        .def ks_ex_jc_jcdecap6
++ks_ex_jc_jcdecap6
+ JCDECAP6
+ 	.long	JCDEADLEG6A,JCDEADLEG6B,JCDEADLEG6C
+ 	.long	JCDEADTORSO6A,0
++        .def ks_ex_jc_jcdecap7
++ks_ex_jc_jcdecap7
+ JCDECAP7
+ 	.long	JCDEADLEG7A,JCDEADLEG7B
+ 	.long	JCDEADTORSO7A,0
+--- a/src/MKJX.ASM
++++ b/src/MKJX.ASM
+@@ -1,3 +1,8 @@
++	.def JXFLIPPED1
++	.def JXFLIPPED2
++	.def JXFLIPPED3
++	.def JXFLIPPED4
++	.def JXKNOCKDOWN1
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -857,6 +862,8 @@
+ 
+ JXSTUMBLE1
+ 	.long	JXSTUMBLE1A,JXSTUMBLE1B,JXSTUMBLE1C,JXSTUMBLE1D,0
++        .def ks_ex_jx_jxstumble2
++ks_ex_jx_jxstumble2
+ JXSTUMBLE2
+ 	.long	JXSTUMBLE2A,JXSTUMBLE2B,JXSTUMBLE2C,JXSTUMBLE2D,0
+ JXSTUMBLE3
+@@ -1645,24 +1652,34 @@
+ 	.long	0
+ 
+ 
++        .def ks_ex_jx_jxdecap1
++ks_ex_jx_jxdecap1
+ JXDECAP1
+ 	.long	JXDECAPLEG1A
+ 	.long	JXDECAPTORSO1A,0
++        .def ks_ex_jx_jxdecap2
++ks_ex_jx_jxdecap2
+ JXDECAP2
+ 	.long	JXDECAPLEG2A
+ 	.long	JXDECAPTORSO2A,0
+ JXDECAP3
+ 	.long	JXDECAPLEG3A
+ 	.long	JXDECAPTORSO3A,0
++        .def ks_ex_jx_jxdecap4
++ks_ex_jx_jxdecap4
+ JXDECAP4
+ 	.long	JXDECAPLEG4A
+ 	.long	JXDECAPTORSO4A,0
+ JXDECAP5
+ 	.long	JXDECAPLEG5A
+ 	.long	JXDECAPTORSO5A,0
++        .def ks_ex_jx_jxdecap6
++ks_ex_jx_jxdecap6
+ JXDECAP6
+ 	.long	JXDECAPLEG6A,JXDECAPLEG6B
+ 	.long	JXDECAPTORSO6A,0
++        .def ks_ex_jx_jxdecap7
++ks_ex_jx_jxdecap7
+ JXDECAP7
+ 	.long	JXDECAPLEG7A,JXDECAPLEG7B
+ 	.long	JXDECAPTORSO7A,0
+--- a/src/MKLK.ASM
++++ b/src/MKLK.ASM
+@@ -1,3 +1,8 @@
++	.def LKFLIPPED1
++	.def LKFLIPPED2
++	.def LKFLIPPED3
++	.def LKFLIPPED4
++	.def LKKNOCKDOWN1
+ **************************************************************************
+ *											     *
+ *  video game project:	mortal kombat 2							*
+@@ -822,6 +827,8 @@
+ 
+ LKSTUMBLE1
+ 	.long	LKSTUMBLE1A,LKSTUMBLE1B,0
++        .def ks_ex_lk_lkstumble2
++ks_ex_lk_lkstumble2
+ LKSTUMBLE2
+ 	.long	LKSTUMBLE2A,LKSTUMBLE2B,0
+ LKSTUMBLE3
+@@ -1619,24 +1626,34 @@
+ 	.long	LKDECAP7
+ 	.long	0
+ 
++        .def ks_ex_lk_lkdecap1
++ks_ex_lk_lkdecap1
+ LKDECAP1
+ 	.long	LKDEADLEG1A,LKDEADLEG1B
+ 	.long	LKDEADTORSO1A,LKDEADTORSO1B,0
++        .def ks_ex_lk_lkdecap2
++ks_ex_lk_lkdecap2
+ LKDECAP2
+ 	.long	LKDEADLEG2A,LKDEADLEG2B
+ 	.long	LKDEADTORSO2A,LKDEADTORSO2B,LKDEADTORSO2C,0
+ LKDECAP3
+ 	.long	LKDEADLEG3A,LKDEADLEG3B
+ 	.long	LKDEADTORSO3A,LKDEADTORSO3B,LKDEADTORSO3C,0
++        .def ks_ex_lk_lkdecap4
++ks_ex_lk_lkdecap4
+ LKDECAP4
+ 	.long	LKDEADLEG4A,LKDEADLEG4B
+ 	.long	LKDEADTORSO4A,0
+ LKDECAP5
+ 	.long	LKDEADLEG5A,LKDEADLEG5B
+ 	.long	LKDEADTORSO5A,0
++        .def ks_ex_lk_lkdecap6
++ks_ex_lk_lkdecap6
+ LKDECAP6
+ 	.long	LKDEADLEG6A,LKDEADLEG6B,LKDEADLEG6C
+ 	.long	LKDEADTORSO6A,LKDEADTORSO6B,0
++        .def ks_ex_lk_lkdecap7
++ks_ex_lk_lkdecap7
+ LKDECAP7
+ 	.long	LKDEADLEG7A,LKDEADLEG7B
+ 	.long	LKDEADTORSO7A,0
+--- a/src/MKNJ.ASM
++++ b/src/MKNJ.ASM
+@@ -1,3 +1,8 @@
++	.def NJFLIPPED1
++	.def NJFLIPPED2
++	.def NJFLIPPED3
++	.def NJFLIPPED4
++	.def NJKNOCKDOWN1
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -1131,6 +1136,8 @@
+ 
+ NJSTUMBLE1
+ 	.long	NJSTUMBLE1A,NJSTUMBLE1B,0
++        .def ks_ex_nj_njstumble2
++ks_ex_nj_njstumble2
+ NJSTUMBLE2
+ 	.long	NJSTUMBLE2A,NJSTUMBLE2B,NJSTUMBLE2C,0
+ NJSTUMBLE3
+@@ -2456,18 +2463,28 @@
+ NJDECAPLEG1
+ 	.long	NJDECAPLEG1A,0
+ 
++        .def ks_ex_nj_njdecap1
++ks_ex_nj_njdecap1
+ NJDECAP1
+ 	.long	NJDECAPLEG1A,NJDECAPTORSO1,0
++        .def ks_ex_nj_njdecap2
++ks_ex_nj_njdecap2
+ NJDECAP2
+ 	.long	NJDECAPLEG2A,NJDECAPTORSO2,0
+ NJDECAP3
+ 	.long	NJDECAPLEG3A,NJDECAPLEG3B,NJDECAPTORSO3,0
++        .def ks_ex_nj_njdecap4
++ks_ex_nj_njdecap4
+ NJDECAP4
+ 	.long	NJDECAPLEG4A,NJDECAPLEG4B,NJDECAPTORSO4,0
+ NJDECAP5
+ 	.long	NJDECAPLEG5A,NJDECAPLEG5B,NJDECAPTORSO5,0
++        .def ks_ex_nj_njdecap6
++ks_ex_nj_njdecap6
+ NJDECAP6
+ 	.long	NJDECAPLEG6A,NJDECAPLEG6B,NJDECAPTORSO5,0
++        .def ks_ex_nj_njdecap7
++ks_ex_nj_njdecap7
+ NJDECAP7
+ 	.long	NJDECAPLEG7A,NJDECAPLEG7B,NJDECAPTORSO7,0
+ 
+--- a/src/MKPROP.ASM
++++ b/src/MKPROP.ASM
+@@ -1,3 +1,4 @@
++	.def ochar_dived_poses,ochar_dived_adjust
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -1494,6 +1495,7 @@
+ 	.word	-048H,000H	;
+ 	.word	-048H,000H	;
+ 
++	.word -048H,000H,-048H,000H ; own Kano/Sonya hand lineup
+ ochar_dived_poses
+ 	.word	001H	; hathead = frame 2
+ 	.word	001H	; kang = frame 2
+@@ -1514,6 +1516,7 @@
+ 	.word	000H
+ 	.word	000H
+ 	.word	001H
++	.word 0,0 ; own Kano/Sonya knockdown frame
+ 
+ ;********************************************************************
+ 
+--- a/src/MKRD.ASM
++++ b/src/MKRD.ASM
+@@ -1,3 +1,8 @@
++	.def RNFLIPPED1
++	.def RNFLIPPED2
++	.def RNFLIPPED3
++	.def RNFLIPPED4
++	.def RNKNOCKDOWN1
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -894,6 +899,8 @@
+ 
+ RNSTUMBLE1
+ 	.long	RNSTUMBLE1A,RNSTUMBLE1B,0
++        .def ks_ex_rd_rnstumble2
++ks_ex_rd_rnstumble2
+ RNSTUMBLE2
+ 	.long	RNSTUMBLE2A,RNSTUMBLE2B,RNSTUMBLE2C,RNSTUMBLE2D,0
+ RNSTUMBLE3
+@@ -1732,24 +1739,34 @@
+ 	.long	0
+ 
+ 
++        .def ks_ex_rd_rndecap1
++ks_ex_rd_rndecap1
+ RNDECAP1
+ 	.long	RNDECAPLEG1A
+ 	.long	RNDECAPTORSO1A,0
++        .def ks_ex_rd_rndecap2
++ks_ex_rd_rndecap2
+ RNDECAP2
+ 	.long	RNDECAPLEG2A
+ 	.long	RNDECAPTORSO2A,0
+ RNDECAP3
+ 	.long	RNDECAPLEG3A,RNDECAPLEG3B
+ 	.long	RNDECAPTORSO3A,0
++        .def ks_ex_rd_rndecap4
++ks_ex_rd_rndecap4
+ RNDECAP4
+ 	.long	RNDECAPLEG4A,RNDECAPLEG4B
+ 	.long	RNDECAPTORSO4A,0
+ RNDECAP5
+ 	.long	RNDECAPLEG5A,RNDECAPLEG5B,RNDECAPLEG5C
+ 	.long	RNDECAPTORSO5A,0
++        .def ks_ex_rd_rndecap6
++ks_ex_rd_rndecap6
+ RNDECAP6
+ 	.long	RNDECAPLEG6A,RNDECAPLEG6B,RNDECAPLEG6C
+ 	.long	RNDECAPTORSO6A,0
++        .def ks_ex_rd_rndecap7
++ks_ex_rd_rndecap7
+ RNDECAP7
+ 	.long	RNDECAPLEG7A,RNDECAPLEG7B
+ 	.long	RNDECAPTORSO7A,0
+--- a/src/MKREACT.ASM
++++ b/src/MKREACT.ASM
+@@ -1,3 +1,4 @@
++	.def ks_superk_block_pick
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -9,6 +10,12 @@
+ *  copyright (c) 1993 midway manufacturing							*
+ *											     *
+ **************************************************************************
++	.ref ks_blade_hurt
++	.def reaction_start_abc,airborn_hit_no_sound,land_on_my_back
++	.ref ks_bike_wait
++	.ref ks_choke_wait
++	.ref ks_leg_wait
++	.ref illegal_opcode
+ 	.file	"mkreact.asm"
+ 	.width	132
+ 	.option	b,d,l,t
+@@ -41,6 +48,9 @@
+ 	.long	react_to_nj
+ 	.long	react_to_nj
+ 	.long	react_to_fn
++; MK2KS native source extension
++	.long ks_react_to_kano
++	.long ks_react_to_sonya
+ 
+ react_to_sk
+ 	.long	r_kahn_punch
+@@ -260,6 +270,65 @@
+ 	.long	r_lk_dbuc	; 18 - 
+ 
+ 
++ks_react_to_kano
++	.long	r_hikicked	; 0
++	.long	r_lokicked	; 1
++	.long	r_hipunched	; 2
++	.long	r_lopunched	; 3
++	.long	r_sweep		; 4
++	.long	r_duckpunched	; 5
++	.long	r_duckkickedh	; 6
++	.long	r_duckkickedl	; 7
++	.long	r_upcutted	; 8
++	.long	r_hhjumpupp	; 9
++	.long	r_hhjumpupk	; a
++	.long	r_flipk		; b
++	.long	r_flipp		; c
++	.long	r_roundh	; d
++	.long	r_hhknee	; e
++	.long	r_elbow		; f
++	.long	r_hhhat		; 10
++	.long	r_lkzap		; 11
++	.long	r_lokicked	; 12
++	.long	r_lokicked	; 13
++	.long	r_lk_super	; 14
++	.long	r_lk_bike	; 15
++	.long	r_lokicked	; 16
++	.long	r_lokicked	; 17
++	.long	r_lk_dbuc	; 18 - 
++	.long ks_blade_hurt	; 19 - own Blade Swipe victim state
++	.long ks_choke_wait	; 1a - own Choke held state
++
++
++ks_react_to_sonya
++	.long	r_hikicked	; 0
++	.long	r_lokicked	; 1
++	.long	r_hipunched	; 2
++	.long	r_lopunched	; 3
++	.long	r_sweep		; 4
++	.long	r_duckpunched	; 5
++	.long	r_duckkickedh	; 6
++	.long	r_duckkickedl	; 7
++	.long	r_upcutted	; 8
++	.long	r_hhjumpupp	; 9
++	.long	r_hhjumpupk	; a
++	.long	r_flipk		; b
++	.long	r_flipp		; c
++	.long	r_roundh	; d
++	.long	r_hhknee	; e
++	.long	r_elbow		; f
++	.long	r_hhhat		; 10
++	.long	r_lkzap		; 11
++	.long	r_lokicked	; 12
++	.long	r_lokicked	; 13
++	.long	r_lk_super	; 14
++	.long	r_lk_bike	; 15
++	.long	r_lokicked	; 16
++	.long	r_lokicked	; 17
++	.long	r_lk_dbuc	; 18 - 
++	.long ks_leg_wait,ks_bike_wait	; own leg 19 / own bicycle 1a
++
++
+ react_to_hh
+ 	.long	r_hikicked	; 0
+ 	.long	r_lokicked	; 1
+@@ -424,6 +493,8 @@
+ 	.long	0
+ 	.long	0
+ 	.long	0
++; MK2KS native source extension
++	.long 0,0
+ 
+ goro_block_calla
+ 	pull	a7
+@@ -554,6 +625,7 @@
+ 	.long	0
+ 	.long	0
+ 	.long	0
++	.long 0,0
+ 
+ **************************************************************************
+ 
+@@ -2807,6 +2879,8 @@
+ 	.long	tossed_flight
+ 	.long	tossed_flight
+ 	.long	slammed_by_fn
++; MK2KS native source extension
++	.long tossed_flight,tossed_flight
+ 
+ 
+ slammed_by_jx
+@@ -3138,6 +3212,7 @@
+ 	.word	4
+ 
+ 
++	.word 4,4
+ check_stay_down
+ 	move	@winner_status,a0,w
+ 	jreq	gup9			; no winner ----> get up
+@@ -3320,6 +3395,12 @@
+ b_superkang
+ 	movk	2,a6
+ 	callr	blocked_start
++ks_superk_block_pick
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jreq b_superk_lite
++	cmpi 18,a0
++	jreq b_superk_lite
+ 	movi	ochar_block_superk,a0
+ 	calla	get_char_word
+ 	jreq	b_superk_lite		; 0 = lite hit
+--- a/src/MKSA.ASM
++++ b/src/MKSA.ASM
+@@ -1,3 +1,8 @@
++	.def UGFLIPPED1
++	.def UGFLIPPED2
++	.def UGFLIPPED3
++	.def UGFLIPPED4
++	.def UGKNOCKDOWN1
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -859,6 +864,8 @@
+ 
+ UGSTUMBL1E1
+ 	.long	UGSTUMBL1E1A,UGSTUMBLE1B,0
++        .def ks_ex_sa_ugstumbl1e2
++ks_ex_sa_ugstumbl1e2
+ UGSTUMBL1E2
+ 	.long	UGSTUMBLE2A,UGSTUMBLE2B,0
+ UGSTUMBL1E3
+@@ -1629,24 +1636,34 @@
+ 
+ 
+ 
++        .def ks_ex_sa_ugdecap1
++ks_ex_sa_ugdecap1
+ UGDECAP1
+ 	.long	UGDECAPLEG1A
+ 	.long	UGDECAPTORSO1A,UGDECAPTORSO1B,0
++        .def ks_ex_sa_ugdecap2
++ks_ex_sa_ugdecap2
+ UGDECAP2
+ 	.long	UGDECAPLEG2A
+ 	.long	UGDECAPTORSO2A,UGDECAPTORSO2B,0
+ UGDECAP3
+ 	.long	UGDECAPLEG3A,UGDECAPLEG3B
+ 	.long	UGDECAPTORSO3A,UGDECAPTORSO3B,0
++        .def ks_ex_sa_ugdecap4
++ks_ex_sa_ugdecap4
+ UGDECAP4
+ 	.long	UGDECAPLEG4A,UGDECAPLEG4B
+ 	.long	UGDECAPTORSO4A,UGDECAPTORSO4B,0
+ UGDECAP5
+ 	.long	UGDECAPLEG5A,UGDECAPLEG5B,UGDECAPLEG5C
+ 	.long	UGDECAPTORSO5A,UGDECAPTORSO5B,0
++        .def ks_ex_sa_ugdecap6
++ks_ex_sa_ugdecap6
+ UGDECAP6
+ 	.long	UGDECAPLEG6A,UGDECAPLEG6B,UGDECAPLEG6C
+ 	.long	UGDECAPTORSO6A,UGDECAPTORSO6B,0
++        .def ks_ex_sa_ugdecap7
++ks_ex_sa_ugdecap7
+ UGDECAP7
+ 	.long	UGDECAPLEG7A,UGDECAPLEG7B,UGDECAPLEG7C
+ 	.long	UGDECAPTORSO7A,0
+--- a/src/MKSEL.ASM
++++ b/src/MKSEL.ASM
+@@ -1,3 +1,21 @@
++	.ref ks_menu_ids
++	.ref ks_id_menu
++	.ref ks_up_change
++	.ref ks_down_change
++	.ref ks_left_change
++	.ref ks_right_change
++	.ref ks_up_sans
++	.ref ks_down_sans
++	.ref ks_left_sans
++	.ref ks_right_sans
++	.ref ks_cursor_destination
++	.ref ks_move_legal
++	.ref ks_kano_selector
++	.ref ks_sonya_selector
++	.ref ks_kano_locked_palette
++	.ref ks_sonya_locked_palette
++	.ref ks_kano_ladder
++	.ref ks_sonya_ladder
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -268,6 +286,11 @@
+ 	.long	RDBOX
+ 	.word	mug1_x+(x_space*3),mug1_y+(y_space*2)
+ 
++; MK2KS native source extension
++	.long ks_kano_selector
++	.word 23,24
++	.long ks_sonya_selector
++	.word 323,24
+ 	.long	0
+ 
+ 
+@@ -356,7 +379,7 @@
+ 
+ menu_to_ochar
+ 	sll	4,a0
+-	addi	mto_table,a0
++	addi	ks_menu_ids,a0
+ 	move	*a0,a0,w
+ 	rets
+ 
+@@ -378,7 +401,7 @@
+ 
+ ochar_to_menu
+ 	sll	4,a0
+-	addi	otm_table,a0
++	addi	ks_id_menu,a0
+ 	move	*a0,a0,w
+ 	rets
+ 
+@@ -615,11 +638,11 @@
+ cmove5	btst	0,a0
+ 	jreq	cmove6
+ 
+-	movi	upsans,a2
++	movi	ks_up_sans,a2
+ 	callr	is_move_legal		; is this move legal ?
+ 	jrnc	cmove6
+ 
+-	movi	up_change,a2
++	movi	ks_up_change,a2
+ 	clr	a3
+ 	movi	-y_space,a4		; delta y
+ 	jruc	new_cursor_position
+@@ -629,11 +652,11 @@
+ cmove6	btst	1,a0
+ 	jreq	cmove7
+ 
+-	movi	dnsans,a2
++	movi	ks_down_sans,a2
+ 	callr	is_move_legal		; is this move legal ?
+ 	jrnc	cmove7
+ 
+-	movi	down_change,a2
++	movi	ks_down_change,a2
+ 	clr	a3
+ 	movi	y_space,a4		; delta y
+ 	jruc	new_cursor_position
+@@ -643,11 +666,11 @@
+ cmove7	btst	2,a0
+ 	jreq	cmove8
+ 
+-	movi	lfsans,a2
++	movi	ks_left_sans,a2
+ 	callr	is_move_legal		; is this move legal ?
+ 	jrnc	cmove8
+ 
+-	movi	left_change,a2
++	movi	ks_left_change,a2
+ 	movi	-x_space,a3		; delta x
+ 	clr	a4
+ 	jruc	new_cursor_position
+@@ -657,11 +680,11 @@
+ cmove8	btst	3,a0
+ 	jreq	cmove3
+ 
+-	movi	rtsans,a2
++	movi	ks_right_sans,a2
+ 	callr	is_move_legal		; is this move legal ?
+ 	jrnc	cmove3
+ 
+-	movi	right_change,a2
++	movi	ks_right_change,a2
+ 	movi	x_space,a3		; delta x
+ 	clr	a4
+ 	jruc	new_cursor_position
+@@ -802,10 +825,28 @@
+ 	sleep	1
+ 	jruc	selsp1			; yes ---> wait till he is done
+ 
+-selsp3	addi	01cH,a10
++selsp3	cmpi	ft_kano,a10
++	jreq	ks_sel_kano
++	cmpi	ft_sonya,a10
++	jreq	ks_sel_sonya
++	addi	01cH,a10
+ 	move	a10,a0
++	jruc	ks_sel_call
++ks_sel_kano
++	movi	05bH,a0
++	jruc	ks_sel_call
++ks_sel_sonya
++	movi	05cH,a0
++ks_sel_call
+ 	calla	triple_sound2
++	cmpi	ft_kano,a10
++	jreq	ks_sel_own_wait
++	cmpi	ft_sonya,a10
++	jreq	ks_sel_own_wait
+ 	sleep	030H
++	die
++ks_sel_own_wait
++	sleep	048H
+ 	die
+ 
+ **************************************************************************
+@@ -816,26 +857,7 @@
+ *											     *
+ **************************************************************************
+ is_move_legal
+-	move	*a2+,a3,w		; grab a table entry
+-	cmp	a1,a3			; sans ??
+-	jreq	imlno
+-	move	*a2+,a3,w		; grab a table entry
+-	cmp	a1,a3			; sans ??
+-	jreq	imlno
+-	move	*a2+,a3,w		; grab a table entry
+-	cmp	a1,a3			; sans ??
+-	jreq	imlno
+-	move	*a2+,a3,w		; grab a table entry
+-	cmp	a1,a3			; sans ??
+-	jreq	imlno
+-	move	*a2+,a3,w		; grab a table entry
+-	cmp	a1,a3			; sans ??
+-	jreq	imlno
+-	setc
+-	rets
+-
+-imlno	clrc
+-	rets
++	jauc ks_move_legal
+ 
+ upsans	.word	0,1,2,9,9
+ dnsans	.word	5,3,10,7,7
+@@ -930,9 +952,7 @@
+ *											     *
+ **************************************************************************
+ new_cursor_position
+-	sll	4,a1
+-	add	a2,a1			; direction table
+-	move	*a1,a1,w		; new ochar
++	calla ks_cursor_destination
+ 	move	*a13(p_mychar),a5,l
+ 	move	a1,*a5,w		; update my new ochar
+ 
+@@ -992,6 +1012,9 @@
+ 	.long	BOX10D_P	; reptile
+ 	.long	BOX11D_P	; scorpion
+ 	.long	BOX3D_P		; jax
++; MK2KS native source extension
++	.long BOX1D_P,BOX1D_P,BOX1D_P,BOX1D_P,BOX1D_P
++	.long ks_kano_locked_palette,ks_sonya_locked_palette
+ 
+ 
+ 
+@@ -1326,12 +1349,12 @@
+ 	move	a0,@scrolly,l			; button pressed = scroll fast
+ 
+ mpan4	move	@worldtly+16,a0,w
+-	cmpi	0310H,a0
++	cmpi	ks_ladder_bottom,a0
+ 	jrlt	mpan3	    			; wait till we hit bottom
+ 
+ 	clr	a0
+ 	move	a0,@scrolly,l
+-	movi	0310H,a0
++	movi	ks_ladder_bottom,a0
+ 	move	a0,@worldtly+16,w
+ 
+ 	movi	020H,a0
+@@ -1389,9 +1412,9 @@
+ 
+ 	movi	y_spacing,a1
+ 	move	@map_position,a0,w
+-	cmpi	00eH,a0
++	cmpi	16,a0
+ 	jrne	bmu0
+-	sll	1,a1			; last guy = move up 2x as long
++	movi	074h,a1			; last guy = move up 2x as long
+ bmu0
+ 	move	*a9(oypos),a0,w
+ 	sub	a1,a0
+@@ -1600,29 +1623,33 @@
+ 	.long	mysterybox	; 14 - 3 hidden characters
+ 	.long	mysterybox	; 15 - 3 hidden characters
+ 	.long	mysterybox	; 16 - 3 hidden characters
++; MK2KS native source extension
++	.long ks_kano_ladder,ks_sonya_ladder
+ 
+ 
+ world_y_spots
+-	.word	0310H
+-	.word	0310H
+-	.word	0310H-(1*y_spacing)
+-	.word	0310H-(2*y_spacing)
+-	.word	0310H-(3*y_spacing)
+-	.word	0310H-(4*y_spacing)
+-	.word	0310H-(5*y_spacing)
+-	.word	0310H-(6*y_spacing)
+-	.word	0310H-(7*y_spacing)
+-	.word	0310H-(8*y_spacing)
+-	.word	0310H-(9*y_spacing)
+-	.word	0310H-(10*y_spacing)
+-
+-	.word	0310H-(10*y_spacing)	; secret
+-
+-	.word	0310H-(12*y_spacing)
+-	.word	0310H-(13*y_spacing)-01aH
+-
+-
+-y_spacing	.set	03aH
++	.word 788
++	.word 788
++	.word 737
++	.word 686
++	.word 635
++	.word 584
++	.word 533
++	.word 482
++	.word 431
++	.word 380
++	.word 329
++	.word 278
++	.word 227
++	.word 176
++	.word 176
++	.word 74
++	.word 4
++
++
++ks_ladder_roster .set 1
++ks_ladder_bottom .set 0314h
++y_spacing .set 033h
+ 
+ **************************************************************************
+ *											     *
+@@ -1660,6 +1687,8 @@
+ 	.word	ft_fn2		; 5
+ 	.word	ft_subzero     	; 7
+ 	.word	ft_kang		; 1
++	.word ft_kano
++	.word ft_sonya
+ 	.word	ft_smoke       	; 11
+ 	.word	ft_st		; 12
+ 	.word	ft_goro		; 13
+@@ -1677,6 +1706,8 @@
+ 	.word	ft_fn2		; 5
+ 	.word	ft_scorpion    	; 9
+ 	.word	ft_raiden      	; 6
++	.word ft_kano
++	.word ft_sonya
+ 	.word	ft_smoke       	; 11
+ 	.word	ft_st		; 12
+ 	.word	ft_goro		; 13
+@@ -1694,6 +1725,8 @@
+ 	.word	ft_cage		; 2
+ 	.word	ft_hathead	; 0
+ 	.word	ft_scorpion    	; 9
++	.word ft_kano
++	.word ft_sonya
+ 	.word	ft_smoke       	; 11
+ 	.word	ft_st		; 12
+ 	.word	ft_goro		; 13
+@@ -1711,6 +1744,8 @@
+ 	.word	ft_cage		; 2
+ 	.word	ft_hathead	; 0
+ 	.word	ft_scorpion    	; 9
++	.word ft_kano
++	.word ft_sonya
+ 	.word	ft_smoke       	; 11
+ 	.word	ft_st		; 12
+ 	.word	ft_goro		; 13
+@@ -1728,6 +1763,8 @@
+ 	.word	ft_subzero     	; 7
+ 	.word	ft_raiden      	; 6
+ 	.word	ft_hathead	; 0
++	.word ft_kano
++	.word ft_sonya
+ 	.word	ft_smoke       	; 11
+ 	.word	ft_st		; 12
+ 	.word	ft_goro		; 13
+@@ -1745,6 +1782,8 @@
+ 	.word	ft_reptile     	; 8
+ 	.word	ft_cage		; 2
+ 	.word	ft_scorpion    	; 9
++	.word ft_kano
++	.word ft_sonya
+ 	.word	ft_smoke       	; 11
+ 	.word	ft_st		; 12
+ 	.word	ft_goro		; 13
+@@ -1754,22 +1793,24 @@
+ **************************************************************************
+ 
+ box_coordinate_table
+-	.word	080H+(14*y_spacing)
+-	.word	080H+(13*y_spacing)
+-	.word	080H+(12*y_spacing)
+-	.word	080H+(11*y_spacing)
+-	.word	080H+(10*y_spacing)
+-	.word	080H+(9*y_spacing)
+-	.word	080H+(8*y_spacing)
+-	.word	080H+(7*y_spacing)
+-	.word	080H+(6*y_spacing)
+-	.word	080H+(5*y_spacing)
+-	.word	080H+(4*y_spacing)
+-	.word	080H+(3*y_spacing)
+-	.word	080H+(2*y_spacing)
+-	.word	080H+(1*y_spacing)
+-	.word	080H
+-	.word	-1
++	.word 080h+(16*y_spacing)
++	.word 080h+(15*y_spacing)
++	.word 080h+(14*y_spacing)
++	.word 080h+(13*y_spacing)
++	.word 080h+(12*y_spacing)
++	.word 080h+(11*y_spacing)
++	.word 080h+(10*y_spacing)
++	.word 080h+(9*y_spacing)
++	.word 080h+(8*y_spacing)
++	.word 080h+(7*y_spacing)
++	.word 080h+(6*y_spacing)
++	.word 080h+(5*y_spacing)
++	.word 080h+(4*y_spacing)
++	.word 080h+(3*y_spacing)
++	.word 080h+(2*y_spacing)
++	.word 080h+(1*y_spacing)
++	.word 080h+(0*y_spacing)
++	.word -1
+ 
+ pf_battle_plan
+ 	mess_mac rd15font,2,200,-022H,bpal_yellow*010000H,strcnrmos,0
+@@ -2177,7 +2218,7 @@
+ 
+ 	sleep	4
+ 
+-	movk	12,a0
++	movk 14,a0
+ 	calla	randu
+ 	dec	a0
+ 	sll	5,a0
+@@ -2204,25 +2245,25 @@
+ 	jruc	cmove9
+ 
+ auto_move_down
+-	movi	down_change,a2
++	movi	ks_down_change,a2
+ 	clr	a3
+ 	movi	y_space,a4		; delta y
+ 	jruc	new_auto_position
+ 
+ auto_move_up
+-	movi	up_change,a2
++	movi	ks_up_change,a2
+ 	clr	a3
+ 	movi	-y_space,a4		; delta y
+ 	jruc	new_auto_position
+ 
+ auto_move_left
+-	movi	left_change,a2
++	movi	ks_left_change,a2
+ 	movi	-x_space,a3		; delta x
+ 	clr	a4
+ 	jruc	new_auto_position
+ 
+ auto_move_right
+-	movi	right_change,a2
++	movi	ks_right_change,a2
+ 	movi	x_space,a3		; delta x
+ 	clr	a4
+ *
+@@ -2235,9 +2276,7 @@
+ 	move	*a13(p_mychar),a1,l
+ 	move	*a1,a1,w		; a1 = my current ochar
+ 
+-	sll	4,a1
+-	add	a2,a1			; direction table
+-	move	*a1,a1,w		; new ochar
++	calla ks_cursor_destination
+ 	move	*a13(p_mychar),a5,l
+ 	move	a1,*a5,w		; update my new ochar
+ 
+--- a/src/MKSLAM.ASM
++++ b/src/MKSLAM.ASM
+@@ -1,3 +1,5 @@
++	.def back_break_adjusts
++	.ref ks_kano_throw,ks_sonya_throw
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -25,6 +27,15 @@
+ 
+ * FF8B6BB0
+ do_body_slam
++	move *a8(ochar),a0,w
++	cmpi 17,a0
++	jrne ks_throw_sonya_check
++	jauc ks_kano_throw
++ks_throw_sonya_check
++	cmpi 18,a0
++	jrne ks_throw_original
++	jauc ks_sonya_throw
++ks_throw_original
+ 	calla	init_special   		; this is considered a special move
+ 	callr	body_slam_init
+ 
+@@ -197,6 +208,10 @@
+ 	.word	00aH,-04bH
+ 	.word	00aH,-04bH
+ 	.word	00aH,-04bH
++; MK2KS explicit alignment slots: standing-size initial calibration.
++; Bent-back own art and final knee alignment remain unqualified.
++	.word 00ah,-04bh ; 17 - Kano
++	.word 00ah,-04bh ; 18 - Sonya
+ 
+ 
+ bb_fall_call
+@@ -415,6 +430,8 @@
+ 	.word	3
+ 	.word	3
+ 	.word	3
++; MK2KS native source extension
++	.word 4,4
+ 
+ hathead_slam
+ 	movi	060H,a0
+@@ -484,6 +501,8 @@
+ 	.word	0
+ 	.word	0
+ 	.word	0
++; MK2KS native source extension
++	.word 0,0
+ 
+ *
+ * grab / shake
+--- a/src/MKSOUND.ASM
++++ b/src/MKSOUND.ASM
+@@ -421,6 +421,20 @@
+ 	.word	sp_attkv1|21,0290H	; fb = jon hey jump voice
+ 	.word	sp_attkv1|20,0312H	; fc = kang jump voice
+ 	.word	sp_attkv1|20,02c2H	; fd = girl jump voice
++; MK2KS own native DCS Square launch: playlists2000/2001/2002.
++	.word	sp_attkv1|59,07d0H	; fe = Sonya Square launch
++	.word	sp_attkv1|53,07d3H	; ff = Sonya Bicycle launch
++	.word	sp_bikeyl|86,07d6H	; 100 = Sonya Bicycle paired cry
++	.word	sp_attkv1|86,07e5H	; 101 = Sonya kiss
++	.word	sp_effect|234,07e8H	; 102 = Sonya burn fire
++	.word	sp_reacv1|168,07ebH	; 103 = Sonya burn victim
++	.word	sp_effect|40,07eeH	; 104 = Kano Friendship bubble pop
++	.word	sp_attkv1|72,07f1H	; 105 = Kano Ball launch
++	.word	sp_woosh1|16,07f4H	; 106 = Sonya Friendship variant0
++	.word	sp_woosh1|23,07f7H	; 107 = Sonya Friendship variant1
++	.word	sp_woosh1|20,07faH	; 108 = Sonya Friendship variant2
++	.word	sp_woosh1|18,07fdH	; 109 = Sonya Friendship variant3
++
+ triple_end
+ 
+ 
+@@ -530,6 +544,12 @@
+ 	.word	sp_bossv1|69,044cH	; 59 = Shao Kahn: f ?
+ 	.word	sp_bossv1|112,0578H	; 5a = feel the power of toasty
+ 
++; MK2KS own name and win announcements, slots5b..5e.
++	.word	sp_bossv1|72,007d9H	; Kano name
++	.word	sp_bossv1|72,007dcH	; Sonya name
++	.word	sp_bossv1|122,007dfH	; Kano wins
++	.word	sp_bossv1|122,007e2H	; Sonya wins
++
+ triple_end2
+ 
+ *
+@@ -687,6 +707,8 @@
+ *
+ rsnd_ochar
+ 	move	*a8(ochar),a2,w
++	cmpi	ft_sonya,a2
++	jreq	rsnd_female
+ 	cmpi	ft_fn1,a2
+ 	jreq	rsnd_female
+ 	cmpi	ft_fn2,a2
+--- a/src/MKST.ASM
++++ b/src/MKST.ASM
+@@ -1,3 +1,8 @@
++	.def STFLIPPED2
++	.def STFLIPPED3
++	.def STFLIPPED4
++	.def STKNOCKDOWN1
++	.def STSTUMBLE4
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -112,6 +117,23 @@
+ 	.long	a_st_drain	; c
+ 	.long	a_burst		; d
+ 
++	.long dummy,dummy,dummy
++	.long ks_st_to_kano,ks_st_to_sonya
++; Authored intermediate frames; native cadence and final stance retained.
++	.ref ks_kano_pose_ff8246a0,ks_kano_pose_ff824700,ks_kano_pose_ff8247c0
++	.ref ks_sonya_pose_ff8325a0,ks_sonya_pose_ff832600,ks_sonya_pose_ff832660
++ks_st_to_kano
++	.ref ks_mo_kano_pose0,ks_mo_kano_pose1,ks_mo_kano_pose2
++	.ref ks_mo_sonya_pose0,ks_mo_sonya_pose1,ks_mo_sonya_pose2
++	.long STSTANCE1
++	.long ani_calla,ks_morph_kano_pal
++	.long ks_mo_kano_pose0,ks_mo_kano_pose1,ks_mo_kano_pose2
++	.long ani_nosleep,ks_kano_pose_ff8246a0,0
++ks_st_to_sonya
++	.long STSTANCE1
++	.long ani_calla,ks_morph_sonya_pal
++	.long ks_mo_sonya_pose0,ks_mo_sonya_pose1,ks_mo_sonya_pose2
++	.long ani_nosleep,ks_sonya_pose_ff8325a0,0
+ dummy
+ a_ststance
+ 	.long	STSTANCE1
+@@ -882,6 +904,8 @@
+ 
+ STSTUMBLE1
+ 	.long	STSTUMBLE1A,STSTUMBLE1B,0
++        .def ks_ex_st_ststumble2
++ks_ex_st_ststumble2
+ STSTUMBLE2
+ 	.long	STSTUMBLE2A,STSTUMBLE2B,STSTUMBLE2C,STSTUMBLE2D,0
+ STSTUMBLE3
+@@ -1511,6 +1535,21 @@
+ 
+ 	move	*a9(32),a0,l
+ 	jruc	msp3
++
++; Own entry images use the target baseline while OCHAR is still Shang.
++; Reverse morph already uses the target anchor and does not call these.
++ks_morph_kano_pal
++	callr morph_swpal
++	movi 131,a1
++	jruc ks_morph_entry_ground
++ks_morph_sonya_pal
++	callr morph_swpal
++	movi 132,a1
++ks_morph_entry_ground
++	move @ground_y,a0,w
++	sub a1,a0
++	move a0,*a8(oypos),w
++	rets
+ 
+ morph_swpal
+ 	move	*a9,a0,l
+@@ -1744,12 +1783,22 @@
+ 	.long	NJDECAP7
+ 	.long	0
+ 
++        .def ks_ex_st_njdecap1
++ks_ex_st_njdecap1
+ NJDECAP1	.long	STDECAPLEG1A,STDECAPTORSO1,0
++        .def ks_ex_st_njdecap2
++ks_ex_st_njdecap2
+ NJDECAP2	.long	STDECAPLEG2A,STDECAPTORSO2,0
+ NJDECAP3	.long	STDECAPLEG3A,STDECAPLEG3B,STDECAPTORSO3,0
++        .def ks_ex_st_njdecap4
++ks_ex_st_njdecap4
+ NJDECAP4	.long	STDECAPLEG4A,STDECAPLEG4B,STDECAPTORSO4,0
+ NJDECAP5	.long	STDECAPLEG5A,STDECAPLEG5B,STDECAPTORSO5,0
++        .def ks_ex_st_njdecap6
++ks_ex_st_njdecap6
+ NJDECAP6	.long	STDECAPLEG6A,STDECAPLEG6B,STDECAPTORSO6,0
++        .def ks_ex_st_njdecap7
++ks_ex_st_njdecap7
+ NJDECAP7	.long	STDECAPLEG7A,STDECAPTORSO7,0
+ 
+ STDECAPLEG1
+--- a/src/MKSTK.ASM
++++ b/src/MKSTK.ASM
+@@ -61,6 +61,9 @@
+ 	.long	nj_strikes	; 14 - smoke
+ 	.long	nj_strikes	; 15
+ 	.long	fn_strikes	; 16 - jade
++; MK2KS native source extension
++	.long ks_kano_lk_strikes
++	.long ks_sonya_lk_strikes
+ 
+ stk_dummy
+ 	.word	00		; x offset of collision box
+@@ -2236,6 +2239,578 @@
+ *  Hathead strike table									     *
+ *											     *
+ **************************************************************************
++ks_kano_lk_strikes
++	.long	ks_kano_stk_lkhikick	; 0
++	.long	ks_kano_stk_lklokick	; 1
++	.long	ks_kano_stk_lkhipunch	; 2
++	.long	ks_kano_stk_lklopunch	; 3
++	.long	ks_kano_stk_lksweepk	; 4
++	.long	ks_kano_stk_lkduckpunch	; 5
++	.long	ks_kano_stk_lkduckkickh	; 6
++	.long	ks_kano_stk_lkduckkickl	; 7
++	.long	ks_kano_stk_lkuppercut	; 8
++	.long	ks_kano_stk_lkjumpupp	; 9
++	.long	ks_kano_stk_lkjumpupk	; a
++	.long	ks_kano_stk_lkflipk	; b
++	.long	ks_kano_stk_lkflipp	; c
++	.long	ks_kano_stk_lkroundh	; d
++	.long	ks_kano_stk_lkknee	; e
++	.long	ks_kano_stk_lkelbow	; f
++
++	.long	ks_kano_stk_lkzap1	; 10
++	.long	ks_kano_stk_lkzap2	; 11
++	.long	ks_kano_stk_lkzap3	; 12
++	.long ks_kano_stk_projectile	; 13
++	.long	ks_kano_stk_lksuper	; 14
++	.long	ks_kano_stk_lk_bike	; 15
++	.long	ks_kano_stk_lk_dbuc	; 16
++
++
++ks_kano_stk_lkhikick
++	.word	05eH		; x offset of collision box
++	.word	005H		; y offset of collision box
++	.word	045H		; x size of collision box
++	.word	017H		; y size of collision box
++	.word	00000H		; strike routine
++	.word	02008H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lklokick
++	.word	068H		; x offset of collision box
++	.word	02aH		; y offset of collision box
++	.word	043H		; x size of collision box
++	.word	014H		; y size of collision box
++	.word	00101H		; strike routine
++	.word	01a06H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lkhipunch
++	.word	80		; x offset of collision box
++	.word	8		; y offset of collision box
++	.word	45		; x size of collision box
++	.word	30		; y size of collision box
++	.word	00202H		; strike routine
++	.word	00b03H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lklopunch
++	.word	80		; x offset of collision box
++	.word	20		; y offset of collision box
++	.word	45		; x size of collision box
++	.word	20		; y size of collision box
++	.word	00303H		; strike routine
++	.word	00802H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lksweepk
++	.word	92		; x offset of collision box
++	.word	105		; y offset of collision box
++	.word	60		; x size of collision box
++	.word	30		; y size of collision box
++	.word	0041cH		; strike routine
++	.word	01405H		; damage
++	.long	0		; score value for hit
++	.word	sf_duck
++
++ks_kano_stk_lkduckpunch
++	.word	75		; x offset of collision box
++	.word	64		; y offset of collision box
++	.word	50		; x size of collision box
++	.word	25		; y size of collision box
++	.word	00505H		; strike routine
++	.word	00602H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lkduckkickh
++	.word	85		; x offset of collision box
++	.word	70		; y offset of collision box
++	.word	65		; x size of collision box
++	.word	30		; y size of collision box
++	.word	00606H		; strike routine
++	.word	00c03H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lkduckkickl
++	.word	85		; x offset of collision box
++	.word	120		; y offset of collision box
++	.word	65		; x size of collision box
++	.word	21		; y size of collision box
++	.word	00707H		; strike routine
++	.word	00602H		; damage
++	.long	0		; score value for hit
++	.word	sf_duck
++
++ks_kano_stk_lkuppercut
++	.word	04bH		; x offset of collision box
++	.word	-00aH		; y offset of collision box
++	.word	035H		; x size of collision box
++	.word	040H		; y size of collision box
++
++;	.word	65		; x offset of collision box
++;	.word	-5		; y offset of collision box
++;	.word	45		; x size of collision box
++;	.word	60		; y size of collision box
++
++	.word	0081eH		; strike routine
++	.WORD	0280AH		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lkjumpupp
++	.word	80		; x offset of collision box
++	.word	5		; y offset of collision box
++	.word	55		; x size of collision box
++	.word	45		; y size of collision box
++	.word	00c0cH		; strike routine
++	.word	01005H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lkjumpupk
++	.word	77		; x offset of collision box
++	.word	12		; y offset of collision box
++	.word	55		; x size of collision box
++	.word	65		; y size of collision box
++	.word	00a0aH		; strike routine
++	.word	02006H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lkflipk
++	.word	89		; x offset of collision box
++	.word	3		; y offset of collision box
++	.word	70		; x size of collision box
++	.word	37		; y size of collision box
++	.word	00b12H		; strike routine
++	.word	01a07H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lkflipp
++	.word	80		; x offset of collision box
++	.word	5		; y offset of collision box
++	.word	55		; x size of collision box
++	.word	45		; y size of collision box
++	.word	00c12H		; strike routine
++	.word	01005H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lkroundh
++	.word	88		; x offset of collision box
++	.word	5		; y offset of collision box
++	.word	45		; x size of collision box
++	.word	030H		; y size of collision box
++	.word	00d1eH		; strike routine
++	.word	02008H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lkknee
++	.word	60		; x offset of collision box
++	.word	47		; y offset of collision box
++	.word	30		; x size of collision box
++	.word	45		; y size of collision box
++	.word	00e0eH		; strike routine
++	.word	01406H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lkelbow
++	.word	58		; x offset of collision box
++	.word	15		; y offset of collision box
++	.word	35		; x size of collision box
++	.word	45		; y size of collision box
++	.word	00f0fH		; strike routine
++	.word	01806H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lkzap1
++	.word	52		; x offset of collision box
++	.word	20		; y offset of collision box
++	.word	45		; x size of collision box
++	.word	30		; y size of collision box
++	.word	01110H		; strike routine
++	.word	01605H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lkzap2
++	.word	112		; x offset of collision box
++	.word	25		; y offset of collision box
++	.word	100		; x size of collision box
++	.word	20		; y size of collision box
++	.word	01110H		; strike routine
++	.word	01605H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lkzap3
++	.word	148		; x offset of collision box
++	.word	25		; y offset of collision box
++	.word	125		; x size of collision box
++	.word	20		; y size of collision box
++	.word	01110H		; strike routine
++	.word	01605H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lkzap4
++	.word	197		; x offset of collision box
++	.word	25		; y offset of collision box
++	.word	70		; x size of collision box
++	.word	20		; y size of collision box
++	.word	01110H		; strike routine
++	.word	01606H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lksuper
++	.word	89		; x offset of collision box
++	.word	3		; y offset of collision box
++	.word	70		; x size of collision box
++	.word	37		; y size of collision box
++	.word	01417H		; strike routine
++	.word	01a07H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lk_bike
++	.word	044H		; x offset of collision box
++	.word	023H		; y offset of collision box
++	.word	038H		; x size of collision box
++	.word	020H		; y size of collision box
++	.word	01503H		; strike routine
++	.word	03006H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lk_wheel
++	.word	80		; x offset of collision box
++	.word	35		; y offset of collision box
++	.word	70		; x size of collision box
++	.word	40		; y size of collision box
++	.word	01818H		; strike routine
++	.word	00101H		; damage
++	.long	0	  	; score value for hit
++	.word	sf_squeeze
++
++ks_kano_stk_lk_dbuc
++	.word	65		; x offset of collision box
++	.word	-5		; y offset of collision box
++	.word	45		; x size of collision box
++	.word	60		; y size of collision box
++	.word	01818H		; strike routine
++	.word	00000H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++**************************************************************************
++*											     *
++*  Hathead strike table									     *
++*											     *
++**************************************************************************
++ks_sonya_lk_strikes
++	.long	ks_sonya_stk_lkhikick	; 0
++	.long	ks_sonya_stk_lklokick	; 1
++	.long	ks_sonya_stk_lkhipunch	; 2
++	.long	ks_sonya_stk_lklopunch	; 3
++	.long	ks_sonya_stk_lksweepk	; 4
++	.long	ks_sonya_stk_lkduckpunch	; 5
++	.long	ks_sonya_stk_lkduckkickh	; 6
++	.long	ks_sonya_stk_lkduckkickl	; 7
++	.long	ks_sonya_stk_lkuppercut	; 8
++	.long	ks_sonya_stk_lkjumpupp	; 9
++	.long	ks_sonya_stk_lkjumpupk	; a
++	.long	ks_sonya_stk_lkflipk	; b
++	.long	ks_sonya_stk_lkflipp	; c
++	.long	ks_sonya_stk_lkroundh	; d
++	.long	ks_sonya_stk_lkknee	; e
++	.long	ks_sonya_stk_lkelbow	; f
++
++	.long	ks_sonya_stk_lkzap1	; 10
++	.long	ks_sonya_stk_lkzap2	; 11
++	.long	ks_sonya_stk_lkzap3	; 12
++	.long ks_sonya_stk_projectile	; 13
++	.long	ks_sonya_stk_lksuper	; 14
++	.long	ks_sonya_stk_lk_bike	; 15
++	.long	ks_sonya_stk_lk_dbuc	; 16
++	.long ks_sonya_stk_ring_close	; 17
++
++
++ks_sonya_stk_lkhikick
++	.word	05eH		; x offset of collision box
++	.word	005H		; y offset of collision box
++	.word	045H		; x size of collision box
++	.word	017H		; y size of collision box
++	.word	00000H		; strike routine
++	.word	02008H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lklokick
++	.word	068H		; x offset of collision box
++	.word	02aH		; y offset of collision box
++	.word	043H		; x size of collision box
++	.word	014H		; y size of collision box
++	.word	00101H		; strike routine
++	.word	01a06H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lkhipunch
++	.word	80		; x offset of collision box
++	.word	8		; y offset of collision box
++	.word	45		; x size of collision box
++	.word	30		; y size of collision box
++	.word	00202H		; strike routine
++	.word	00b03H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lklopunch
++	.word	80		; x offset of collision box
++	.word	20		; y offset of collision box
++	.word	45		; x size of collision box
++	.word	20		; y size of collision box
++	.word	00303H		; strike routine
++	.word	00802H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lksweepk
++	.word	92		; x offset of collision box
++	.word	105		; y offset of collision box
++	.word	60		; x size of collision box
++	.word	30		; y size of collision box
++	.word	0041cH		; strike routine
++	.word	01405H		; damage
++	.long	0		; score value for hit
++	.word	sf_duck
++
++ks_sonya_stk_lkduckpunch
++	.word	75		; x offset of collision box
++	.word	64		; y offset of collision box
++	.word	50		; x size of collision box
++	.word	25		; y size of collision box
++	.word	00505H		; strike routine
++	.word	00602H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lkduckkickh
++	.word	85		; x offset of collision box
++	.word	70		; y offset of collision box
++	.word	65		; x size of collision box
++	.word	30		; y size of collision box
++	.word	00606H		; strike routine
++	.word	00c03H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lkduckkickl
++	.word	85		; x offset of collision box
++	.word	120		; y offset of collision box
++	.word	65		; x size of collision box
++	.word	21		; y size of collision box
++	.word	00707H		; strike routine
++	.word	00602H		; damage
++	.long	0		; score value for hit
++	.word	sf_duck
++
++ks_sonya_stk_lkuppercut
++	.word	04bH		; x offset of collision box
++	.word	-00aH		; y offset of collision box
++	.word	035H		; x size of collision box
++	.word	040H		; y size of collision box
++
++;	.word	65		; x offset of collision box
++;	.word	-5		; y offset of collision box
++;	.word	45		; x size of collision box
++;	.word	60		; y size of collision box
++
++	.word	0081eH		; strike routine
++	.WORD	0280AH		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lkjumpupp
++	.word	80		; x offset of collision box
++	.word	5		; y offset of collision box
++	.word	55		; x size of collision box
++	.word	45		; y size of collision box
++	.word	00c0cH		; strike routine
++	.word	01005H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lkjumpupk
++	.word	77		; x offset of collision box
++	.word	12		; y offset of collision box
++	.word	55		; x size of collision box
++	.word	65		; y size of collision box
++	.word	00a0aH		; strike routine
++	.word	02006H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lkflipk
++	.word	89		; x offset of collision box
++	.word	3		; y offset of collision box
++	.word	70		; x size of collision box
++	.word	37		; y size of collision box
++	.word	00b12H		; strike routine
++	.word	01a07H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lkflipp
++	.word	80		; x offset of collision box
++	.word	5		; y offset of collision box
++	.word	55		; x size of collision box
++	.word	45		; y size of collision box
++	.word	00c12H		; strike routine
++	.word	01005H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lkroundh
++	.word	88		; x offset of collision box
++	.word	5		; y offset of collision box
++	.word	45		; x size of collision box
++	.word	030H		; y size of collision box
++	.word	00d1eH		; strike routine
++	.word	02008H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lkknee
++	.word	60		; x offset of collision box
++	.word	47		; y offset of collision box
++	.word	30		; x size of collision box
++	.word	45		; y size of collision box
++	.word	00e0eH		; strike routine
++	.word	01406H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lkelbow
++	.word	58		; x offset of collision box
++	.word	15		; y offset of collision box
++	.word	35		; x size of collision box
++	.word	45		; y size of collision box
++	.word	00f0fH		; strike routine
++	.word	01806H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lkzap1
++	.word	52		; x offset of collision box
++	.word	20		; y offset of collision box
++	.word	45		; x size of collision box
++	.word	30		; y size of collision box
++	.word	01110H		; strike routine
++	.word	01605H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lkzap2
++	.word	112		; x offset of collision box
++	.word	25		; y offset of collision box
++	.word	100		; x size of collision box
++	.word	20		; y size of collision box
++	.word	01110H		; strike routine
++	.word	01605H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lkzap3
++	.word	148		; x offset of collision box
++	.word	25		; y offset of collision box
++	.word	125		; x size of collision box
++	.word	20		; y size of collision box
++	.word	01110H		; strike routine
++	.word	01605H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lkzap4
++	.word	197		; x offset of collision box
++	.word	25		; y offset of collision box
++	.word	70		; x size of collision box
++	.word	20		; y size of collision box
++	.word	01110H		; strike routine
++	.word	01606H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lksuper
++	.word	89		; x offset of collision box
++	.word	3		; y offset of collision box
++	.word	70		; x size of collision box
++	.word	37		; y size of collision box
++	.word	01417H		; strike routine
++	.word	01a07H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lk_bike
++	.word	044H		; x offset of collision box
++	.word	023H		; y offset of collision box
++	.word	038H		; x size of collision box
++	.word	020H		; y size of collision box
++	.word	01503H		; strike routine
++	.word	03006H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lk_wheel
++	.word	80		; x offset of collision box
++	.word	35		; y offset of collision box
++	.word	70		; x size of collision box
++	.word	40		; y size of collision box
++	.word	01818H		; strike routine
++	.word	00101H		; damage
++	.long	0	  	; score value for hit
++	.word	sf_squeeze
++
++ks_sonya_stk_lk_dbuc
++	.word	65		; x offset of collision box
++	.word	-5		; y offset of collision box
++	.word	45		; x size of collision box
++	.word	60		; y size of collision box
++	.word	01818H		; strike routine
++	.word	00000H		; damage
++	.long	0		; score value for hit
++	.word	sf_squeeze
++
++**************************************************************************
++*											     *
++*  Hathead strike table									     *
++*											     *
++**************************************************************************
++ks_kano_stk_projectile
++	.word 35,-24,51,50
++	.word 01110h,01605h
++	.long 0
++	.word sf_squeeze
++ks_sonya_stk_projectile
++	.word 108,35,36,11
++	.word 01110h,01605h
++	.long 0
++	.word sf_squeeze
++ks_sonya_stk_ring_close
++	.word 77,35,47,27
++	.word 01110h,01605h
++	.long 0
++	.word sf_squeeze
+ hh_strikes
+ 	.long	stk_hhhikick	; 0
+ 	.long	stk_hhlokick	; 1
+--- a/src/MKTOAST.ASM
++++ b/src/MKTOAST.ASM
+@@ -150,9 +150,11 @@
+ 
+ ***************************************************************************
+ 
++; ks_ladder_jade: last regular rung to Shang after secret challenge
++
+ jade_check
+ 	move	@map_position,a0,w
+-	cmpi	10,a0
++	cmpi	12,a0
+ 	jrne	jade_no
+ 	calla	count_active_players
+ 	cmpi	2,a0
+@@ -189,7 +191,7 @@
+ 
+ 	pull	a0
+ 
+-	movi	00cH,a0
++	movi	14,a0
+ 	move	a0,@map_position,w
+ 
+ 	movi	aud_found_jade,a0
+--- a/src/MKUTIL.ASM
++++ b/src/MKUTIL.ASM
+@@ -914,10 +914,14 @@
+ **************************************************************************
+ kmo_proc
+ 	move	*a2(oslink),a0,l	; proc
++	move	a0,a0
++	jreq	kmop3
+ 	move	*a0(pwake),a1,l
++	cmpi	multi_dummy_proc,a1	; never-woken multipart dummy
++	jreq	kmopkill
+ 	cmpi	multi_dummy_wake,a1	; still a dummy proc ?
+ 	jrne	kmop3			; no
+-	calla	kill			; yes, kill proc
++kmopkill	calla	kill			; yes, kill proc
+ kmop3	move	a2,a0
+ 	jauc	delobjp			; kill obj
+ 
+--- a/src/MKZAP.ASM
++++ b/src/MKZAP.ASM
+@@ -9,6 +9,8 @@
+ *  copyright (c) 1993 midway manufacturing							*
+ *											     *
+ **************************************************************************
++	.def spear_adjustments
++	.def delete_proj_and_die,dead_projectile,proj_strike_check,tell_world_stk
+ 	.file	"mkzap.asm"
+ 	.width	132
+ 	.option	b,d,l,t
+@@ -1113,6 +1115,7 @@
+ 	.word	07cH
+ 	.word	07cH
+ 	.word	07cH
++	.word 124,124 ; own Kano/Sonya rope alignment
+ 
+ 
+ tugged_in_by_spear
+@@ -2496,6 +2499,9 @@
+ 	.word	pid_proj1,pid_proj2
+ 	.word	pid_proj1,pid_proj2
+ 	.word	pid_proj1,pid_proj2
++	.word pid_proj1,pid_proj2
++	.word pid_proj1,pid_proj2
++	.word pid_proj1,pid_proj2
+ 
+ **************************************************************************
+ *											     *
+@@ -2589,6 +2595,8 @@
+ 	.word	oid_slow_proj,oid_slow_proj	; reptile
+ 	.word	0,0
+ 	.word	0,0
++	.word 0,0,0,0,0,0,0,0,0,0
++	.word 0711h,0711h,0712h,0712h
+ 
+ *
+ *          a8 = projectile object
+--- a/src/MOVES.ASM
++++ b/src/MOVES.ASM
+@@ -1,3 +1,13 @@
++	.def shocker_info
++	.ref ks_kano_lk_release,ks_sonya_high_punch
++	.ref ks_kano_high_punch,ks_sonya_low_punch
++	.ref ks_sonya_high_kick
++	.ref ks_kano_low_punch
++	.ref ks_sonya_block
++	.def button_mask,do_switches_match,fatality_xfer_close
++	.def fatality_xfer
++	.def button_look_lr
++	.ref ks_kano_high_kick
+ **************************************************************************
+ *											     *
+ *  video game project:	Mortal Kombat 2							*
+@@ -203,6 +213,9 @@
+ 	.long	sucide			;
+ 	.long	sucide			;
+ 	.long	sucide			;
++; MK2KS native source extension
++	.long sucide,sucide,sucide,sucide,sucide
++	.long sucide,sucide
+ 
+ 
+ char_joydown
+@@ -218,6 +231,9 @@
+ 	.long	sucide			;
+ 	.long	sucide			;
+ 	.long	sucide			;
++; MK2KS native source extension
++	.long sucide,sucide,sucide,sucide,sucide
++	.long sucide,sucide
+ 
+ 
+ char_joyleft
+@@ -234,6 +250,9 @@
+ 	.long	sucide			;
+ 	.long	sucide			;
+ 	.long	sucide			;
++; MK2KS native source extension
++	.long sucide,sucide,sucide,sucide,sucide
++	.long sucide,sucide
+ 
+ 
+ st_down
+@@ -317,6 +336,9 @@
+ 	.long	rp_hi_punch		; 9 - reptile
+ 	.long	sc_hi_punch		; 10
+ 	.long	jx_hi_punch	  	; 11
++; MK2KS native source extension
++	.long sucide,sucide,sucide,sucide,sucide
++	.long ks_kano_high_punch,ks_sonya_high_punch
+ 
+ char_lo_punch
+ 	.long	hh_lo_punch		; 0 - hathead
+@@ -331,6 +353,9 @@
+ 	.long	rp_lo_punch		; 9 - reptile
+ 	.long	sc_lo_punch		; a - scorpion
+ 	.long	jx_lo_punch		; b - jax
++; MK2KS native source extension
++	.long sucide,sucide,sucide,sucide,sucide
++	.long ks_kano_low_punch,ks_sonya_low_punch
+ 
+ char_block
+ 	.long	sucide			; 0
+@@ -345,6 +370,9 @@
+ 	.long	rp_block		; 9 -
+ 	.long	sc_block		; 10 - scorpion
+ 	.long	jx_block		; 11 - jax
++; MK2KS native source extension
++	.long sucide,sucide,sucide,sucide,sucide
++	.long sucide,ks_sonya_block
+ 
+ char_hi_kick
+ 	.long	hh_hi_kick		; 0 = hathead
+@@ -359,8 +387,12 @@
+ 	.long	rp_hi_kick		; 9 - reptile
+ 	.long	sc_hi_kick		;10 - scorpion
+ 	.long	jx_hi_kick		;
++; MK2KS native source extension
++	.long sucide,sucide,sucide,sucide,sucide
++	.long ks_kano_high_kick,ks_sonya_high_kick
+ 
+ char_lo_kick
++	.ref ks_baby_kick
+ 	.long	hh_lo_kick		; 0
+ 	.long	lk_lo_kick		; 1
+ 	.long	jc_lo_kick		; 2 - cage
+@@ -373,6 +405,9 @@
+ 	.long	rp_lo_kick		; 9 - reptile
+ 	.long	sc_lo_kick		; 10 - scorpion
+ 	.long	jx_lo_kick		; 11 - jax
++; MK2KS native source extension
++	.long sucide,sucide,sucide,sucide,sucide
++	.long ks_baby_kick,ks_baby_kick
+ 
+ **************************************************************************
+ *											     *
+@@ -407,6 +442,9 @@
+ 	.long	sucide			;
+ 	.long	sc_hp_open		; 10
+ 	.long	sucide			;
++; MK2KS native source extension
++	.long sucide,sucide,sucide,sucide,sucide
++	.long sucide,sucide
+ 
+ ;******************************************************************
+ 
+@@ -427,6 +465,9 @@
+ 	.long	sucide			; 9
+ 	.long	sucide			; a
+ 	.long	sucide			; b
++; MK2KS native source extension
++	.long sucide,sucide,sucide,sucide,sucide
++	.long sucide,ks_sonya_block
+ 
+ ;******************************************************************
+ 
+@@ -584,6 +625,9 @@
+ 	.long	sucide			; 9
+ 	.long	sucide			; 10
+ 	.long	jx_lp_open		; 11
++; MK2KS native source extension
++	.long sucide,sucide,sucide,sucide,sucide
++	.long sucide,sucide
+ 
+ 
+ jx_block
+@@ -656,6 +700,9 @@
+ 	.long	sucide			;
+ 	.long	sucide			;
+ 	.long	jx_lk_open		;
++; MK2KS native source extension
++	.long sucide,sucide,sucide,sucide,sucide
++	.long ks_kano_lk_release,sucide
+ 
+ lk_down
+ 	move	@winner_status,a0,w
+@@ -1111,6 +1158,11 @@
+ ;*********************************************************************
+ 
+ st_block
++	calla ks_leg_chord
++	jrnc ks_st_block_original
++	movi do_st_2_sonya,a7
++	jruc restricted_xfer
++ks_st_block_original
+ 	movi	bcom_st_2_fn1,a11
+ 	callr	button_look_lr
+ 	jrnc	stblk3				; no
+@@ -1585,6 +1637,11 @@
+ 
+ 
+ st_lo_punch
++	calla ks_leg_chord
++	jrnc ks_st_lp_original
++	movi do_st_2_sonya,a7
++	jruc restricted_xfer
++ks_st_lp_original
+ 	movi	f1b0|f1b2|f1b3|f1b4,a0
+ 	movi	f2b0|f2b2|f2b3|f2b4,a1
+ 	movi	scom_st_2_jc,a11
+@@ -1723,6 +1780,14 @@
+ 	jruc	fatality_xfer
+ 
+ stlk2
++	movi f1b0|f1b1|f1b2|f1b3,a0
++	movi f2b0|f2b1|f2b2|f2b3,a1
++	movi ks_scom_st_kano,a11
++	callr combo_look_lr
++	jrnc ks_st_lk_original
++	movi do_st_2_kano,a7
++	jruc restricted_xfer
++ks_st_lk_original
+ 	movi	f1b0|f1b1|f1b2|f1b3,a0
+ 	movi	f2b0|f2b1|f2b2|f2b3,a1
+ 	movi	scom_st_2_rd,a11
+@@ -2315,6 +2380,17 @@
+ 	jruc	shang_morph
+ 
+ 
++	.ref ks_leg_chord
++ks_scom_st_kano
++	.word 030H
++	.word sw_left,sw_down,sw_left,0,0,0
++	.word sw_right,sw_down,sw_right,0,0,0
++do_st_2_kano
++	movi 17,a9
++	jruc shang_morph
++do_st_2_sonya
++	movi 18,a9
++	jruc shang_morph
+ do_st_2_hh
+ 	clr	a9
+ 	jruc	shang_morph
+@@ -2720,6 +2796,8 @@
+ 	.word	2,2
+ 	.word	2,2
+ 	.word	2,2
++; MK2KS native source extension
++	.word 2,0,2,0
+ 
+ ;************************************************************
+ 
+@@ -2869,8 +2947,15 @@
+ 	calla	am_i_joy
+ 	jrnc	ucut2			; i am a drone ---> he is slimed
+ 
++	.if wunit
++* Wolf LP/LK are bits16/17 (P1),20/21 (P2) of the main input longword.
++	move	@switch,a3,l
++	not	a3
++	srl	16,a3
++	.else
+ 	move	@switch2,a3,l
+ 	not	a3
++	.endif
+ 	move	*a8(oid),a0,w
+ 	cmpi	oid_p1,a0
+ 	jreq	ucut1
+@@ -3102,6 +3187,8 @@
+ 	.word	3	;
+ 	.word	3	;
+ 	.word	3	;
++; MK2KS native source extension
++	.word 3,3
+ 
+ 
+ do_knee
+@@ -3200,6 +3287,8 @@
+ 	.word	20
+ 	.word	20
+ 	.word	20
++; MK2KS native source extension
++	.word 20,20,20,20
+ 
+ ***************************************************************************
+ 
+@@ -3293,6 +3382,8 @@
+ 	.word	14
+ 	.word	14
+ 	.word	14
++; MK2KS native source extension
++	.word 14,14
+ 
+ elbow_speeds
+ 	.word	2	; hathead
+@@ -3314,6 +3405,8 @@
+ 	.word	2
+ 	.word	2
+ 	.word	2
++; MK2KS native source extension
++	.word 2,2
+ 
+ 
+ do_shred
+@@ -3421,6 +3514,8 @@
+ 	jreq	useless_splits 		; move is useless against females
+ 	cmpi	ft_jade,a2
+ 	jreq	useless_splits 		; move is useless against females
++	cmpi 18,a2
++	jreq useless_splits ; Sonya follows native female immunity
+ 
+ 	calla	is_he_a_boss
+ 	jrc	useless_splits		; boss monsters bhave no balls, dummy
+@@ -3624,6 +3719,7 @@
+ 	.long	02301d0e0H
+ 	.long	02301d0e0H
+ 	.long	02301d0e0H
++	.long 02300c0e0H,02300c0e0H ; own Kano/Sonya shock pose and lineup
+ 
+ **************************************************************************
+ *											     *
+@@ -3843,6 +3939,7 @@
+ 
+ ************************************************************************
+ 
++	.def check_dtp
+ check_dtp
+ 	move	@f_no_violence,a0,w
+ 	jrne	death			; the pit if too violent for kidz !!
+@@ -4116,6 +4213,31 @@
+ *											     *
+ **************************************************************************
+ button_mask
++	.if wunit
++* Wolf LP/LK occupy the upper half of the main input longword, not switch2.
++* Keep P1's native bits; translate P2 LP/LK into the engine's fake mask bits.
++	move	@switch,a2,l
++	not	a2
++	move	a2,a3
++	andi	p1b0|p1b1|p1b2|p1b3|p1b4|p2b0|p2b2|p2b3,a2
++	btst	20,a3
++	jreq	wbmask1
++	ori	f2b1,a2
++wbmask1
++	btst	21,a3
++	jreq	wbmask2
++	ori	f2b4,a2
++wbmask2
++* MKII also treats the Wolf harness Run input as the redundant Block button.
++	btst	18,a3
++	jreq	wbmask3
++	ori	f1b2,a2
++wbmask3
++	btst	22,a3
++	jreq	wbmask4
++	ori	f2b2,a2
++wbmask4
++	.else
+ 	move	@switch,a2,l
+ 	move	@switch2,a3,l
+ 	not	a2
+@@ -4131,6 +4253,7 @@
+ 	ori	f2b4,a2				; yes, 'or' in fake bit
+ bmask4	andi	p1b1|p1b4,a3			; we dont need em any more
+ 	or	a3,a2
++	.endif
+ 
+ 	move	@p1_obj,a4,l
+ 	cmp	a8,a4
+--- a/src/UNZIP.ASM
++++ b/src/UNZIP.ASM
+@@ -127,6 +127,16 @@
+ ;***************************************************************
+ 
+ show_a0_ending
++	cmpi 17,a0
++	jrne ks_story_not_kano
++	movi ks_story_kano,a8
++	jruc ks_story_show
++ks_story_not_kano
++	cmpi 18,a0
++	jrne ks_story_original
++	movi ks_story_sonya,a8
++	jruc ks_story_show
++ks_story_original
+ 	pushp	a0
+ 
+ 	move	a0,a1
+@@ -172,6 +182,85 @@
+ 	movi	040H*12,a2			; a2 = view time
+ 	jsrp	one_story_screen
+ 	retp
++
++; Ordinary image objects and text, with no added compressed-picture decoder.
++        .ref ks_end_kano_picture1,ks_end_kano_picture2
++        .ref ks_end_sonya_picture1,ks_end_sonya_picture2
++        .ref dlists_bogus
++ks_story_show
++ks_story_page
++	pushp a8
++	calla murder_myoinit_score
++	calla clr_scrn
++	; oinit clears dlists: restore native object-list rendering for this page.
++	movi dlists_bogus,a0
++	move a0,@dlists,l
++	; Native static-story path: one fixed page, no autoerase or page flipping.
++	calla page_0_setup_no_init
++	pullp a11
++	move *a11+,a5,l
++	move *a11+,a4,l
++	pushp a11
++	pushp a4
++	calla gso_dmawnz_ns
++	pullp a4
++	calla set_xy_coordinates
++	calla insobj2a8
++	pullp a11
++	move *a11+,a8,l
++	pushp a11
++	jsrp lm_printf
++	calla display_on
++	sleep 4
++	calla display_off
++	calla sync_wait_dma_q
++	calla grab_screen
++	calla display_on
++	sleep 040H*12
++	pullp a8
++	move *a8,a0,l
++	jrne ks_story_page
++	calla murder_myoinit_score
++	calla clr_scrn
++	retp
++
++ks_story_kano
++	.long ks_end_kano_picture1,0029001eH,ks_story_kano_text1
++	.long ks_end_kano_picture2,0019003cH,ks_story_kano_text2
++	.long 0
++ks_story_sonya
++	.long ks_end_sonya_picture1,0029001eH,ks_story_sonya_text1
++	.long ks_end_sonya_picture2,0019003cH,ks_story_sonya_text2
++	.long 0
++ks_story_kano_text1
++	mess_mac rd11font,2,0bdH,012H,bpal_white*010000H,strlnrmos_scr,0
++	.string "KANO\n\n"
++	.string "WITH SHAO KAHN\n"
++	.string "DEFEATED, KANO\n"
++	.string "ESCAPES THE CHAINS\n"
++	.string "THAT HELD HIM\n"
++	.string "IN OUTWORLD.",0
++	.even
++ks_story_kano_text2
++	mess_mac rd11font,2,01cH,0a5H,bpal_white*010000H,strlnrmos_scr,0
++	.string "HIS FREEDOM IS NO VICTORY FOR EARTH.\n"
++	.string "THE BLACK DRAGON WILL RISE AGAIN.",0
++	.even
++ks_story_sonya_text1
++	mess_mac rd11font,2,0bdH,012H,bpal_white*010000H,strlnrmos_scr,0
++	.string "SONYA\n\n"
++	.string "FREE OF SHAO KAHN'S\n"
++	.string "CHAINS, SONYA\n"
++	.string "RETURNS TO EARTH\n"
++	.string "WITH HER MISSION\n"
++	.string "UNFINISHED.",0
++	.even
++ks_story_sonya_text2
++	mess_mac rd11font,2,01cH,0a5H,bpal_white*010000H,strlnrmos_scr,0
++	.string "KANO HAS ESCAPED ONCE MORE.\n"
++	.string "SHE WILL NOT REST UNTIL THE BLACK DRAGON\n"
++	.string "FALLS.",0
++	.even
+ 
+ end_text_1
+ 	.long	pf_hh_end_1a,pf_hh_end_1b,0

@@ -1,0 +1,168 @@
+{
+  "programSHA256": "221919459A4129FFDB37C8A3E9EC7F9AA6210D99AED00A35BC3256842C5E1F5A",
+  "castRows": [
+    {
+      "identities": [
+        3,
+        1
+      ],
+      "names": [
+        "BARAKA",
+        "LIU KANG"
+      ],
+      "x": [
+        112,
+        288
+      ],
+      "credits": [
+        "RICHARD DIVIZIO\\nAS\\nBARAKA",
+        "HOSUNG PAK\\nAS\\nLIU KANG"
+      ]
+    },
+    {
+      "identities": [
+        7,
+        2
+      ],
+      "names": [
+        "RAIDEN",
+        "JOHNNY CAGE"
+      ],
+      "x": [
+        96,
+        288
+      ],
+      "credits": [
+        "CARLOS PESINA\\nAS\\nRAIDEN",
+        "DANIEL PESINA\\nAS\\nJOHNNY CAGE"
+      ]
+    },
+    {
+      "identities": [
+        4,
+        0
+      ],
+      "names": [
+        "KITANA",
+        "KUNG LAO"
+      ],
+      "x": [
+        112,
+        304
+      ],
+      "credits": [
+        "KATALIN ZAMIAR\\nAS\\nKITANA",
+        "ANTHONY MARQUEZ\\nAS\\nKUNG LAO"
+      ]
+    },
+    {
+      "identities": [
+        6,
+        11
+      ],
+      "names": [
+        "SHANG TSUNG",
+        "JAX"
+      ],
+      "x": [
+        104,
+        304
+      ],
+      "credits": [
+        "PHILLIP AHN M.D.\\nAS\\nSHANG TSUNG",
+        "JOHN PARRISH\\nAS\\nJAX"
+      ]
+    },
+    {
+      "identities": [
+        5,
+        8
+      ],
+      "names": [
+        "MILEENA",
+        "SUB-ZERO"
+      ],
+      "x": [
+        96,
+        288
+      ],
+      "credits": [
+        "KATALIN ZAMIAR\\nAS\\nMILEENA",
+        "DANIEL PESINA\\nAS\\nSUBZERO"
+      ]
+    },
+    {
+      "identities": [
+        9,
+        10
+      ],
+      "names": [
+        "REPTILE",
+        "SCORPION"
+      ],
+      "x": [
+        96,
+        296
+      ],
+      "credits": [
+        "DANIEL PESINA\\nAS\\nREPTILE",
+        "DANIEL PESINA\\nAS\\nSCORPION"
+      ]
+    },
+    {
+      "identities": [
+        17,
+        18
+      ],
+      "names": [
+        "KANO",
+        "SONYA"
+      ],
+      "x": [
+        112,
+        288
+      ],
+      "credits": [
+        "RICHARD DIVIZIO\\nAS\\nKANO",
+        "KERRI HOSKINS\\nAS\\nSONYA"
+      ]
+    }
+  ],
+  "ownAnimationRoots": [
+    {
+      "actor": "kano",
+      "animation": 6,
+      "label": "ks_kano_vertical_jump",
+      "address": "FFC57830"
+    },
+    {
+      "actor": "kano",
+      "animation": 41,
+      "label": "ks_kano_main_29",
+      "address": "FFC710E0"
+    },
+    {
+      "actor": "sonya",
+      "animation": 6,
+      "label": "ks_sonya_vertical_jump",
+      "address": "FFC57FF0"
+    },
+    {
+      "actor": "sonya",
+      "animation": 41,
+      "label": "ks_sonya_main_29",
+      "address": "FFC76090"
+    }
+  ],
+  "originalSixPairsPreserved": true,
+  "ownSeventhPairAndTerminatorVerified": true,
+  "ownBowAnimationRuntimeVerified": false,
+  "creditsRuntimeVerified": false,
+  "releaseReady": false,
+  "sourceSHA256": {
+    "MKEND.ASM": "82605549FBBFE38C8101EC8FD2DC1588E6E9BC4139B6C45F937FC59516EBC71A",
+    "MKEND.LST": "6D353011070FEC95A30F1DE79FEEF88DEE33479DBBA9B03E9C6AC98A1319B866",
+    "MK2P.MAP": "F10C9CEA9CC6F338420994D3902131ECB748E314463FF3BDE47BFD8896ACF945",
+    "KSROOT.ASM": "0CD9C899A6C02CF33B17A96F7329DCCA70A85CE4F151D7D2FFC021433EC73E94"
+  }
+}

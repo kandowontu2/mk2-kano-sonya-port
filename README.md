@@ -1,51 +1,50 @@
-# Mortal Kombat II — Kano / Sonya port source
+# Mortal Kombat II — native Kano / Sonya ROM port
 
-Source for the custom MAME integration that adds Kano and Sonya as distinct
-MKII roster entries, with their own selection portraits, ladder presentation,
-combat, finishers, morphs, voices, shadows, and endings.
+The current development implementation is in **[native-rom/](native-rom/README_PATCHING.txt)**.
+Gameplay and character data live in compiled ROMs, with readable native ASM
+sources and per-chip IPS patches. It runs on unmodified stock MAME 0.289 using
+the existing `mk3` Wolf-unit hardware/socket definition. This is MKII game code,
+not MK3 gameplay. No custom MAME driver, host samples, identity proxy or
+emulator-side gameplay injection is required by this implementation.
 
-This is an unofficial fan project. It is not affiliated with the owners of
-Mortal Kombat or MAME. Game ROMs, ripped graphics/audio, generated character
-payloads, release binaries, and gameplay recordings are **not included**.
+**Development snapshot, not a finished release.** Finite current tests cover
+both added identities, selection transitions, normal/special moves, finishers,
+morphs and fresh-match recovery. Sonya has an earned current-ROM campaign clear.
+Kano's earned boss clear/ending and final audiovisual/release acceptance remain
+open. Test counts and manifests are not a complete-playability certificate.
 
-## Start here
+## Current source and patch instructions
 
-- [Change guide](docs/CHANGES.md): what changed and where to read it.
-- [Build and asset boundaries](docs/BUILD.md): upstream revision, overlay,
-  compiler command, and limitations of the historical asset-building tools.
-- [Full movelist](docs/MK2_KANO_SONYA_MOVES.txt).
-- [Test methodology](docs/TESTING.md): what the checks establish and what they
-  do not establish.
-- [Source manifest](SOURCE_MANIFEST.json): every exported source file's hash,
-  upstream revision, and the matched release EXE/payload identifiers.
-- [Exact native integration diff](patches/native-integration.patch).
+- [Patching and stock-MAME launch](native-rom/README_PATCHING.txt).
+- [Source guide and rebuild boundaries](native-rom/source/NATIVE_SOURCE_GUIDE.md).
+- [59 added ASM modules](native-rom/source/asm/).
+- [Changes to 40 original engine files](native-rom/source/native_source.patch).
+- [Complete written movelist](native-rom/MOVELIST_NATIVE.txt), including
+  fatalities, stage finishers, Friendship/Babality and Shang's added morphs.
+- [Per-chip patch manifest](native-rom/PATCH_MANIFEST.json) and
+  [snapshot file hashes](native-rom/FILES.json).
 
-## Repository layout
+Supply your own exact matching MKII/MK3 ROM inputs to the patcher. Original
+game source, proprietary TI tools, complete ROMs and emulator binaries are not
+included in this native snapshot. Rebuilding program, graphics and sound are
+separate chains; read the source guide before attempting a source rebuild.
+The snapshot is not a standalone replacement for those original build inputs.
 
-| Directory | Contents |
-| --- | --- |
-| `mame-overlay/` | All 15 exact canonical compile inputs for the released custom emulator, relative to the upstream MAME checkout. |
-| `patches/` | Tracked-file changes against the pinned upstream commit. The new picture-codec header is in the overlay, not this tracked-only diff. |
-| `tools/` | Retained builders, extractors, analysis, tests, qualifications, capture and packaging scripts, including historical revisions. |
-| `development/` | Retained top-level Lua drivers and supporting launch scripts. |
-| `controllers/` | Prepared, source-only test controllers. No runtime dumps or generated media. |
-| `history/` | Dated technical development notes. Their “current” labels refer to their original checkpoints. |
-| `licenses/` | Upstream license texts. |
+## Historical custom-driver implementation
 
-The repository is a **source snapshot**, not a reconstructed chronological Git
-history. Numbered filenames identify development revisions/cases; they are not
-a count of separately compiled releases. Historical scripts can depend on old
-workspace paths and evidence that is deliberately not published here. Do not
-run arbitrary historical scripts as a build recipe.
+The older `mame-overlay/`, root `patches/`, `tools/`, `controllers/`,
+`development/`, `history/` and root `SOURCE_MANIFEST.json` describe the withdrawn
+custom-emulator work. They remain historical material, **not current native
+build inputs or instructions**. The old readme is retained at
+[docs/WITHDRAWN_DRIVER_README.md](docs/WITHDRAWN_DRIVER_README.md).
+Do not compile that overlay to run the native ROM patches.
 
-## Licensing
+## Rights and provenance
 
-Existing source-file license headers and copyright notices are retained.
-The custom MAME changes retain the licenses of the files they modify, generally
-BSD-3-Clause. MAME as a whole is GPL-2.0; see [MAME_COPYING](MAME_COPYING).
-Original support scripts and documentation without another license notice are
-provided under [GPL-2.0-only](licenses/GPL-2.0).
-
-These code licenses do not grant rights to Mortal Kombat ROMs, artwork, audio,
-characters, or trademarks. Supply your own game data separately; nothing in this
-repository downloads it.
+This is an unofficial fan project, not affiliated with Mortal Kombat or MAME's
+owners. Existing source-file licenses and copyright notices remain applicable;
+see [licenses/](licenses/) and [MAME_COPYING](MAME_COPYING) for the historical
+MAME/support-code licenses. Those licenses do not grant rights to original game
+code, ROMs, artwork, audio, characters or trademarks. Do not interpret the
+availability of patches or generated ASM data as a blanket license for the
+underlying game assets. Nothing here downloads the original game data.

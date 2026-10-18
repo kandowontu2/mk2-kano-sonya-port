@@ -1,0 +1,163 @@
+; Original donor photos, native typed image/palette records only.
+; Generated reproducibly from user-supplied MK3 graphics ROMs.
+        .data
+        .def ks_end_kano_picture1
+ks_end_kano_picture1
+        .word 124,163,0,0
+        .long 007197278h
+        .word 00000h ; eight-bit, uncompressed native DMA
+        .long ks_end_kano_picture1_palette
+ks_end_kano_picture1_palette
+        .word 256
+        .word 00000h,0280ah,029a0h,031e1h,02de0h,02160h,01d20h,018e0h
+        .word 014c0h,010a0h,00c80h,014c1h,00c61h,00420h,01042h,01463h
+        .word 00841h,01442h,020a1h,02905h,03565h,041a8h,049ebh,04e4dh
+        .word 0562eh,04e0bh,04e0ch,05a71h,020c5h,00000h,018a5h,05a92h
+        .word 0516bh,03000h,03c00h,02000h,018e2h,02122h,03124h,03d67h
+        .word 045cah,041eah,0520fh,02108h,01d03h,04000h,01421h,020a3h
+        .word 03544h,05a4fh,03569h,05a0fh,06400h,05400h,04c00h,018e3h
+        .word 062d0h,05e91h,049ech,039ceh,041cch,066b3h,05e6fh,040c3h
+        .word 07000h,02124h,02d22h,03d87h,06271h,06ed5h,05deah,05dach
+        .word 07c63h,02d04h,041a9h,0460eh,03987h,02d4ah,0318ch,06ef2h
+        .word 07d4ah,03defh,05293h,062f7h,020e6h,056b5h,06f15h,06ed2h
+        .word 02800h,03882h,04483h,03546h,049c9h,055cdh,0418ah,02d26h
+        .word 0739ch,07779h,07f16h,01c63h,028c3h,02081h,05ef6h,06f33h
+        .word 07fffh,028a5h,07757h,06210h,04631h,04a52h,03108h,02883h
+        .word 04e4fh,07f37h,034a5h,02964h,03d65h,06b5ah,06739h,06f7bh
+        .word 03082h,02561h,02547h,041c8h,03064h,03c21h,03083h,04421h
+        .word 035aah,029a6h,05021h,031a9h,034c2h,03a09h,05c00h,04d49h
+        .word 03c83h,028a1h,07eb5h,0616bh,04842h,07a31h,050c6h,041c6h
+        .word 03ce8h,07e51h,05d49h,07c21h,069adh,04462h,02101h,050a5h
+        .word 035e7h,02901h,074a5h,07ce7h,07cc6h,02d83h,04de8h,04884h
+        .word 06a0fh,06a51h,07929h,07d6bh,05e2bh,03ca3h,07f18h,07f59h
+        .word 06233h,07defh,07f7bh,07dadh,04defh,0673bh,056d4h,038a4h
+        .word 04670h,06b38h,050a4h,05885h,058a5h,07fdeh,077bdh,07042h
+        .word 060a5h,0418dh,07084h,05672h,06d29h,070c6h,060c5h,06127h
+        .word 0716bh,05ce4h,04ce4h,058e5h,07086h,0420ch,0424ah,04a8dh
+        .word 04d23h,02da4h,031c5h,0466ch,03604h,041e6h,04f20h,02da2h
+        .word 03da6h,03620h,03d64h,04964h,03e44h,03a60h,042a0h,031a6h
+        .word 046e0h,04dc7h,045e8h,03cc2h,04a09h,05780h,062b4h,052afh
+        .word 0562ah,04da8h,05209h,054c0h,058c0h,0558dh,048a1h,04e90h
+        .word 0624ch,062cfh,07f79h,07fdbh,05946h,07755h,07fbch,0668dh
+        .word 0618ah,072b0h,058e6h,075edh,0624bh,04d66h,0722fh,0620ch
+        .word 072f2h,051c8h,05dc8h,066f3h,06f78h,061a6h,06e8fh,06a6dh
+        .def ks_end_kano_picture2
+ks_end_kano_picture2
+        .word 280,119,0,0
+        .long 0071bea18h
+        .word 00000h ; eight-bit, uncompressed native DMA
+        .long ks_end_kano_picture2_palette
+ks_end_kano_picture2_palette
+        .word 256
+        .word 00000h,0280ah,029a0h,031e1h,02de0h,02160h,01d20h,018e0h
+        .word 014c0h,010a0h,00c80h,014c1h,00c61h,00420h,01042h,01463h
+        .word 00841h,01442h,020a1h,02905h,03565h,041a8h,049ebh,04e4dh
+        .word 0562eh,04e0bh,04e0ch,05a71h,020c5h,00000h,018a5h,05a92h
+        .word 0516bh,03000h,03c00h,02000h,018e2h,02122h,03124h,03d67h
+        .word 045cah,041eah,0520fh,02108h,01d03h,04000h,01421h,020a3h
+        .word 03544h,05a4fh,03569h,05a0fh,06400h,05400h,04c00h,018e3h
+        .word 062d0h,05e91h,049ech,039ceh,041cch,066b3h,05e6fh,040c3h
+        .word 07000h,02124h,02d22h,03d87h,06271h,06ed5h,05deah,05dach
+        .word 07c63h,02d04h,041a9h,0460eh,03987h,02d4ah,0318ch,06ef2h
+        .word 07d4ah,03defh,05293h,062f7h,020e6h,056b5h,06f15h,06ed2h
+        .word 02800h,03882h,04483h,03546h,049c9h,055cdh,0418ah,02d26h
+        .word 0739ch,07779h,07f16h,01c63h,028c3h,02081h,05ef6h,06f33h
+        .word 07fffh,028a5h,07757h,06210h,04631h,04a52h,03108h,02883h
+        .word 04e4fh,07f37h,034a5h,02964h,03d65h,06b5ah,06739h,06f7bh
+        .word 03082h,02561h,02547h,041c8h,03064h,03c21h,03083h,04421h
+        .word 035aah,029a6h,05021h,031a9h,034c2h,03a09h,05c00h,04d49h
+        .word 03c83h,028a1h,07eb5h,0616bh,04842h,07a31h,050c6h,041c6h
+        .word 03ce8h,07e51h,05d49h,07c21h,069adh,04462h,02101h,050a5h
+        .word 035e7h,02901h,074a5h,07ce7h,07cc6h,02d83h,04de8h,04884h
+        .word 06a0fh,06a51h,07929h,07d6bh,05e2bh,03ca3h,07f18h,07f59h
+        .word 06233h,07defh,07f7bh,07dadh,04defh,0673bh,056d4h,038a4h
+        .word 04670h,06b38h,050a4h,05885h,058a5h,07fdeh,077bdh,07042h
+        .word 060a5h,0418dh,07084h,05672h,06d29h,070c6h,060c5h,06127h
+        .word 0716bh,05ce4h,04ce4h,058e5h,07086h,0420ch,0424ah,04a8dh
+        .word 04d23h,02da4h,031c5h,0466ch,03604h,041e6h,04f20h,02da2h
+        .word 03da6h,03620h,03d64h,04964h,03e44h,03a60h,042a0h,031a6h
+        .word 046e0h,04dc7h,045e8h,03cc2h,04a09h,05780h,062b4h,052afh
+        .word 0562ah,04da8h,05209h,054c0h,058c0h,0558dh,048a1h,04e90h
+        .word 0624ch,062cfh,07f79h,07fdbh,05946h,07755h,07fbch,0668dh
+        .word 0618ah,072b0h,058e6h,075edh,0624bh,04d66h,0722fh,0620ch
+        .word 072f2h,051c8h,05dc8h,066f3h,06f78h,061a6h,06e8fh,06a6dh
+        .def ks_end_sonya_picture1
+ks_end_sonya_picture1
+        .word 124,163,0,0
+        .long 0071ffb58h
+        .word 00000h ; eight-bit, uncompressed native DMA
+        .long ks_end_sonya_picture1_palette
+ks_end_sonya_picture1_palette
+        .word 256
+        .word 00000h,00000h,04085h,03864h,03885h,02422h,02843h,03444h
+        .word 01822h,01c43h,040c8h,00426h,00425h,00846h,00845h,01ceeh
+        .word 02531h,02d74h,014a9h,0210dh,01cebh,04e7ch,02d70h,03df5h
+        .word 056bdh,0631fh,039d1h,02d6dh,05adah,018c7h,01ce8h,05297h
+        .word 0673ch,0631ah,06f7dh,04211h,05295h,0044ch,0086dh,0086bh
+        .word 00c8eh,018f0h,01d12h,035d7h,03e19h,0465bh,04e9dh,00449h
+        .word 00c8ch,04238h,05afeh,035d4h,00868h,04657h,01d0dh,05afah
+        .word 056d8h,01d08h,05bf7h,008c2h,008a2h,04390h,025c9h,00862h
+        .word 010c4h,02debh,05bb6h,042b0h,010a4h,05b76h,04ef3h,014c5h
+        .word 05b56h,031cch,01d07h,04250h,04eb3h,05af6h,06338h,077ddh
+        .word 03b4dh,047b0h,00961h,01e46h,053f3h,01183h,01de6h,04710h
+        .word 00901h,00d22h,01985h,063f7h,011c2h,015e3h,01e25h,02266h
+        .word 02aa8h,032eah,0370bh,01d86h,0364ch,01123h,036cbh,03f0dh
+        .word 05bd4h,05333h,06ffah,05fd5h,02a87h,0434dh,02225h,01d46h
+        .word 03289h,0430dh,05f95h,01dc4h,02e87h,03ecch,053b0h,01983h
+        .word 00ca2h,0430ch,01905h,04f30h,02daah,077fch,02e47h,06bf7h
+        .word 036a8h,03248h,03669h,03e4dh,03aa9h,03ecah,05bb1h,04ef0h
+        .word 05f74h,02e26h,05b53h,04b0ch,04f2dh,03aa7h,03648h,04acdh
+        .word 05b6fh,056f2h,02dc6h,029a4h,01d23h,052d0h,056f1h,06791h
+        .word 031c6h,0424ah,04eabh,06fb3h,04e8eh,056d1h,02544h,02965h
+        .word 035c8h,0464ch,04a6ah,06f93h,077d5h,077d6h,06750h,018c2h
+        .word 02105h,018c4h,05ad1h,0420dh,056b1h,05ef3h,04630h,04e72h
+        .word 06317h,05ef6h,04e4ah,05eceh,07fd7h,041e9h,03587h,03dc9h
+        .word 06f55h,041ebh,018a2h,039aah,03dcbh,05270h,04e2ch,07f95h
+        .word 018a3h,0358ah,066d0h,05a90h,0628dh,03545h,07b54h,03d66h
+        .word 04187h,045a8h,0668eh,07313h,01882h,03104h,04dc9h,051eah
+        .word 0560bh,05e6fh,04e0dh,04a0eh,04e2fh,028e4h,020c4h,03504h
+        .word 04dcah,05e2ch,06eb0h,072d1h,076f2h,028c3h,041abh,03505h
+        .word 030e4h,024a3h,05e0dh,02042h,00c21h,02884h,06718h,00421h
+        .word 00842h,00c63h,01084h,014a5h,018c6h,01ce7h,02108h,02529h
+        .word 02d6bh,0318ch,035adh,039ceh,03defh,04210h,04631h,04a52h
+        .word 04e73h,05294h,056b5h,05ad6h,06739h,06b5ah,06f7bh,0739ch
+        .def ks_end_sonya_picture2
+ks_end_sonya_picture2
+        .word 280,119,0,0
+        .long 0072272f8h
+        .word 00000h ; eight-bit, uncompressed native DMA
+        .long ks_end_sonya_picture2_palette
+ks_end_sonya_picture2_palette
+        .word 256
+        .word 00000h,00000h,04085h,03864h,03885h,02422h,02843h,03444h
+        .word 01822h,01c43h,040c8h,00426h,00425h,00846h,00845h,01ceeh
+        .word 02531h,02d74h,014a9h,0210dh,01cebh,04e7ch,02d70h,03df5h
+        .word 056bdh,0631fh,039d1h,02d6dh,05adah,018c7h,01ce8h,05297h
+        .word 0673ch,0631ah,06f7dh,04211h,05295h,0044ch,0086dh,0086bh
+        .word 00c8eh,018f0h,01d12h,035d7h,03e19h,0465bh,04e9dh,00449h
+        .word 00c8ch,04238h,05afeh,035d4h,00868h,04657h,01d0dh,05afah
+        .word 056d8h,01d08h,05bf7h,008c2h,008a2h,04390h,025c9h,00862h
+        .word 010c4h,02debh,05bb6h,042b0h,010a4h,05b76h,04ef3h,014c5h
+        .word 05b56h,031cch,01d07h,04250h,04eb3h,05af6h,06338h,077ddh
+        .word 03b4dh,047b0h,00961h,01e46h,053f3h,01183h,01de6h,04710h
+        .word 00901h,00d22h,01985h,063f7h,011c2h,015e3h,01e25h,02266h
+        .word 02aa8h,032eah,0370bh,01d86h,0364ch,01123h,036cbh,03f0dh
+        .word 05bd4h,05333h,06ffah,05fd5h,02a87h,0434dh,02225h,01d46h
+        .word 03289h,0430dh,05f95h,01dc4h,02e87h,03ecch,053b0h,01983h
+        .word 00ca2h,0430ch,01905h,04f30h,02daah,077fch,02e47h,06bf7h
+        .word 036a8h,03248h,03669h,03e4dh,03aa9h,03ecah,05bb1h,04ef0h
+        .word 05f74h,02e26h,05b53h,04b0ch,04f2dh,03aa7h,03648h,04acdh
+        .word 05b6fh,056f2h,02dc6h,029a4h,01d23h,052d0h,056f1h,06791h
+        .word 031c6h,0424ah,04eabh,06fb3h,04e8eh,056d1h,02544h,02965h
+        .word 035c8h,0464ch,04a6ah,06f93h,077d5h,077d6h,06750h,018c2h
+        .word 02105h,018c4h,05ad1h,0420dh,056b1h,05ef3h,04630h,04e72h
+        .word 06317h,05ef6h,04e4ah,05eceh,07fd7h,041e9h,03587h,03dc9h
+        .word 06f55h,041ebh,018a2h,039aah,03dcbh,05270h,04e2ch,07f95h
+        .word 018a3h,0358ah,066d0h,05a90h,0628dh,03545h,07b54h,03d66h
+        .word 04187h,045a8h,0668eh,07313h,01882h,03104h,04dc9h,051eah
+        .word 0560bh,05e6fh,04e0dh,04a0eh,04e2fh,028e4h,020c4h,03504h
+        .word 04dcah,05e2ch,06eb0h,072d1h,076f2h,028c3h,041abh,03505h
+        .word 030e4h,024a3h,05e0dh,02042h,00c21h,02884h,06718h,00421h
+        .word 00842h,00c63h,01084h,014a5h,018c6h,01ce7h,02108h,02529h
+        .word 02d6bh,0318ch,035adh,039ceh,03defh,04210h,04631h,04a52h
+        .word 04e73h,05294h,056b5h,05ad6h,06739h,06b5ah,06f7bh,0739ch

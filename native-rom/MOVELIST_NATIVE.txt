@@ -1,0 +1,78 @@
+MKII KANO / SONYA - NATIVE DEVELOPMENT MOVELIST
+Current native ASM commands; not the withdrawn custom-driver build.
+Development candidate: full campaign/final audiovisual acceptance is unfinished.
+
+NOTATION
+F = toward opponent; B = away; U = up; D = down.
+HP/LP = high/low punch; HK/LK = high/low kick; BL = Block.
+Commas mean successive presses. '+' means hold together. Release between repeated
+direction/button taps. Directions reverse when you change sides.
+Use MAME's Input Assignments to see or change your actual keyboard/controller keys.
+
+INPUT TIP AFTER BLOCKING
+If a special becomes a normal punch after leaving a crouch/block, release Block
+and Down and let the character finish standing before entering a fresh command.
+For deliberate Knife practice, the tested sequence is: D for 3 game ticks,
+release for 3, B for 3, release for 3, then HP for 3. This is a tested input
+example, not a requirement to count ticks during normal play. Do not start the
+sequence during the rising animation. All normal native input restrictions apply.
+
+KANO - SPECIAL MOVES
+Ball:             Hold LK for more than 80 game ticks, then release LK.
+Knife:            D, B + HP.
+Blade:            D, F + HP.
+Choke:            D, F + LP (close).
+
+KANO - FINISHERS (during FINISH HIM/HER)
+Skeleton extract: B, D, F + HK (close; at most 112 world pixels apart).
+Eye laser:        LP, BL, BL, HK (128-288 world pixels apart).
+Friendship:       LK, BL, BL, HK (at least 160 world pixels apart).
+Babality:         F, F, D, D + LK (at least 160 world pixels apart).
+Tomb/Pit II:      U, U, B + LK (close; at most 72 world pixels apart).
+Dead Pool:        Hold LP + LK, then D + HP for the finishing uppercut, close.
+
+SONYA - SPECIAL MOVES
+Ring:             D, F + LP.
+Square wave:      F, B + HP (opponent must be airborne).
+Bicycle kick:     B, B, D + HK.
+Leg grab:         D + LP + BL (close). Hold D and BL, then press LP;
+                  keep all three held for the command. Do not add other buttons.
+
+SONYA - FINISHERS (during FINISH HIM/HER)
+Flame kiss:       B, F, D, D + LP.
+Death orb:        Hold BL before starting U, U, B, D + HK; keep BL held throughout
+                  (at least 160 world pixels apart).
+Friendship:       B, F, B, D + BL (at least 160 world pixels apart).
+Babality:         D, D, F + LK (at least 160 world pixels apart).
+Tomb/Pit II:      F, F, D + HP (close; at most 72 world pixels apart).
+Dead Pool:        Hold LP + LK, then D + HP for the finishing uppercut, close.
+
+FINISHER NOTES
+Friendships and Babalities retain the native no-punch eligibility rule: avoid
+HP and LP in the deciding round. Bosses are not valid finisher victims.
+Stage commands only work on the named stages, not on every background.
+Fatalities require the game's violence/blood settings to permit them.
+Distance numbers are actor-coordinate separations, not visible sprite-edge gaps.
+For upward commands, holding Block during the direction taps helps prevent a jump;
+release it before the final button unless the command explicitly requires Block.
+
+SHANG TSUNG - ADDED MORPHS
+Kano:             B, D, B + LK.
+Sonya:            D + LP + BL (hold D and BL, then press LP).
+These transform into true Kano/Sonya identities, with their own move sets.
+Native eligibility caveat: Sonya's LP-based morph records punch use. A later
+Friendship/Babality remains subject to the original no-punch rule; morphing
+does not clear that history. The four lethal fatalities are not affected.
+The normal temporary morph lasts about 524 game ticks; an active paired throw
+can delay the return until the throw is safely finished. Original morphs remain.
+
+SHARED NORMAL MOVES
+Standing HP/LP/HK/LK; crouching D + attack; jumping U/UF/UB + attack.
+Uppercut: D + HP. Sweep: B + LK. Roundhouse: B + HK.
+Throw: F + LP at throw range. Block: hold BL (D + BL for low block).
+These retain native MKII range, stance, opponent and recovery restrictions.
+
+SOURCE REFERENCES
+source/asm/KSCMD.ASM: special/finisher dispatch, command histories and distances.
+source/native_source.patch: native friendship/babality/stage/morph integration.
+Game logic and assets are ROM-resident; no custom MAME driver is required.

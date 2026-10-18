@@ -1,0 +1,105 @@
+{
+  "scope": "Actual current program-ROM image/palette/page records",
+  "programSHA256": "221919459A4129FFDB37C8A3E9EC7F9AA6210D99AED00A35BC3256842C5E1F5A",
+  "images": [
+    {
+      "label": "ks_end_kano_picture1",
+      "address": "FFCA1CB0",
+      "width": 124,
+      "height": 163,
+      "graphicsBitAddress": "07197278",
+      "nativeEightBitDMA": true,
+      "paletteWords": 256
+    },
+    {
+      "label": "ks_end_kano_picture2",
+      "address": "FFCA2D50",
+      "width": 280,
+      "height": 119,
+      "graphicsBitAddress": "071BEA18",
+      "nativeEightBitDMA": true,
+      "paletteWords": 256
+    },
+    {
+      "label": "ks_end_sonya_picture1",
+      "address": "FFCA3DF0",
+      "width": 124,
+      "height": 163,
+      "graphicsBitAddress": "071FFB58",
+      "nativeEightBitDMA": true,
+      "paletteWords": 256
+    },
+    {
+      "label": "ks_end_sonya_picture2",
+      "address": "FFCA4E90",
+      "width": 280,
+      "height": 119,
+      "graphicsBitAddress": "072272F8",
+      "nativeEightBitDMA": true,
+      "paletteWords": 256
+    }
+  ],
+  "pages": [
+    {
+      "actor": "kano",
+      "page": 1,
+      "recordAddress": "FF8D5130",
+      "imageAddress": "FFCA1CB0",
+      "textAddress": "FF8D52F0",
+      "x": 30,
+      "y": 41
+    },
+    {
+      "actor": "kano",
+      "page": 2,
+      "recordAddress": "FF8D5190",
+      "imageAddress": "FFCA2D50",
+      "textAddress": "FF8D5670",
+      "x": 60,
+      "y": 25
+    },
+    {
+      "actor": "sonya",
+      "page": 1,
+      "recordAddress": "FF8D5210",
+      "imageAddress": "FFCA3DF0",
+      "textAddress": "FF8D5970",
+      "x": 30,
+      "y": 41
+    },
+    {
+      "actor": "sonya",
+      "page": 2,
+      "recordAddress": "FF8D5270",
+      "imageAddress": "FFCA4E90",
+      "textAddress": "FF8D5D20",
+      "x": 60,
+      "y": 25
+    }
+  ],
+  "ownImageAndPalettePointersVerified": true,
+  "twoPagesAndTerminatorPerCharacterVerified": true,
+  "nativeObjectDisplayListRestoredAfterPageReset": true,
+  "actualNativeCallCounts": {
+    "murder_myoinit_score": 2,
+    "clr_scrn": 2,
+    "gso_dmawnz_ns": 1,
+    "set_xy_coordinates": 1,
+    "insobj2a8": 1,
+    "display_on": 2,
+    "page_0_setup_no_init": 1,
+    "display_off": 1,
+    "sync_wait_dma_q": 1,
+    "grab_screen": 1
+  },
+  "originalEndingFallbackSourcePreserved": true,
+  "endingRuntimeVerified": false,
+  "campaignVerified": false,
+  "releaseReady": false,
+  "sourceSHA256": {
+    "UNZIP.ASM": "77139D79212F9C23526321C63B07BBBB5E972A0213D2F1EF2DED471AFB9354F4",
+    "UNZIP.LST": "340AE5F606CD90D8B88536C066BB031183D2560C85260E14D297096E44BB71A0",
+    "KSENDART.ASM": "9CD0E37479F58E9B1A0A0B6E09D1B942158DDC139B9B41AE58BBF0453375151F",
+    "MK2P.MAP": "F10C9CEA9CC6F338420994D3902131ECB748E314463FF3BDE47BFD8896ACF945"
+  }
+}
