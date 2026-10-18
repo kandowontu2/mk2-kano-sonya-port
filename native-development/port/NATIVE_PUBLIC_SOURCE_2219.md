@@ -20,3 +20,15 @@ game source, proprietary tools, complete ROM archives or emulator binaries.
 The separate local evidence/video/controller work remains development work;
 do not infer that every local diagnostic was included in this121-file export.
 Publication is not proof of a completed Kano campaign or full-port acceptance.
+
+## Developer source refresh
+
+Remote main was subsequently verified at
+`e602369e41d91cc5d23df4aefabdf42c55af8267`. Its separate
+`native-development/` tree contains697 source files including the hash manifest
+(3,017,536 bytes). All697 staged files were checked byte-for-byte before push;
+the public checkout was clean afterward. The local unit checkpoint passed431
+cases. Bounded native video/audio capture, Sonya campaign verification tooling,
+and newer experimental Kano controllers are included. Canonical native ASM/IPS
+did not change, and runtime media/ROMs/bulk evidence remain excluded. This is
+still an unfinished developer snapshot, not a final release or Kano clear.

@@ -1,5 +1,5 @@
 import unittest
-from inspect_kintaro_variety import validate_decision
+from inspect_kintaro_variety import validate_decision, retreat_summary
 
 
 class VarietyAuditTests(unittest.TestCase):
@@ -15,6 +15,12 @@ class VarietyAuditTests(unittest.TestCase):
     def test_unready_request_cannot_pass(self):
         with self.assertRaises(AssertionError):validate_decision(dict(self.row(),ownFlags='4'))
         self.assertFalse(validate_decision(dict(self.row(),decision='wait')))
+
+    def test_retreat_count_does_not_bridge_unobserved_fields(self):
+        rows=[dict(frame=str(f),decision=d) for f,d in
+              ((1,'retreat'),(2,'retreat'),(4,'retreat'),(5,'wait'),(6,'retreat'))]
+        self.assertEqual(retreat_summary(rows),dict(observedRetreatFields=4,longestContiguousRetreatFields=2))
+        with self.assertRaises(AssertionError): retreat_summary(rows+rows)
 
 
 if __name__=='__main__':unittest.main()

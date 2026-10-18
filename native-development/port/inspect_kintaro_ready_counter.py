@@ -17,9 +17,10 @@ def main(name):
     assert name and all(c.isalnum() or c in '_-' for c in name)
     run=BASE/name
     receipt=json.loads((run/'execution.json').read_text())
-    assert '--campaign-kano-kintaro-ready-counter' in receipt['testArguments']
+    hybrid='--campaign-kano-kintaro-varied-counter' in receipt['testArguments']
+    assert '--campaign-kano-kintaro-ready-counter' in receipt['testArguments'] or hybrid
     maximum=int(next((arg.split('=',1)[1] for arg in receipt['testArguments']
-        if arg.startswith('--campaign-kano-kintaro-ready-range=')),'115'))
+        if arg.startswith('--campaign-kano-kintaro-ready-range=')),'104' if hybrid else '115'))
     subprocess.run([sys.executable,str(PORT/'audit_campaign_run.py'),name],check=True,
                    stdout=subprocess.DEVNULL,creationflags=FLAGS)
     log=(run/'mame.log').read_text();assert 'Fatal error:' not in log and '[LUA ERROR]' not in log

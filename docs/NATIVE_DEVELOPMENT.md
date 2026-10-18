@@ -19,8 +19,8 @@ archives, raw game assets, screenshots, recordings or bulk test-run dumps.
   deliberately rejected cases and narrower scope limits.
 - [`FILES.json`](../native-development/FILES.json): exact snapshot hashes.
 
-The last complete local unittest run at this checkpoint passed431 test cases.
-That is not431 separately compiled builds or431 independent test suites.
+The last complete local unittest run at this checkpoint passed434 test cases.
+That is not434 separately compiled builds or434 independent test suites.
 Bundled standalone IPS-codec tests are a smaller five-case subset; see the
 native validation document. Runtime fixtures, source/build qualifications,
 unit tests and media comparisons establish different things. None alone is a
@@ -56,5 +56,8 @@ This refresh includes bounded named-pipe video capture, native-audio muxing,
 the verified Sonya campaign recording workflow, and newer physical-input Kano
 boss trials. Sonya's full campaign recording is qualified locally; media and
 runtime dumps are not part of this source snapshot. The newer Kano spacing
-controller remains experimental, not a claimed campaign clear. No canonical
+controllers remain experimental: bounded spacing, close-counter and adaptive
+airborne timing trials all completed without a native Kintaro round win.
+Their retained provenance distinguishes requests, native entries and results.
+No canonical
 game ASM or ROM patch changed in this developer-tool refresh.

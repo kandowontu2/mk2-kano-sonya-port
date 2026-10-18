@@ -140,3 +140,62 @@ punch from116-pixel separation; Kintaro later remained at6HP when Kano lost.
 This does not support claiming a clear or simply adding more continues. The
 next useful investigation is safer grounded launch spacing/retreat and corner
 handling, rather than weakening native repeat punishment or damage rules.
+
+The separate `stock_wolf_2219_kano_kintaro_varied_spacing` trial completed
+cleanly, exit0/no timeout. Its 16 boss rounds yielded no native round wins;
+minimum boss HP was69. It requested34 kicks/20 punches/7 Knives, with33/17/6
+sampled native activations. Grounded retreat below175, held until220, caused
+6740 retreat fields and fewer attack opportunities. One continuous retreat
+lasted292 fields; sampled positions show both players moving while the boss
+followed, not a proven corner collision. A distinct bounded-spacing trial
+limits each physical retreat episode to48 fields before waiting for actual
+stance and attacking. This is an experimental controller change only.
+
+That bounded trial, `stock_wolf_2219_kano_kintaro_varied_spacing_bounded`,
+completed at159411 fields, exit0/no timeout. All current-ROM/frozen physical
+input/clean-log campaign checks pass. Across16 boss rounds it recorded44 kick,
+58 punch and41 Knife requests, with41/43/37 sampled native entries. Actual
+logged retreat totaled3599 fields; its longest continuous run was48, confirming
+the cap operated. Best boss HP was17, but there were zero native round wins
+and no full Kintaro match. This restores attack opportunities versus unbounded
+spacing but does not prove a clear or justify repeating unchanged. The next
+investigation is native close-range exchanges versus retreat/jump timing.
+
+The distinct `stock_wolf_2219_kano_kintaro_varied_counter` experiment adds a
+close-range branch to the bounded variety controller. At <=104 separation it
+physically holds Down and requests HP only after actual native duck-dispatch,
+body<=96, eligible grounded flags and grounded opponent are observed, with
+six-field minimum request spacing and three-field pulse. Readiness requests
+are logged separately in kintaro_ready_counter.csv; queue-based ranged requests
+remain in kintaro_variety.csv. The terminal auditors must check both logs and
+native counters, not confuse an uppercut request with a hit or a match win.
+The earlier human route and native gameplay code are unchanged. Result pending.
+
+The hybrid subsequently completed at157751 fields, exit0/no timeout. Both
+terminal auditors pass:49 kick/48 punch/17 Knife requests yielded47/47/13
+sampled entries;43 ready uppercut requests yielded35 native107h entries and
+18 linked damage windows. Across16 boss rounds, minimum boss HP was47 and
+there were zero native round wins. Retreat remained capped at48 consecutive
+logged fields (2233 total). This is a regression from bounded variety's17HP,
+not an earned campaign clear. Input recognition is demonstrated; repeatedly
+rerunning the same policy or changing native recovery/damage is not justified.
+
+The separate `stock_wolf_2219_kano_kintaro_varied_adaptive` trial retains the
+bounded variety policy without the regressing close-uppercut hybrid. Requested
+air attack age is now clamp(floor((distance-80)/4),10,28), logged per request.
+It tests earlier physical attack inputs for close launches instead of assuming
+the fixed28-field delay suits both116- and192-pixel gaps. This is a controller
+hypothesis, not verified geometry/contact or a ROM change. The terminal audit
+checks logged timing against actual request distance and seeks native entries
+relative to each requested age. Result pending; no win or hit inferred.
+
+The adaptive trial completed at157863 fields, exit0/no timeout. The audit
+validated each logged age against its launch distance:68 airborne requests
+kept age28, while35 used earlier ages10..27. Across16 boss rounds it requested
+55 kicks/48 punches/28 Knives with49/40/25 sampled native entries. Best boss
+HP was36; zero native round wins. Retreat totaled3274 logged fields and never
+exceeded48 continuously. Thus earlier physical inputs were actually tried,
+but did not improve on the bounded fixed-timing trial's17HP minimum or earn
+a match. Current-ROM/frozen-input/clean-log checks pass; full clear remains
+unproved. Do not convert this failed controller experiment into a ROM timing
+or damage change without independent game-defect evidence.

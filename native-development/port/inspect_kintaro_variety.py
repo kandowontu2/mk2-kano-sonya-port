@@ -6,9 +6,25 @@ import sys
 from collections import Counter
 from inspect_normal_runtime import BASE, PORT, sha
 from refresh_special_videos import FLAGS
-from kintaro_variety_policy import next_move
+from kintaro_variety_policy import next_move, air_attack_age
 
 MOVES={'mixkick':0x200,'mixpunch':0x201,'readyknife':0x211}
+
+
+def retreat_summary(rows):
+    """Count contiguous logged retreat fields; gaps are not assumed observed."""
+    longest=length=total=0
+    previous=None
+    for row in rows:
+        frame=int(row['frame'])
+        assert previous is None or frame>previous, 'Nonmonotonic decision trace'
+        if row['decision']=='retreat':
+            length=length+1 if previous==frame-1 else 1
+            total+=1
+            longest=max(longest,length)
+        else: length=0
+        previous=frame
+    return dict(observedRetreatFields=total,longestContiguousRetreatFields=longest)
 
 
 def validate_decision(row):
@@ -35,12 +51,18 @@ def main(name):
         decisions=list(csv.DictReader(stream))
     requests=[row for row in decisions if validate_decision(row)]
     assert requests,'No native boss attack request observed'
+    adaptive='--campaign-kano-kintaro-varied-adaptive' in receipt['testArguments']
+    for row in requests:
+        if row['decision']!='readyknife':
+            expected=air_attack_age(int(row['distance'])) if adaptive else 28
+            assert int(row.get('airAttackAge',28))==expected
     with (run/'campaign.csv').open() as stream:rows=list(csv.DictReader(stream))
     index={int(row['frame']):row for row in rows}
     observed=[]
     for number,request in enumerate(requests):
         frame=int(request['frame']);kind=request['decision']
-        earliest=frame+(12 if kind=='readyknife' else 24)
+        attack_age=int(request.get('airAttackAge',28))
+        earliest=frame+(12 if kind=='readyknife' else max(0,attack_age-4))
         latest=min(frame+40,int(requests[number+1]['frame'])-1 if number+1<len(requests) else frame+40)
         entry=next((f for f in range(earliest,latest+1) if f in index and index[f]['mode']=='2' and
             index[f]['p1char']=='17' and index[f]['p2char']=='12' and int(index[f]['p1action'])==MOVES[kind]),None)
@@ -53,7 +75,7 @@ def main(name):
         observedActivations=dict(Counter(r['requestedPlan'] for r in observed if r['sampledEntryFrame'] is not None)),
         cases=observed,allLoggedQueueCountsAndRequestsValidated=True,
         bossRounds=len(rounds),bestObservedBossHP=min(r['minimumCPUHP'] for r in rounds),
-        nativeKintaroRoundWins=wins,fullPortVerified=False,
+        nativeKintaroRoundWins=wins,retreat=retreat_summary(decisions),fullPortVerified=False,
         pins={str(p):sha(p) for p in (run/'execution.json',run/'autoboot.lua',run/'campaign.csv',run/'kintaro_variety.csv')})
     (run/'KINTARO_VARIETY_QUALIFICATION.json').write_text(json.dumps(report,indent=2)+'\n')
     print('Requested',report['requests'],'observed',report['observedActivations'],'native round wins',len(wins))

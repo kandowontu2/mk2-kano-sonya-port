@@ -2,6 +2,52 @@
 
 ## Current authoritative summary
 
+The native program/graphics/audio are ROM-side, running on unmodified MAME
+0.289 using its existing Wolf hardware definition. The development IPS ZIP
+remains SHA256877B7537120B940E3719543230BB7EA0A2C89A77AA04E9CA65AAAF7004F316E8:
+59 added ASM modules,40 original-source diffs,14 IPS files and12 unchanged
+graphics copies reconstruct the current26 chips. This is not a final release.
+
+The latest complete local unittest run passed431 cases (not431 builds or
+independent suites). Finite contact coverage includes136 normal/proximity
+cells; side-swapped human-state stress observed29054 controlled combat fields
+across12 fresh matches. These results do not prove arbitrary matchups or every
+possible animation/finisher interaction.
+
+Sonya has an earned full native campaign clear and a47:59 recording with
+native audio,157503 contiguous captured frames, full decode/count checks and
+sparse visual review. Both29-chapter move showcases preserve every decoded
+source frame exactly. See NATIVE_VIDEO_INDEX.md and SONYA_CAMPAIGN_VIDEO_2219.md.
+Exact native A/V timing and full subjective animation review remain separate
+open acceptance work; encoding preservation alone is not that approval.
+
+Kano has reached Kintaro after the human ladder, but no earned full Kintaro
+match/Kahn clear/ending or full campaign video is qualified. The six-hit-queue
+variety controller reached6 boss HP without a round win. Unbounded spacing
+regressed to69 HP; its292-field retreat exposed a controller problem, not a
+ROM defect. The48-field bounded-retreat trial completed cleanly at159411
+fields: maximum logged retreat48, best boss HP17, no native round wins.
+No emulator remains from that trial. All432 local unit cases pass.
+The subsequent close-uppercut hybrid also terminated cleanly, with35 native
+uppercut entries/18 linked damage windows but zero round wins, best boss HP47.
+It is rejected as an improvement. Latest local unit checkpoint is433 cases.
+Adaptive airborne timing then completed cleanly with35 earlier-timed requests,
+best boss HP36 and no native round wins. It also failed to improve the result.
+Latest full local unit checkpoint is434 cases. No emulator remains.
+Do not infer a win from requests, damage windows, or individual HP minima.
+
+Public main was verified at e602369e41d91cc5d23df4aefabdf42c55af8267 with
+the canonical native source/patch snapshot plus697 developer source files.
+The newest bounded-retreat experiment is local pending outcome. Remaining
+deliverables include Kano's earned campaign/video, final audiovisual review,
+and final minimal release ZIP/GitHub release review. No native AI, difficulty,
+health, damage or result edits were made to force campaign progress.
+
+Runtime policy: one emulator, hidden/headless and BelowNormal priority;
+bounded-memory capture, single-thread encoding, no focus-taking build windows.
+
+## Historical checkpoint log (newest first; pending claims below are historical)
+
 388 tests pass. Postmortem ready104: all27 requests without observed entry
 are followed by native Kintaro507h grabs;49 damage windows all20HP,41 other
 native entries missed. No Kano/Sonya uppercut timing difference in two

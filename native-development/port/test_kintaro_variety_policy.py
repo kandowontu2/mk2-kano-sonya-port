@@ -1,6 +1,6 @@
 from pathlib import Path
 import unittest
-from kintaro_variety_policy import next_move
+from kintaro_variety_policy import next_move, air_attack_age
 
 
 class VarietyPolicyTests(unittest.TestCase):
@@ -21,15 +21,29 @@ class VarietyPolicyTests(unittest.TestCase):
         self.assertIn('variedKicks<2',branch)
         self.assertIn('variedPunches<2',branch)
         self.assertIn('KS_CAMPAIGN_BOSS_HITQ',branch)
-        self.assertIn('planAge>=28 and planAge<=31',source)
+        self.assertIn('planAge>=(subBallRecovery.variedAirAttackAge or 28)',source)
         self.assertNotIn(':write_u',source)
 
     def test_spacing_uses_retreat_hysteresis_without_block(self):
         source=(Path(__file__).parent/'diagnostics/campaign_probe.lua').read_text()
-        branch=source.split('elseif distance<175 or (subBallRecovery.variedRetreating and distance<220) then',1)[1].split('elseif',1)[0]
+        branch=source.split('elseif (distance<175 or (subBallRecovery.variedRetreating and distance<220)) and',1)[1].split('elseif',1)[0]
+        self.assertIn('n-subBallRecovery.variedRetreatSince<48',branch)
         self.assertIn('variedRetreating=true',branch)
         self.assertIn('set(away,1)',branch)
         self.assertNotIn("set('P1 Block'",branch)
+
+    def test_close_counter_requires_physical_duck_readiness(self):
+        source=(Path(__file__).parent/'diagnostics/campaign_probe.lua').read_text()
+        branch=source.split('elseif subBallRecovery.kintaroVariedCounter and (distance<=104',1)[1].split('elseif (distance<175',1)[0]
+        for check in ('readyBody<=96','readyButton==subBallRecovery.readyDuck',
+                      'n-subBallRecovery.uppercutAt>=6',"set('P1 Down',1)",
+                      "set('P1 High Punch',1)","readyPhase='fire'"):
+            self.assertIn(check,branch)
+        self.assertNotIn(':write_u',branch)
+
+    def test_distance_timing_is_bounded(self):
+        self.assertEqual([air_attack_age(d) for d in (0,116,160,192,260)],[10,10,20,28,28])
+        with self.assertRaises(AssertionError):air_attack_age(-1)
 
 
 if __name__=='__main__':unittest.main()

@@ -133,7 +133,12 @@ def main():
     if '--campaign-kano-kintaro-varied' in sys.argv:
         assert '--campaign-kano-boss-guard' in sys.argv and '--campaign-subzero-rfp-duck' in sys.argv
         assert '--sonya' not in sys.argv
-        assert not any(arg.startswith('--campaign-kano-kintaro-') and arg!='--campaign-kano-kintaro-varied' for arg in sys.argv)
+        assert not any(arg.startswith('--campaign-kano-kintaro-') and arg not in ('--campaign-kano-kintaro-varied','--campaign-kano-kintaro-varied-counter','--campaign-kano-kintaro-varied-adaptive') for arg in sys.argv)
+    if '--campaign-kano-kintaro-varied-counter' in sys.argv:
+        assert '--campaign-kano-kintaro-varied' in sys.argv
+    if '--campaign-kano-kintaro-varied-adaptive' in sys.argv:
+        assert '--campaign-kano-kintaro-varied' in sys.argv
+        assert '--campaign-kano-kintaro-varied-counter' not in sys.argv
     assert len(ready_ranges)<=1 and (not ready_ranges or ready_ranges[0] in ('84','104','115'))
     assert not ready_ranges or '--campaign-kano-kintaro-ready-counter' in sys.argv
     if '--campaign-kano-sub-normal-throw' in sys.argv:
@@ -674,6 +679,8 @@ def main():
         environment['KS_CAMPAIGN_KANO_KINTARO_READY']='1' if '--campaign-kano-kintaro-ready-counter' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_EARLY_COUNTER']='1' if '--campaign-kano-kintaro-early-counter' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_VARIED']='1' if '--campaign-kano-kintaro-varied' in sys.argv else '0'
+        environment['KS_CAMPAIGN_KANO_KINTARO_VARIED_COUNTER']='1' if '--campaign-kano-kintaro-varied-counter' in sys.argv else '0'
+        environment['KS_CAMPAIGN_KANO_KINTARO_VARIED_ADAPTIVE']='1' if '--campaign-kano-kintaro-varied-adaptive' in sys.argv else '0'
         if '--campaign-kano-kintaro-varied' in sys.argv:
             environment['KS_CAMPAIGN_BOSS_HITQ']=str(symbols['p2_hitq'])
         environment['KS_CAMPAIGN_KANO_KINTARO_READY_RANGE']=ready_ranges[0] if ready_ranges else '115'
