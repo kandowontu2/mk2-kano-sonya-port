@@ -92,8 +92,11 @@ local subBallRecovery={counter=os.getenv('KS_CAMPAIGN_KANO_SUB_RECOVERY_COUNTER'
  kintaroVariedFinishUpper=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VARIED_FINISH_UPPERCUT')=='1',
  finishUpperThreshold=tonumber(os.getenv('KS_CAMPAIGN_FINISH_UPPERCUT_THRESHOLD') or '20'),
  knifeClearance=tonumber(os.getenv('KS_CAMPAIGN_KNIFE_CLEARANCE') or '175'),
+ fixedAirAge=tonumber(os.getenv('KS_CAMPAIGN_MIXED_AIR_AGE') or '28'),
+ punchRetreatHop=os.getenv('KS_CAMPAIGN_PUNCH_RETREAT_HOP')=='1',lastPunchRetreat=false,
  kintaroStompRefresh=os.getenv('KS_CAMPAIGN_KANO_KINTARO_STOMP_REFRESH')=='1',stompJumpRequested=false,
  kintaroStompMomentum=os.getenv('KS_CAMPAIGN_KANO_KINTARO_STOMP_MOMENTUM')=='1',
+ kintaroWalkStomp=os.getenv('KS_CAMPAIGN_WALK_STOMP')=='1',
  kintaroVertical=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VERTICAL_KICK')=='1',
  verticalAttackAge=tonumber(os.getenv('KS_CAMPAIGN_KANO_KINTARO_VERTICAL_AGE') or '28'),
  kintaroRecovery=os.getenv('KS_CAMPAIGN_KANO_KINTARO_RECOVERY_COUNTER')=='1',bossPunishAt=-1000,
@@ -133,6 +136,10 @@ end
 if subBallRecovery.kintaroVaried then
  subBallRecovery.variedLog=assert(io.open('kintaro_variety.csv','w'))
  subBallRecovery.variedLog:write('frame,history,kicks,punches,distance,ownAction,ownFlags,ownHeight,decision,ownHP,enemyHP,airAttackAge\n')
+ if subBallRecovery.punchRetreatHop then
+  subBallRecovery.hopLog=assert(io.open('kintaro_punch_hops.csv','w'))
+  subBallRecovery.hopLog:write('frame,plan,distance,direction,away,toward,retreat,ownHP,enemyHP\n')
+ end
 end
 if subBallRecovery.kintaroVertical then
  assert(subBallRecovery.verticalAttackAge==10 or subBallRecovery.verticalAttackAge==28)
@@ -518,7 +525,7 @@ emu.register_frame_done(function()
     stompEscapeLast=n
     set(stompEscapeDirection,1)
     local ownHeight=s16(proc1+0x200)-s16(a+0xb0)
-    if earlyStompEvade then
+    if earlyStompEvade and not (subBallRecovery.kintaroWalkStomp and target==17) then
      if subBallRecovery.kintaroStompRefresh and target==17 then
       -- An older offensive jump is not an escape jump requested this phase.
       if ownHeight>0 and subBallRecovery.stompJumpRequested then stompJumped=true end
@@ -1232,7 +1239,7 @@ emu.register_frame_done(function()
      subBallRecovery.verticalButtons,subBallRecovery.verticalStance,subBallRecovery.verticalDecision,
      u16(0x010602f0),u16(0x01060ec0),subBallRecovery.verticalAttackAge));subBallRecovery.verticalLog:flush()
    elseif subBallRecovery.kintaroVaried and target==17 and c2==12 and not plan then
-    if combat<3 then subBallRecovery.variedRetreatSince=nil;subBallRecovery.variedRetreating=false end
+    if combat<3 then subBallRecovery.variedRetreatSince=nil;subBallRecovery.variedRetreating=false;subBallRecovery.lastPunchRetreat=false end
     subBallRecovery.variedHistory={};subBallRecovery.variedKicks=0;subBallRecovery.variedPunches=0
     for index=0,5 do
      subBallRecovery.variedHistory[index+1]=u16(assert(tonumber(os.getenv('KS_CAMPAIGN_BOSS_HITQ')))+index*16)
@@ -1279,9 +1286,17 @@ emu.register_frame_done(function()
       subBallRecovery.variedRetreating=false
       subBallRecovery.variedRetreatSince=nil
       plan=subBallRecovery.variedWanted;planAge=0;planToward=plan=='readyknife' and away or toward
+      if subBallRecovery.punchRetreatHop then
+       local retreat=plan=='mixpunch' and distance<175 and not subBallRecovery.lastPunchRetreat
+       if retreat then planToward=away end
+       if plan~='readyknife' then subBallRecovery.lastPunchRetreat=retreat end
+       subBallRecovery.hopLog:write(string.format('%d,%s,%d,%s,%s,%s,%d,%d,%d\n',
+        n,plan,distance,planToward,away,toward,retreat and 1 or 0,u16(0x010602f0),u16(0x01060ec0)))
+       subBallRecovery.hopLog:flush()
+      end
       subBallRecovery.variedRequestAt=n;subBallRecovery.reactiveAirAt=nil
       subBallRecovery.variedAirAttackAge=subBallRecovery.kintaroVariedAdaptive and
-       math.max(10,math.min(28,math.floor((distance-80)/4))) or 28
+       math.max(10,math.min(28,math.floor((distance-80)/4))) or subBallRecovery.fixedAirAge
       subBallRecovery.variedDecision=plan
       if plan=='readyknife' then subBallRecovery.bossShotAt=n end
      end

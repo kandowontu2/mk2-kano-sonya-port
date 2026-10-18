@@ -88,7 +88,8 @@ def main(name):
         with (run/'kintaro_air_timing.csv').open() as stream:timing=reactive_attack_ages(csv.DictReader(stream))
     for row in requests:
         if row['decision']!='readyknife':
-            expected=air_attack_age(int(row['distance'])) if adaptive else 28
+            fixed=int(next((a.split('=',1)[1] for a in receipt['testArguments'] if a.startswith('--campaign-mixed-air-age=')),'28'))
+            expected=air_attack_age(int(row['distance'])) if adaptive else fixed
             assert int(row.get('airAttackAge',28))==expected
     with (run/'campaign.csv').open() as stream:rows=list(csv.DictReader(stream))
     index={int(row['frame']):row for row in rows}

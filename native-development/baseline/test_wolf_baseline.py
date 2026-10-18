@@ -138,7 +138,7 @@ def main():
         assert '--campaign-kano-kintaro-varied' in sys.argv
         assert not any(arg.startswith('--campaign-kano-kintaro-') and arg not in (
             '--campaign-kano-kintaro-varied','--campaign-kano-kintaro-varied-finish','--campaign-kano-kintaro-varied-finish-uppercut',
-            '--campaign-kano-kintaro-stomp-refresh') for arg in sys.argv)
+            '--campaign-kano-kintaro-stomp-refresh','--campaign-kano-kintaro-stomp-momentum') for arg in sys.argv)
     if '--campaign-kano-kintaro-varied-finish-uppercut' in sys.argv:
         assert '--campaign-kano-kintaro-varied-finish' in sys.argv
     finish_thresholds=[arg.split('=',1)[1] for arg in sys.argv if arg.startswith('--campaign-finish-uppercut-threshold=')]
@@ -150,6 +150,32 @@ def main():
     boss_continue_delays=[arg.split('=',1)[1] for arg in sys.argv if arg.startswith('--campaign-boss-continue-delay=')]
     assert len(boss_continue_delays)<=1 and (not boss_continue_delays or boss_continue_delays[0]=='60')
     assert not boss_continue_delays or '--campaign-kano-boss-guard' in sys.argv
+    mixed_air_ages=[arg.split('=',1)[1] for arg in sys.argv if arg.startswith('--campaign-mixed-air-age=')]
+    assert len(mixed_air_ages)<=1 and (not mixed_air_ages or mixed_air_ages[0] in ('24','26','30'))
+    if mixed_air_ages:
+        assert '--campaign-kano-kintaro-varied' in sys.argv
+        assert '--campaign-kano-kintaro-varied-adaptive' not in sys.argv
+        assert '--campaign-kano-kintaro-varied-reactive' not in sys.argv
+    if '--campaign-punch-retreat-hop' in sys.argv:
+        assert '--campaign-kano-kintaro-varied-finish-uppercut' in sys.argv
+    if '--campaign-walk-stomp' in sys.argv:
+        assert '--campaign-kano-kintaro-varied-finish-uppercut' in sys.argv
+        assert '--campaign-kano-kintaro-stomp-refresh' not in sys.argv
+        assert '--campaign-kano-kintaro-stomp-momentum' not in sys.argv
+    if '--campaign-boss-checkpoint' in sys.argv:
+        assert '--game' in sys.argv and '--campaign-kano-boss-guard' in sys.argv
+        assert '--sonya' not in sys.argv
+    planning_states=[arg.split('=',1)[1] for arg in sys.argv if arg.startswith('--planning-state=')]
+    assert len(planning_states)<=1
+    if planning_states:
+        assert '--game' in sys.argv and '--campaign-kano-kintaro-varied-finish-uppercut' in sys.argv
+        assert '--campaign-boss-checkpoint' not in sys.argv
+        planned_state=Path(planning_states[0]).resolve()
+        assert planned_state==HERE/'stock_wolf_2219_kano_earned_kintaro_checkpoint_v3/earned_kintaro_intro.sta'
+        assert planned_state.is_file()
+        checkpoint_proof=json.loads((planned_state.parent/'EARNED_CHECKPOINT_QUALIFICATION.json').read_text())
+        assert sha(planned_state.read_bytes())==checkpoint_proof['pins'][str(planned_state)]
+        assert checkpoint_proof['naturallyDefeatedHumanOpponents']==14 and not checkpoint_proof['campaignClear']
     if '--campaign-kano-kintaro-varied-reactive' in sys.argv:
         assert '--campaign-kano-kintaro-varied' in sys.argv
         assert '--campaign-kano-kintaro-varied-counter' not in sys.argv and '--campaign-kano-kintaro-varied-adaptive' not in sys.argv
@@ -735,6 +761,9 @@ def main():
         environment['KS_CAMPAIGN_FINISH_UPPERCUT_THRESHOLD']=finish_thresholds[0] if finish_thresholds else '20'
         environment['KS_CAMPAIGN_KNIFE_CLEARANCE']=knife_clearances[0] if knife_clearances else '175'
         environment['KS_CAMPAIGN_BOSS_CONTINUE_DELAY']=boss_continue_delays[0] if boss_continue_delays else '0'
+        environment['KS_CAMPAIGN_WALK_STOMP']='1' if '--campaign-walk-stomp' in sys.argv else '0'
+        environment['KS_CAMPAIGN_MIXED_AIR_AGE']=mixed_air_ages[0] if mixed_air_ages else '28'
+        environment['KS_CAMPAIGN_PUNCH_RETREAT_HOP']='1' if '--campaign-punch-retreat-hop' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_STOMP_REFRESH']='1' if '--campaign-kano-kintaro-stomp-refresh' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_STOMP_MOMENTUM']='1' if '--campaign-kano-kintaro-stomp-momentum' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_VERTICAL_KICK']='1' if '--campaign-kano-kintaro-vertical-kick' in sys.argv else '0'
@@ -996,6 +1025,12 @@ def main():
         environment['KS_CAPTURE_MIN_FIELDS']=str(capture_min)
         environment['KS_CAPTURE_MAX_FIELDS']='800' if action==0x404 else '400'
         probe_bytes+=b'\n'+(HERE.parent/'port/diagnostics/move_capture.lua').read_bytes()
+    if '--campaign-boss-checkpoint' in sys.argv:
+        environment['KS_BOSS_CHECKPOINT_PATH']=str((OUT/'earned_kintaro_intro.sta').resolve())
+        probe_bytes+=b'\n'+(HERE.parent/'port/diagnostics/boss_checkpoint.lua').read_bytes()
+    if planning_states:
+        environment['KS_PLANNING_STATE']=str(planned_state)
+        probe_bytes+=b'\n'+(HERE.parent/'port/diagnostics/campaign_planning_load.lua').read_bytes()
     frozen_probe.write_bytes(probe_bytes)
     prepatched=next((arg.split('=',1)[1] for arg in sys.argv if arg.startswith('--prepatched-rom=')),None)
     if prepatched:
@@ -1036,6 +1071,7 @@ def main():
     assert sha(MAME.read_bytes())==before
     report=dict(emulator=str(MAME),emulatorSHA256=before,stockHardware='mk3 Wolf-unit',customDriver=False,gameMemoryWrites=False,nativeArtDiagnostic=art_scene,nativeInitialPhaseMatrix=cycle_scene,
                 nativeGameplayCandidate=game_candidate,playablePortVerified=False,diagnosticSoundTrack=sound_track,
+                planningStateLoadUsed=bool(planning_states),
                 controllerSHA256=sha(frozen_probe.read_bytes()),testArguments=sys.argv[2:],wallTimeoutSeconds=wall_limit,guestSecondsLimit=int(guest_limit),
                 replacementChips={n:sha(b) for n,b in replacements.items()},archiveStorage=archive_storage,**status)
     if audio.exists():

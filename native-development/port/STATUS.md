@@ -10,7 +10,7 @@ The deciding round was lost, so this is NOT a match or campaign clear.
 The bounded64-continue endurance trial completed at276392 fields. Across81
 observed Kintaro rounds it earned no additional round win and no full match;
 the only win is the already observed attempt31 round2. No emulator remains.
-Latest unit checkpoint:471 cases. A finite32-continue controller trial,
+Latest unit checkpoint:472 cases. A finite32-continue controller trial,
 stock_wolf_2219_kano_finish13_stomp_refresh, completed at159868 fields,
 exit0/no timeout. Its16 boss rounds yielded no wins; closest boss HP29.
 It combined13HP finishing and corrected escape-Up, without game/ROM changes
@@ -24,6 +24,10 @@ The boss-buy-in delay60 trial also completed cleanly at158748 fields:16 lost
 boss rounds, best boss HP68. Native purchase-to-selection latencies verify
 the intended141-to201-field boss-only change; the policy is rejected as an
 improvement. No game/ROM changes or earned full Kano campaign clear occurred.
+The subsequent walk-only stomp trial ended cleanly at157410 fields:16 lost
+boss rounds, best boss HP54.1465 verified directional/no-Up escape fields
+confirm the variant was exercised; it is rejected as an improvement. No
+emulator remains and no gameplay/ROM changes were made.
 The minimal local player ZIP passes independent33-member/hash checks and
 isolated exact-ROM patch reproduction; it is not a final/public release.
 Current V2 ignores external MAME INI settings; the superseded94MiB player ZIP

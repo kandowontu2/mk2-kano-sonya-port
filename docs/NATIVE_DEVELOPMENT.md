@@ -1,7 +1,7 @@
 # Native developer and test source snapshot
 
 [`native-development/`](../native-development/) contains the source-only native
-development tooling:729 files, approximately3MB, including its hash manifest.
+development tooling:746 files, approximately3MB, including its hash manifest.
 This is separate from the historical custom-driver tools elsewhere in this
 repository. It contains no complete ROMs, proprietary toolchain, runtime ROM
 archives, raw game assets, screenshots, recordings or bulk test-run dumps.
@@ -19,12 +19,26 @@ archives, raw game assets, screenshots, recordings or bulk test-run dumps.
   deliberately rejected cases and narrower scope limits.
 - [`FILES.json`](../native-development/FILES.json): exact snapshot hashes.
 
-The last complete local unittest run at this checkpoint passed471 test cases.
-That is not471 separately compiled builds or471 independent test suites.
+The last complete local unittest run at this checkpoint passed474 test cases.
+That is not474 separately compiled builds or474 independent test suites.
 Bundled standalone IPS-codec tests are a smaller five-case subset; see the
 native validation document. Runtime fixtures, source/build qualifications,
 unit tests and media comparisons establish different things. None alone is a
 full-port completion certificate.
+
+## Loaded-state planning is not a continuous campaign
+
+The new checkpoint tools save an unedited first Kintaro intro reached after
+14 earned human matches. Save/load is through stock MAME, not a custom driver
+or RAM/register edit. The saved-state binary remains local and is not in this
+repository or player ZIP. Planning continuation matched15657 native-state
+reference rows, but the campaign auditor explicitly rejects loaded-state
+profiles/calls and execution receipts marked planningStateLoadUsed. Any final
+campaign/video claim still requires a continuous no-load replay from startup.
+See [`KINTARO_CHECKPOINT_PLANNING.md`](../native-development/port/KINTARO_CHECKPOINT_PLANNING.md)
+for failed helper launches, proven reproduction scope and rejected input
+policies. None of the latest timing/retreat-hop/escape combinations cleared
+a Kintaro match. These scripts improve planning turnaround, not game balance.
 
 The local V3 minimal player ZIP now documents the native first-boot CMOS
 acknowledgment and ignores unrelated MAME INI settings. Clean-folder tests

@@ -606,3 +606,40 @@ finish13 trace. Thus the intended timing difference occurred, but did not
 improve the boss result. This checks native event latency, not raw per-field
 coin/start pin transitions. Do not extend/repeat this policy unchanged or
 claim a campaign clear. No emulator remains.471 full unit cases pass.
+
+The fresh stock_wolf_2219_kano_finish13_walk_stomp trial keeps original
+mixed/13HP finishing attacks, original Knife175 spacing, zero boss-buy-in
+delay and32 continues. During the existing early-stomp escape branch it
+requests only the existing away direction, omitting Up for true Kano.
+This tests horizontal escape against the native saved-X/<96-pixel stomp
+check without committing a new jump; existing offensive airtime/velocity is
+not cancelled or forced. Direction selection, activation conditions, game
+code/damage/AI and all other inputs remain unchanged. The wrapper admits
+this mode only with varied-finishing-uppercut and rejects refresh/momentum
+combinations.471 unit cases pass, not policy effectiveness. A single hidden
+BelowNormal run is active; escape CSV Up fields, trajectories and terminal
+native results must be inspected before any acceptance claim.
+
+The walk-only trial completed at157410 fields, exit0/no timeout. Its16 boss
+rounds all lost, minimum boss HP54. STOMP_WALK_QUALIFICATION.json validates
+1465 logged escape fields with only Left/Right and no Up request; there are
+31 pre-drop stomp-tag damage windows, not31 causally identified stomps.
+Thus the intended physical-input variant was exercised and did not improve
+the earned-round policy. Omission of Up does not cancel an older jump, force
+ground movement or guarantee96-pixel separation from native saved X. Do not
+repeat it unchanged.472 unit cases pass; no emulator remains, and game/ROM
+bytes are unchanged. Kano's full boss match/campaign is still unearned.
+
+Native counter review: goro_stalk checks act_fk_sd (landing recovery), then
+counts act_flykick and act_flypunch separately. At3+ entries it selects
+goro_discourage_flipkp, which chooses a slam with700/1000 randper threshold;
+otherwise it grants stance wait. MKDRONE count_q_repeats explicitly reads
+get_my_hitq and scans six16-bit entries, consistent with the controller
+reading Kintaro's p2_hitq rather than the attacker's queue. The current
+two-per-kind preference is therefore grounded in the correct native queue
+and threshold, not a mistaken opposite-player history. This rules out a
+queue-address "fix" or changing the native abuse threshold as justification
+for the campaign losses. It does not prove every individual slam came from
+the repeat counter: close random grabs, charge-slam and other native paths
+also exist. Future causal inspection must distinguish those active routines
+instead of inferring them from the last action tag or hit-queue count alone.

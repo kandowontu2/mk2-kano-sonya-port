@@ -11,6 +11,7 @@ from current_graphics import verify_archive_sockets
 from campaign_rounds import split_rounds,native_round_wins,completed_native_matches,sampled_action_tag_episodes,require_clean_runtime_log
 from native_roster import verified_names,provenance as roster_provenance
 from campaign_budget import budget
+from campaign_continuity import require_no_state_load
 
 PORT=Path(__file__).resolve().parent
 BASE=PORT.parent/'baseline'
@@ -21,10 +22,12 @@ for name in sys.argv[1:]:
     folder=BASE/name
     receipt=json.loads((folder/'execution.json').read_text())
     assert receipt['exitCode']==0 and not receipt['timedOut']
+    assert not receipt.get('planningStateLoadUsed',False), 'Loaded-state planning is not campaign acceptance'
     assert not receipt['customDriver'] and not receipt['gameMemoryWrites']
     controller=(folder/'autoboot.lua').read_bytes()
     assert sha(controller)==receipt['controllerSHA256']
     observer=controller.decode()
+    require_no_state_load(observer,receipt['testArguments'])
     assert ':write_u' not in observer and not re.search(r'\.value\s*=(?!=)',observer)
     assert receipt['emulatorSHA256']=='AF6966108D9B52C22465C6D50F4E5D50CC371B50F2D27DC443935F287AAD37A3'
     assert receipt['controllerSHA256']==sha((folder/'autoboot.lua').read_bytes())
