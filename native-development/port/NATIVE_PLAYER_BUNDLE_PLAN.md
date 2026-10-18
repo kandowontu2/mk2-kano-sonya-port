@@ -1,5 +1,16 @@
 # Minimal native player bundle preparation
 
+Local playtest checkpoint (2026-10-18): the minimal player bundle now exists
+as development_patches/MK2KS_NATIVE_PLAYTEST_WITH_STOCK_MAME.zip (98,257,167
+bytes), SHA256
+30F7E0FBF9D91FF2EACB246EAFF404485F7E0D308D64076798BA148D25474D18.
+PLAYER_PLAYTEST_QUALIFICATION.json records its isolated patcher reproduction
+of the exact tested ROM and removal of the temporary ROM. Independent tests
+re-read all 33 ZIP members, all member hashes, the ZIP hash, 14 IPS files and
+unfinished/source-split instructions. The complete local unit suite passes
+460 cases. No MAME window, gameplay replay or new audiovisual acceptance is
+implied by these packaging tests. This is not a public/final release.
+
 `audit_stock_mame_distribution.py` verifies the local official0.289 x64
 installer against GitHub release metadata SHA256
 A1AA7912168C9D1B05E611906BC21B8B9BE3935822AEAD36D12A1DA363150B7D.
@@ -26,11 +37,17 @@ in the player ZIP. No final ZIP has been created by this planning/audit script.
 
 The official corresponding MAME source asset is mame0289s.exe,159028505 bytes,
 SHA2566243EAC3A80DF6BE602BF0AF7889305691737BC26C2DED1433EC11B7C6A3C7B9.
-Plan it as a separate source asset alongside the binary player download;
-it has not been downloaded yet. Preserve upstream notices and complete the
+Plan it as a separate source asset alongside the binary player download.
+It has now been downloaded and verified, as recorded below. Preserve upstream notices and complete the
 source/redistribution review before publishing, not merely a vague source
-promise. The local JSON records correspondingSourceAsset.presentAndHashVerified=false
-and releaseApproved=false.
+promise. The local distribution JSON now records the source as present and
+hash-verified, while releaseApproved remains false.
+
+Update: fetch_stock_mame_source.py has now obtained the exact159028505-byte
+official asset and verified the pinned SHA256. It was not executed or extracted,
+and no extra source tree was created. STOCK_MAME_SOURCE_0289.json records the
+actual asset proof; a fresh distribution audit marks it present/hash-verified.
+This closes asset availability, not final redistribution or release approval.
 
 Open: earned Kano campaign/video, final audiovisual/release acceptance,
 final release-manifest/patcher/player-document validation, and corresponding

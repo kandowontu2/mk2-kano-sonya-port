@@ -473,3 +473,66 @@ continues/300000 fields. All input policy flags and threshold remain the same;
 no AI/difficulty/HP/damage/win state is changed. It is bounded, hidden and
 BelowNormal with one emulator.457 unit cases pass, including budget/profile
 preservation. Extended outcome remains pending; more attempts are not wins.
+
+The64-continue endurance trial completed at276392 fields, exit0/no timeout.
+Across81 observed Kintaro rounds, its only native round win is the same
+attempt31 round2/result153892 already proved in the32-continue run. No further
+round win or full Kintaro match was earned in the extra attempts. Two ready
+finishing requests became two native uppercut entries; only the original
+8HP depletion window is linked to one. The earlier76842-row prefix still
+matches. No emulator remains. This policy must not be repeated unchanged or
+treated as a clear merely because the minimum observed boss HP is0 once.
+
+The streaming damage-distribution audit of this same retained endurance run
+now separates sampled HP losses by attempt/round and both adjacent action
+tags. It finds81 boss rounds; the next closest after the earned round is
+attempt45 round2 (boss minimum4HP, player minimum1HP). This is not another
+win. Common player-loss samples include70 losses of40HP with prior actions
+0/0 and62 losses of56HP with boss action1031 on both adjacent samples.
+These are action adjacency, not causal identification: tags may be stale or
+replaced by hit/recovery. The next policy investigation should examine these
+large-loss windows and the actual linked boss routines before choosing an
+input change, rather than extending the unchanged losing policy again.
+KINTARO_DAMAGE_DISTRIBUTION.json pins the retained trace/controller/receipt;
+the scanner reads CSV incrementally without launching MAME.463 unit cases
+pass, including HP-reset, round/attempt boundary and noncombat-gap checks.
+
+The attempt31 deciding-round losses occur at154474 (40HP),155002 (56HP),
+155242 (40HP) and155540 (remaining25HP); boss HP there is114/74/66/55.
+Native MKREACT slammed_by_goro explicitly loads decimal40 before damage;
+MKBOSS goro_pycho_hit explicitly loads038h (56). These source amounts match
+the large observed losses, but sampled action tags do not independently prove
+the active damage routine at each event. The final loss has boss tag1287,
+so it must not be labeled another stomp based on proximity alone.
+
+The current MKBOSS source is NOT byte-identical to the supplied original:
+two category shifts call ks_boss_category and its helper is appended. The
+new actual-build-source regression test proves the complete file is exactly
+integrate(supplied original), with no extra boss edits. Existing exhaustive
+helper tests restrict altered classification to true Kano/Knife0211h and
+Sonya/Ring0212h; original identities/actions retain original categories.
+Thus original boss damage/spacing/timing code is preserved, while the native
+new-projectile integration remains explicitly acknowledged.464 tests pass.
+
+The new stock_wolf_2219_kano_finish13_stomp_refresh trial combines only the
+13HP finishing policy and old-air/new-Up stomp refresh, without momentum or
+an extended continue budget. The first invocation was rejected by the CLI
+combination guard before any run directory or emulator existed. The guard
+now explicitly admits refresh alongside finishing; no Lua/game code changed.
+The successful launch uses a fresh directory,32 continues, one hidden
+BelowNormal emulator (observed main window handle0, working set200MiB).
+465 unit tests pass. Runtime is in progress; neither a win nor a finished
+execution is inferred from launch. Separate audits will inspect readiness,
+escape intervals, native round results and damage after terminal execution.
+
+This combined trial is now terminal at159868 fields, exit0/no timeout.
+All16 boss rounds lost, minimum boss HP29. Mixed requests67/51/66 produced
+61/51/56 sampled kick/punch/Knife entries.16 old-air/new-Up escape intervals
+were observed,15 followed by new air, with7 pre-drop stomp-tag damage windows
+(not causal proof). The13HP finishing threshold was never reached; no fire
+request occurred, so inspect_kintaro_ready_counter correctly rejected the
+trace instead of certifying a positive activation. The wrapper stopped at
+that failed audit; escape and streaming damage audits were subsequently run
+against the same saved terminal trace, without another emulator. This
+combination did not improve the earned-round policy and must not be repeated
+unchanged. No game/ROM edits or native full-match/campaign clear occurred.

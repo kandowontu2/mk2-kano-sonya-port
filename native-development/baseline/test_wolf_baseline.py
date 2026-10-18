@@ -137,7 +137,8 @@ def main():
     if '--campaign-kano-kintaro-varied-finish' in sys.argv:
         assert '--campaign-kano-kintaro-varied' in sys.argv
         assert not any(arg.startswith('--campaign-kano-kintaro-') and arg not in (
-            '--campaign-kano-kintaro-varied','--campaign-kano-kintaro-varied-finish','--campaign-kano-kintaro-varied-finish-uppercut') for arg in sys.argv)
+            '--campaign-kano-kintaro-varied','--campaign-kano-kintaro-varied-finish','--campaign-kano-kintaro-varied-finish-uppercut',
+            '--campaign-kano-kintaro-stomp-refresh') for arg in sys.argv)
     if '--campaign-kano-kintaro-varied-finish-uppercut' in sys.argv:
         assert '--campaign-kano-kintaro-varied-finish' in sys.argv
     finish_thresholds=[arg.split('=',1)[1] for arg in sys.argv if arg.startswith('--campaign-finish-uppercut-threshold=')]

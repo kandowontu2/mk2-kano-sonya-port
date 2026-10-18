@@ -53,4 +53,11 @@ class BossCategories(unittest.TestCase):
                 if actual!=action>>8:differences.append((identity,action))
         self.assertEqual(differences,[(17,0x211),(18,0x212)])
 
+    def test_actual_build_source_contains_only_declared_integration(self):
+        from inspect_normal_runtime import BASE
+        with zipfile.ZipFile(ZIP) as archive:
+            original=archive.read('mk2-rebuild-main/src/MKBOSS.ASM').decode('cp437').replace('\r\n','\n')
+        actual=(BASE/'mk2-rebuild-main/srcp/MKBOSS.ASM').read_bytes().decode('cp437').replace('\r\n','\n')
+        self.assertEqual(actual,integrate(original))
+
 if __name__=='__main__':unittest.main()

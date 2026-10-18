@@ -7,8 +7,20 @@ Kintaro round: attempt31 round2, result153892, counters1-1. Its76842-row
 pre-change trace matches the original close attempt; the real grounded/duck
 uppercut at153692/gap95 removes the remaining8HP at153700 with player1HP.
 The deciding round was lost, so this is NOT a match or campaign clear.
-A separate bounded64-continue/300000-field endurance trial is active, with
-unchanged policy and no game-state edits. Latest unit checkpoint:457 cases.
+The bounded64-continue endurance trial completed at276392 fields. Across81
+observed Kintaro rounds it earned no additional round win and no full match;
+the only win is the already observed attempt31 round2. No emulator remains.
+Latest unit checkpoint:465 cases. A new finite32-continue controller trial,
+stock_wolf_2219_kano_finish13_stomp_refresh, completed at159868 fields,
+exit0/no timeout. Its16 boss rounds yielded no wins; closest boss HP29.
+It combined13HP finishing and corrected escape-Up, without game/ROM changes
+or extra budget. No finishing request occurred; that positive-request audit
+correctly rejects this trace. No emulator remains.
+The minimal local player ZIP passes independent33-member/hash checks and
+isolated exact-ROM patch reproduction; it is not a final/public release.
+The official corresponding MAME source
+asset is downloaded/hash-verified without extraction/execution for the eventual
+release; redistribution/final acceptance are still not approved.
 
 Latest unit checkpoint:452 cases pass. Recent vertical, recovery-only,
 recovery-approach and windup-reactive controller trials all completed without
