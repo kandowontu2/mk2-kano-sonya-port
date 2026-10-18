@@ -1,2 +1,3 @@
 # Native package hashes cover exact bytes, including Latin-1 source diffs.
 native-rom/** -text
+native-development/** -text
