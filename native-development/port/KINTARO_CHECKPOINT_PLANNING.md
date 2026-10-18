@@ -127,3 +127,50 @@ ground/new-Up intervals include16 with observed air after Up; this validates
 input/airtime behavior, not successful evasion. Combining these escape inputs
 with the best spacing still does not improve the original earned-round
 policy. No game/ROM changes, no emulator remaining;474 unit cases pass.
+
+Bounded short-input search: stock_wolf_2219_kano_short_search compares seven
+ordinary physical-input sequences from the same parent for120 fields each,
+then chooses using native health/round counters. It is greedy planning, not
+game AI/health/RNG editing. One hidden BelowNormal stock MAME, approximately
+201MiB RAM,60-depth/60000-field/180-second bounds. All candidate inputs/results
+are retained; only internally named rejected temporary search states are
+removed. Two generated states totaling909492 bytes remain, plus the original
+earned checkpoint; no older runtime evidence or rebuild input was deleted.
+
+The search terminates at depth37 with native player/cpu counters2-0, CPU HP0,
+player HP161. qualify_kintaro_short_search.py independently checks259 candidate
+scores, all37 best-branch selections, actual current26 ROMs, stock executable,
+frozen controller/checkpoint hashes and terminal counters. The physical route
+is preserved in KINTARO_SHORT_ROUTE.json (37 chunks of120 fields). This is
+the first promising PLANNING match candidate, not an earned continuous
+campaign clear. Continuous startup replay of the exact inputs remains
+required; if it differs, reject/diagnose rather than transfer state/results.
+475 unit cases pass, including score-priority/bounded-distance tests. No
+emulator remains. No native game/ROM bytes were changed.
+
+The no-load startup replay is now active as
+stock_wolf_2219_kano_continuous_short_route. It retains the earned human-route
+controller and replaces only Kintaro inputs with the37 recorded chunks. The
+first native161/161 combat field must be130294 or the replay aborts. Input
+phase logic matches the search, including releasing all controls on each
+chunk's120th field and advancing route time across noncombat/round transitions.
+A source regression test checks the search/replay input bodies match.
+No checkpoint helper is appended and no save/load profile is used. The
+new qualifier requires37 identical boundary states, an unchanged human prefix
+and a same-attempt native two-round Kintaro win. None is claimed before the
+runtime is terminal. One hidden BelowNormal emulator is progressing through
+the ladder; native game/ROM bytes remain unchanged.
+
+Continuous replay PASSES: stock_wolf_2219_kano_continuous_short_route ends
+at149771, exit0/not timed out.65146 pre-Kintaro rows match the earned reference;
+all37 route boundary states match the chosen search path. Native Kintaro
+results132648/134986 prove2-0 within attempt25, with no state loads/saves.
+The unchanged Kahn controller then wins2-0 in attempt26: clear141326/Kano17HP,
+attract149771. Both continuous-route and independent full-campaign qualifiers
+pass current26-ROM/frozen-controller/identity/native-score/flow gates. The
+planning candidate has now been reproduced as a genuine continuous clear;
+the original planning runs remain planning-only and are not relabeled.
+
+Kano's full campaign recording is in progress using the exact continuous
+profile. It will require identical campaign CSV and native media checks.
+No recording/ending-render/final release claim follows before those pass.

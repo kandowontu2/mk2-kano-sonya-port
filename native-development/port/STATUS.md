@@ -2,6 +2,26 @@
 
 ## Current authoritative summary
 
+Kano now has a verified earned FULL native campaign clear on stock MAME,
+from startup with no state loads or guest-memory edits. The continuous short
+route replay matches65146 human-prefix rows and all37 Kintaro route boundary
+states. Kintaro is beaten2-0 in attempt25 (native results132648/134986).
+Kahn is beaten2-0 in attempt26: first win140112, final clear141326, Kano17HP,
+then native ending/gameover flow returns to attract149771. The independent
+CAMPAIGN_CLEAR_QUALIFICATION.json verifies the own-ID final-boss clear;
+CONTINUOUS_ROUTE_QUALIFICATION.json verifies the earned Kintaro route.
+
+The requested Kano campaign VIDEO is now recording sequentially, hidden and
+BelowNormal: one stock emulator (~200MiB) and one-thread stream encoder
+(~38MiB), no raw frame file/large RAM arrays or focus-taking game window.
+The recorder must reproduce the qualified campaign CSV exactly and pass
+stream/audio/decode checks before the video is accepted. Recording completion,
+Kano ending/cast/credits visual review and final release acceptance remain open.
+Sonya's previously verified campaign/video remains unchanged.476 unit tests
+pass. Native game/ROM bytes were not changed to obtain the clear.
+
+## Earlier controller checkpoints (historical; superseded by the clear above)
+
 The original-spacing13HP finishing-uppercut controller now earns one native
 Kintaro round: attempt31 round2, result153892, counters1-1. Its76842-row
 pre-change trace matches the original close attempt; the real grounded/duck

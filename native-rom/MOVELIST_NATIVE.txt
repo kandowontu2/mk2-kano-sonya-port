@@ -1,6 +1,7 @@
 MKII KANO / SONYA - NATIVE DEVELOPMENT MOVELIST
 Current native ASM commands; not the withdrawn custom-driver build.
-Development candidate: full campaign/final audiovisual acceptance is unfinished.
+Both characters have verified continuous campaign clears on stock MAME.
+Release packaging and final release acceptance are tracked separately.
 
 NOTATION
 F = toward opponent; B = away; U = up; D = down.

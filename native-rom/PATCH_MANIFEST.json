@@ -7,7 +7,7 @@
   "stockMAMEVersion": "0.289",
   "testedEmulatorSHA256": "AF6966108D9B52C22465C6D50F4E5D50CC371B50F2D27DC443935F287AAD37A3",
   "customDriver": false,
-  "provenanceReceipt": "stock_wolf_2219_torso_17_p2/execution.json",
+  "provenanceReceipt": "stock_wolf_2219_kano_continuous_short_route/execution.json",
   "chips": [
     {
       "target": "l1_mortal_kombat_3_u114_game_rom.u114",

@@ -43,7 +43,8 @@ def qualify(name):
     run=BASE/name
     # Re-run the full current-ROM/frozen-input/identity/progression audit.
     subprocess.run([sys.executable,str(PORT/'audit_campaign_run.py'),name],
-                   check=True,capture_output=True)
+                   check=True,capture_output=True,
+                   creationflags=(subprocess.CREATE_NO_WINDOW|subprocess.BELOW_NORMAL_PRIORITY_CLASS) if sys.platform=='win32' else 0)
     audit=json.loads((run/'CAMPAIGN_AUDIT.json').read_text())
     assert audit['actor'] in (17,18) and audit['currentFullROMVerified']
     defeated=audit['naturallyDefeatedOpponents']

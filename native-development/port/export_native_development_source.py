@@ -28,6 +28,13 @@ def main():
     assert updating or not destination.exists()
     inputs = []
     inputs += [(p, 'port/' + p.name) for p in PORT.iterdir() if p.is_file() and p.suffix.lower() in ('.py', '.md', '.ps1', '.cmd')]
+    route=PORT/'KINTARO_SHORT_ROUTE.json'
+    if route.exists():
+        data=json.loads(route.read_text())
+        assert len(data['actions'])==37 and data['fieldsPerAction']==120
+        assert all(action in ('kick','punch','counter','knife','guard','away','backkick') for action in data['actions'])
+        assert data['scope'].startswith('Planning candidate only;') and not data['campaignAcceptance']
+        inputs.append((route,'port/'+route.name))
     for directory, suffix in (('diagnostics', '.lua'), ('asm', '.asm')):
         inputs += [(p, 'port/' + directory + '/' + p.name) for p in (PORT / directory).iterdir()
                    if p.is_file() and p.suffix.lower() == suffix]

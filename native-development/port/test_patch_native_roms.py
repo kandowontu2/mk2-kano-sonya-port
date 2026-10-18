@@ -44,6 +44,25 @@ class PatcherTests(unittest.TestCase):
         self.output.parent.mkdir(parents=True);self.output.write_bytes(b'KEEP')
         with self.assertRaises(FileExistsError): self.run_build()
         self.assertEqual(self.output.read_bytes(),b'KEEP')
+    def test_release_status_does_not_change_chip_integrity_or_output(self):
+        self.run_build()
+        self.manifest.update(releaseReady=True,developmentOnly=False,releaseEvidenceSHA256='A'*64)
+        self.save()
+        other=self.root/'release.zip'
+        report=self.run_build(other)
+        self.assertEqual(other.read_bytes(),self.output.read_bytes())
+        self.assertTrue(report['releaseReady'])
+        self.assertFalse(report['developmentOnly'])
+        self.assertFalse(report['fullPortVerified'])
+    def test_release_status_requires_boolean_pair_and_evidence_binding(self):
+        for changes in (dict(releaseReady='true'),dict(releaseReady=True),
+                        dict(releaseReady=True,developmentOnly=False),
+                        dict(releaseReady=True,developmentOnly=False,releaseEvidenceSHA256='bad'),
+                        dict(releaseReady=False,developmentOnly=False)):
+            self.manifest=dict(format='MK2KS-NATIVE-IPS-1',releaseReady=False,chips=self.records)
+            self.manifest.update(changes);self.save()
+            with self.assertRaises(ValueError):self.run_build()
+            self.assertFalse(self.output.parent.exists())
     def test_wrong_source_fails_before_output(self):
         self.records[25]['sourceSHA256']='0'*64;self.save()
         with self.assertRaises(ValueError): self.run_build()

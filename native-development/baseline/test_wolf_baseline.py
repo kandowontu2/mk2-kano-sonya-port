@@ -158,6 +158,14 @@ def main():
         assert '--campaign-kano-kintaro-varied-reactive' not in sys.argv
     if '--campaign-punch-retreat-hop' in sys.argv:
         assert '--campaign-kano-kintaro-varied-finish-uppercut' in sys.argv
+    if '--campaign-short-route' in sys.argv:
+        assert '--campaign-kano-kintaro-varied-finish-uppercut' in sys.argv
+        assert not any(a.startswith('--planning-state=') for a in sys.argv)
+        short_route=json.loads((HERE.parent/'port/KINTARO_SHORT_ROUTE.json').read_text())
+        assert len(short_route['actions'])==37 and short_route['fieldsPerAction']==120
+        assert short_route['expectedStartField']==130294
+        assert all(a in ('kick','punch','counter','knife','guard','away','backkick') for a in short_route['actions'])
+        for source,digest in short_route['pins'].items():assert sha(Path(source).read_bytes())==digest
     if '--campaign-walk-stomp' in sys.argv:
         assert '--campaign-kano-kintaro-varied-finish-uppercut' in sys.argv
         assert '--campaign-kano-kintaro-stomp-refresh' not in sys.argv
@@ -764,6 +772,7 @@ def main():
         environment['KS_CAMPAIGN_WALK_STOMP']='1' if '--campaign-walk-stomp' in sys.argv else '0'
         environment['KS_CAMPAIGN_MIXED_AIR_AGE']=mixed_air_ages[0] if mixed_air_ages else '28'
         environment['KS_CAMPAIGN_PUNCH_RETREAT_HOP']='1' if '--campaign-punch-retreat-hop' in sys.argv else '0'
+        environment['KS_SHORT_ROUTE']=','.join(short_route['actions']) if '--campaign-short-route' in sys.argv else ''
         environment['KS_CAMPAIGN_KANO_KINTARO_STOMP_REFRESH']='1' if '--campaign-kano-kintaro-stomp-refresh' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_STOMP_MOMENTUM']='1' if '--campaign-kano-kintaro-stomp-momentum' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_VERTICAL_KICK']='1' if '--campaign-kano-kintaro-vertical-kick' in sys.argv else '0'

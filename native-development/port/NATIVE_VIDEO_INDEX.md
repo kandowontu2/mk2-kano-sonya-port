@@ -1,5 +1,15 @@
 # Native demonstration videos
 
+## Earned current2219 Kano campaign
+
+[Kano full native campaign](C:/Users/kando/Documents/Codex/2026-08-29/i-ha/work/mk2port/romhack/port/generated_kano_campaign_2219/MKII_KANO_CAMPAIGN_NATIVE.mp4)
+is44:31,380144529 bytes,146109 contiguous frames with native DCS audio. It
+reproduces the independently qualified continuous startup clear exactly,
+including both bosses2-0, own story pages, cast and credits. No checkpoint
+loads or game-memory edits are used. Full media/decode/count gates pass;
+all11 sparse decoded ending/selection/ladder/cast samples were viewed. See
+KANO_CAMPAIGN_VIDEO_2219.md.26 chapter markers are sidecars only.
+
 ## Earned current2219 Sonya campaign
 
 [Sonya full native campaign](C:/Users/kando/Documents/Codex/2026-08-29/i-ha/work/mk2port/romhack/port/generated_sonya_campaign_2219/MKII_SONYA_CAMPAIGN_NATIVE.mp4)
@@ -10,7 +20,7 @@ qualified; the full game trace matches the earlier earned clear byte-for-byte.
 Full A/V decoding/count checks and sparse decoded visual review pass, not an
 all-frame subjective or exact audio-sync certificate. See
 `SONYA_CAMPAIGN_VIDEO_2219.md`. Its23 chapter markers are sidecars, not embedded.
-Kano's earned campaign video remains open.
+Kano's earned campaign video is now complete as described above.
 
 ## Chaptered current2219 showcases
 

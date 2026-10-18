@@ -12,18 +12,24 @@ from campaign_budget import budget
 
 
 def main():
-    assert sys.argv[1:] in ([], ['--preflight'])
+    assert sys.argv[1:] in ([], ['--preflight'], ['--kano'])
     preflight='--preflight' in sys.argv
-    name='stock_wolf_2219_campaign_stream_preflight_v2' if preflight else 'stock_wolf_2219_sonya_campaign_stream'
-    out=PORT/('generated_campaign_stream_preflight_v2' if preflight else 'generated_sonya_campaign_2219')
+    kano='--kano' in sys.argv
+    actor_name='Kano' if kano else 'Sonya'
+    name='stock_wolf_2219_campaign_stream_preflight_v2' if preflight else ('stock_wolf_2219_kano_campaign_stream' if kano else 'stock_wolf_2219_sonya_campaign_stream')
+    out=PORT/('generated_campaign_stream_preflight_v2' if preflight else ('generated_kano_campaign_2219' if kano else 'generated_sonya_campaign_2219'))
     assert not out.exists() and not (BASE/name).exists(), 'Never overwrite recordings or runtime evidence'
     assert shutil.disk_usage(PORT).free>5*1024**3, 'Reserve for encoded output and temporary native WAV'
     idle=subprocess.run(['powershell.exe','-NoProfile','-NonInteractive','-Command',
         'if (Get-Process mame -ErrorAction SilentlyContinue) { exit 7 }; exit 0'],capture_output=True,creationflags=FLAGS)
     assert idle.returncode==0,'Existing emulator'
-    prior=json.loads((BASE/'stock_wolf_2219_sonya_campaign/execution.json').read_text())
+    prior_run=BASE/('stock_wolf_2219_kano_continuous_short_route' if kano else 'stock_wolf_2219_sonya_campaign')
+    prior=json.loads((prior_run/'execution.json').read_text())
+    if kano:
+        assert json.loads((prior_run/'CAMPAIGN_CLEAR_QUALIFICATION.json').read_text())['nativeCampaignClearVerified']
     args=['--game','--campaign','--sonya','--sound-candidate'] if preflight else prior['testArguments']
-    assert '--sonya' in args
+    assert ('--sonya' in args)==(not kano)
+    if kano:assert '--campaign-short-route' in args and not prior.get('planningStateLoadUsed',False)
     maximum=budget(args)['fieldLimit']
     reference=json.loads((BASE/'stock_wolf_2219_video_ball/FINISHER_VIDEO.json').read_text())
     out.mkdir()
@@ -53,9 +59,11 @@ def main():
     if clear:
         assert clock['firstGuestFrame']<clear['firstWinningRoundFrame']<clear['finalBossClearFrame']<=int(end['frame'])
         assert clear['attractReturnFrame']<=int(end['frame'])
-    final=out/('NATIVE_CAMPAIGN_PREFLIGHT.mp4' if preflight else 'MKII_SONYA_CAMPAIGN_NATIVE.mp4')
+    if kano:
+        assert sha(run/'campaign.csv')==sha(prior_run/'campaign.csv'),'Recorded gameplay diverged from qualified continuous clear'
+    final=out/('NATIVE_CAMPAIGN_PREFLIGHT.mp4' if preflight else ('MKII_KANO_CAMPAIGN_NATIVE.mp4' if kano else 'MKII_SONYA_CAMPAIGN_NATIVE.mp4'))
     encoded=mux(run,capture.output,run/'campaign_capture.csv',final,cleanup=True)
-    report=dict(scope='Short native campaign recorder preflight' if preflight else 'Earned native Sonya campaign recording',
+    report=dict(scope='Short native campaign recorder preflight' if preflight else 'Earned native '+actor_name+' campaign recording',
         file=str(final),SHA256=sha(final),streamed=streamed,encoded=encoded,
         earnedFullCampaignClearVerified=clear is not None,clear=clear,
         subjectiveFullVideoReviewPassed=False,fullPortVerified=False)

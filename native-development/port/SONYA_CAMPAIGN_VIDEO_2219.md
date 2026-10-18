@@ -36,5 +36,6 @@ markers, including first encounters and later winning attempts. They are
 sidecars only; chapters have not yet been embedded in this MP4.
 
 This completes Sonya's earned native campaign-video capture, not the whole
-port. Kano's earned boss clear/campaign recording and final acceptance/release
-review remain open. Move/finisher demonstrations are separate video artifacts.
+port. Kano's earned clear/campaign recording is now complete separately (see
+KANO_CAMPAIGN_VIDEO_2219.md); final acceptance/release review remains open.
+Move/finisher demonstrations are separate video artifacts.

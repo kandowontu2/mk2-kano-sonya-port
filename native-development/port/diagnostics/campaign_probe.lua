@@ -141,6 +141,31 @@ if subBallRecovery.kintaroVaried then
   subBallRecovery.hopLog:write('frame,plan,distance,direction,away,toward,retreat,ownHP,enemyHP\n')
  end
 end
+if (os.getenv('KS_SHORT_ROUTE') or '')~='' then
+ subBallRecovery.shortRoute={}
+ for action in string.gmatch(os.getenv('KS_SHORT_ROUTE'),'[^,]+') do
+  subBallRecovery.shortRoute[#subBallRecovery.shortRoute+1]=action
+ end
+ assert(#subBallRecovery.shortRoute==37)
+ subBallRecovery.routeLog=assert(io.open('short_route_replay.csv','w'))
+ subBallRecovery.routeLog:write('frame,depth,action,p1hp,p2hp,p1wins,p2wins,map,mode,distance\n')
+ subBallRecovery.applyShortRoute=function(action,age,toward,away)
+  -- Search clears controls on the final field of each120-field chunk.
+  if age==120 then return end
+  local phase=(age-1)%60+1
+  if action=='kick' or action=='punch' or action=='backkick' then
+   if phase<=3 then set('P1 Up',1);set(action=='backkick' and away or toward,1) end
+   if phase>=28 and phase<=31 then set(action=='punch' and 'P1 High Punch' or 'P1 High Kick',1) end
+  elseif action=='counter' then
+   set('P1 Down',1);if (age-1)%12<3 then set('P1 High Punch',1) end
+  elseif action=='knife' then
+   if phase<=3 then set('P1 Down',1)
+   elseif phase>=7 and phase<=9 then set(away,1)
+   elseif phase>=13 and phase<=15 then set('P1 High Punch',1) end
+  elseif action=='guard' then set('P1 Down',1);set('P1 Block',1)
+  elseif action=='away' then set(away,1) end
+ end
+end
 if subBallRecovery.kintaroVertical then
  assert(subBallRecovery.verticalAttackAge==10 or subBallRecovery.verticalAttackAge==28)
  subBallRecovery.verticalLog=assert(io.open('kintaro_vertical.csv','w'))
@@ -408,6 +433,13 @@ emu.register_frame_done(function()
  local a,b=u32(0x01060220),u32(0x01060df0)
  local proc1,proc2=u32(0x01060260),u32(0x01060e30)
  local x1,x2=a~=0 and s16(a+0x90) or 0,b~=0 and s16(b+0x90) or 0
+ if subBallRecovery.shortRouteStart and n>subBallRecovery.shortRouteStart and
+    (n-subBallRecovery.shortRouteStart)%120==0 and n-subBallRecovery.shortRouteStart<=4440 then
+  subBallRecovery.routeLog:write(string.format('%d,%d,%s,%d,%d,%d,%d,%d,%d,%d\n',n,
+   (n-subBallRecovery.shortRouteStart)//120,subBallRecovery.shortRoute[(n-subBallRecovery.shortRouteStart)//120],
+   u16(0x010602f0),u16(0x01060ec0),u16(0x01060310),u16(0x01060ee0),u16(0x01061b30),mode,math.abs(x2-x1)))
+  subBallRecovery.routeLog:flush()
+ end
  if mode==2 and locked then
   if continuing then
    continueLog:write(string.format('%d,%d,%d,combat\n',n,continuesUsed,u16(0x01061b30)));continueLog:flush()
@@ -433,6 +465,10 @@ emu.register_frame_done(function()
   local toward=x1<x2 and 'P1 Right' or 'P1 Left'
   local away=x1<x2 and 'P1 Left' or 'P1 Right'
   local distance=math.abs(x2-x1)
+  if target==17 and c2==12 and subBallRecovery.shortRoute and not subBallRecovery.shortRouteStart then
+   assert(n==130294 and u16(0x010602f0)==161 and u16(0x01060ec0)==161,'Route startup differs from earned reference')
+   subBallRecovery.shortRouteStart=n
+  end
   -- Read-only state guides physical inputs; health/stage/AI are never modified.
   if combat<=60 and ((sonyaKahnGuard and target==18) or (subBallRecovery.kanoBoss and target==17)) and c2==13 and
      u16(0x010602f0)>0 and u16(0x01060ec0)>0 then
@@ -458,7 +494,8 @@ emu.register_frame_done(function()
      u16(0x010602f0)>0 and u16(0x01060ec0)>0 then
    set('P1 Block',1);set(away,1)
   end
-  if (combat>60 or ((subBallRecovery.kintaroEarlyCounter or subBallRecovery.kintaroVaried or subBallRecovery.kintaroVertical or subBallRecovery.kintaroRecovery) and target==17 and c2==12)) and u16(0x010602f0)>0 and u16(0x01060ec0)>0 then
+  if ((combat>60 or ((subBallRecovery.kintaroEarlyCounter or subBallRecovery.kintaroVaried or subBallRecovery.kintaroVertical or subBallRecovery.kintaroRecovery) and target==17 and c2==12)) and u16(0x010602f0)>0 and u16(0x01060ec0)>0) or
+     (target==17 and c2==12 and subBallRecovery.shortRoute and subBallRecovery.shortRouteStart) then
    local enemyY=b~=0 and s16(b+0xb0) or 0
    local enemyGround=proc2~=0 and s16(proc2+0x200) or 0
    if defensive and u16(0x010602f0)<lastHealth then
@@ -472,7 +509,14 @@ emu.register_frame_done(function()
     if enemyGround-enemyY>0 then stompSawAir=true
     elseif stompSawAir then stompFlightActive=false end
    else stompPhaseSeen=false;stompFlightActive=false;stompSawAir=false;stompJumped=false end
-   if ((sonyaKahnGuard and target==18) or (subBallRecovery.kanoBoss and target==17)) and c2==13 then
+   if target==17 and c2==12 and subBallRecovery.shortRoute then
+    plan=nil
+    subBallRecovery.routeAge=n-subBallRecovery.shortRouteStart
+    if subBallRecovery.routeAge>0 and subBallRecovery.routeAge<=4440 then
+     subBallRecovery.applyShortRoute(subBallRecovery.shortRoute[(subBallRecovery.routeAge-1)//120+1],
+      (subBallRecovery.routeAge-1)%120+1,toward,away)
+    end
+   elseif ((sonyaKahnGuard and target==18) or (subBallRecovery.kanoBoss and target==17)) and c2==13 then
     plan=nil
     local charge=nativeRoutineActive(proc2,assert(tonumber(os.getenv('KS_KAHN_CHARGE_BEGIN'))),
        assert(tonumber(os.getenv('KS_KAHN_CHARGE_END'))))

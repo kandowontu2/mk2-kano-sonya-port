@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 from campaign_video_chapters import chapter_plan, metadata
 from inspect_normal_runtime import BASE, PORT, sha
 from native_roster import verified_names
@@ -11,11 +12,13 @@ from refresh_special_videos import FLAGS
 
 
 def main():
-    out=PORT/'generated_sonya_campaign_2219'
+    assert sys.argv[1:] in ([],['--kano'])
+    kano='--kano' in sys.argv
+    out=PORT/('generated_kano_campaign_2219' if kano else 'generated_sonya_campaign_2219')
     info=json.loads((out/'CAMPAIGN_VIDEO.json').read_text())
     assert info['earnedFullCampaignClearVerified']
     video=Path(info['file']);assert sha(video)==info['SHA256']
-    run=BASE/'stock_wolf_2219_sonya_campaign_stream'
+    run=BASE/('stock_wolf_2219_kano_campaign_stream' if kano else 'stock_wolf_2219_sonya_campaign_stream')
     clock=info['encoded'];clear=info['clear']
     review=out/'review_v2';assert not review.exists();review.mkdir()
     selection=ladder=combat=None
@@ -23,7 +26,7 @@ def main():
         for row in csv.DictReader(stream):
             if row['mode']=='2':
                 combat=int(row['frame']);break
-            if row['mode']=='4' and row['p1selected']=='18':selection=int(row['frame'])
+            if row['mode']=='4' and row['p1selected']==('17' if kano else '18'):selection=int(row['frame'])
             if row['mode']=='7' and ladder is None:ladder=int(row['frame'])
     assert selection and ladder and combat
     points=[('selection',selection),('ladder',ladder+90),('first_combat',combat+90),

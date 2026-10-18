@@ -1,7 +1,7 @@
 # Native developer and test source snapshot
 
 [`native-development/`](../native-development/) contains the source-only native
-development tooling:746 files, approximately3MB, including its hash manifest.
+development tooling:757 files, approximately3MB, including its hash manifest.
 This is separate from the historical custom-driver tools elsewhere in this
 repository. It contains no complete ROMs, proprietary toolchain, runtime ROM
 archives, raw game assets, screenshots, recordings or bulk test-run dumps.
@@ -19,8 +19,8 @@ archives, raw game assets, screenshots, recordings or bulk test-run dumps.
   deliberately rejected cases and narrower scope limits.
 - [`FILES.json`](../native-development/FILES.json): exact snapshot hashes.
 
-The last complete local unittest run at this checkpoint passed474 test cases.
-That is not474 separately compiled builds or474 independent test suites.
+The last complete local unittest run at this checkpoint passed478 test cases.
+That is not478 separately compiled builds or478 independent test suites.
 Bundled standalone IPS-codec tests are a smaller five-case subset; see the
 native validation document. Runtime fixtures, source/build qualifications,
 unit tests and media comparisons establish different things. None alone is a
@@ -37,8 +37,16 @@ profiles/calls and execution receipts marked planningStateLoadUsed. Any final
 campaign/video claim still requires a continuous no-load replay from startup.
 See [`KINTARO_CHECKPOINT_PLANNING.md`](../native-development/port/KINTARO_CHECKPOINT_PLANNING.md)
 for failed helper launches, proven reproduction scope and rejected input
-policies. None of the latest timing/retreat-hop/escape combinations cleared
-a Kintaro match. These scripts improve planning turnaround, not game balance.
+policies. Those earlier timing/retreat-hop/escape combinations did not clear
+a Kintaro match. A subsequent bounded short-input search found a winning route.
+That physical-input route then passed a separate continuous power-on replay,
+without loading states or modifying game memory: both bosses lost2–0, followed
+by Kano's own ending/cast/credits and normal attract return. Sonya also has a
+verified continuous full-game clear. Both complete recordings are generated;
+see the linked native video index for evidence scope and media hashes.
+The search route remains explicitly labeled planning data; continuous replay
+has its own independent qualifier. No boss balance or native ROM edit was
+needed to obtain these clears.
 
 The local V3 minimal player ZIP now documents the native first-boot CMOS
 acknowledgment and ignores unrelated MAME INI settings. Clean-folder tests

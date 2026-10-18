@@ -7,6 +7,22 @@ import zipfile
 from ips_codec import apply_patch
 
 def sha(data): return hashlib.sha256(data).hexdigest().upper()
+
+def manifest_status(manifest):
+    """Lifecycle metadata is separate from the per-chip integrity checks below."""
+    if manifest.get('format')!='MK2KS-NATIVE-IPS-1':
+        raise ValueError('Unexpected native patch format')
+    ready=manifest.get('releaseReady')
+    if type(ready) is not bool:
+        raise ValueError('releaseReady must be a boolean')
+    development=manifest.get('developmentOnly',True)
+    if type(development) is not bool or development==ready:
+        raise ValueError('Inconsistent development/release status')
+    if ready:
+        evidence=manifest.get('releaseEvidenceSHA256','')
+        if not isinstance(evidence,str) or len(evidence)!=64 or any(c not in '0123456789abcdefABCDEF' for c in evidence):
+            raise ValueError('Release manifest lacks its evidence binding')
+    return ready
 def read_chip(archive,name):
     entries=[entry for entry in archive.infolist() if entry.filename==name]
     if len(entries)!=1 or entries[0].file_size>0x200000:
@@ -16,8 +32,7 @@ def read_chip(archive,name):
 def build(mk2,mk3,package,output):
     if output.exists(): raise FileExistsError('Refusing to overwrite '+str(output))
     manifest=json.loads((package/'PATCH_MANIFEST.json').read_text())
-    if manifest['format']!='MK2KS-NATIVE-IPS-1' or manifest['releaseReady'] is not False:
-        raise ValueError('Unexpected development manifest')
+    release_ready=manifest_status(manifest)
     chips={}
     with zipfile.ZipFile(mk2) as a,zipfile.ZipFile(mk3) as b:
         archives={'mk2':a,'mk3':b}
@@ -53,7 +68,8 @@ def build(mk2,mk3,package,output):
         assert archive.testzip() is None
         assert {n:sha(archive.read(n)) for n in archive.namelist()}=={n:sha(d) for n,d in chips.items()}
     return dict(output=str(output),chips=len(chips),SHA256=sha(output.read_bytes()),
-        stockMAME=True,customDriver=False,developmentOnly=True,fullPortVerified=False)
+        stockMAME=True,customDriver=False,developmentOnly=not release_ready,
+        releaseReady=release_ready,fullPortVerified=False)
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
