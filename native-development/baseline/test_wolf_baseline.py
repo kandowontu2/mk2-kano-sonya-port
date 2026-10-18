@@ -133,11 +133,16 @@ def main():
     if '--campaign-kano-kintaro-varied' in sys.argv:
         assert '--campaign-kano-boss-guard' in sys.argv and '--campaign-subzero-rfp-duck' in sys.argv
         assert '--sonya' not in sys.argv
-        assert not any(arg.startswith('--campaign-kano-kintaro-') and arg not in ('--campaign-kano-kintaro-varied','--campaign-kano-kintaro-varied-counter','--campaign-kano-kintaro-varied-adaptive','--campaign-kano-kintaro-varied-reactive','--campaign-kano-kintaro-varied-finish','--campaign-kano-kintaro-stomp-refresh','--campaign-kano-kintaro-stomp-momentum') for arg in sys.argv)
+        assert not any(arg.startswith('--campaign-kano-kintaro-') and arg not in ('--campaign-kano-kintaro-varied','--campaign-kano-kintaro-varied-counter','--campaign-kano-kintaro-varied-adaptive','--campaign-kano-kintaro-varied-reactive','--campaign-kano-kintaro-varied-finish','--campaign-kano-kintaro-varied-finish-uppercut','--campaign-kano-kintaro-stomp-refresh','--campaign-kano-kintaro-stomp-momentum') for arg in sys.argv)
     if '--campaign-kano-kintaro-varied-finish' in sys.argv:
         assert '--campaign-kano-kintaro-varied' in sys.argv
         assert not any(arg.startswith('--campaign-kano-kintaro-') and arg not in (
-            '--campaign-kano-kintaro-varied','--campaign-kano-kintaro-varied-finish') for arg in sys.argv)
+            '--campaign-kano-kintaro-varied','--campaign-kano-kintaro-varied-finish','--campaign-kano-kintaro-varied-finish-uppercut') for arg in sys.argv)
+    if '--campaign-kano-kintaro-varied-finish-uppercut' in sys.argv:
+        assert '--campaign-kano-kintaro-varied-finish' in sys.argv
+    finish_thresholds=[arg.split('=',1)[1] for arg in sys.argv if arg.startswith('--campaign-finish-uppercut-threshold=')]
+    assert len(finish_thresholds)<=1 and (not finish_thresholds or finish_thresholds[0] in ('13','20'))
+    assert not finish_thresholds or '--campaign-kano-kintaro-varied-finish-uppercut' in sys.argv
     if '--campaign-kano-kintaro-varied-reactive' in sys.argv:
         assert '--campaign-kano-kintaro-varied' in sys.argv
         assert '--campaign-kano-kintaro-varied-counter' not in sys.argv and '--campaign-kano-kintaro-varied-adaptive' not in sys.argv
@@ -719,6 +724,8 @@ def main():
         environment['KS_CAMPAIGN_KANO_KINTARO_VARIED_ADAPTIVE']='1' if '--campaign-kano-kintaro-varied-adaptive' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_VARIED_REACTIVE']='1' if '--campaign-kano-kintaro-varied-reactive' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_VARIED_FINISH']='1' if '--campaign-kano-kintaro-varied-finish' in sys.argv else '0'
+        environment['KS_CAMPAIGN_KANO_KINTARO_VARIED_FINISH_UPPERCUT']='1' if '--campaign-kano-kintaro-varied-finish-uppercut' in sys.argv else '0'
+        environment['KS_CAMPAIGN_FINISH_UPPERCUT_THRESHOLD']=finish_thresholds[0] if finish_thresholds else '20'
         environment['KS_CAMPAIGN_KANO_KINTARO_STOMP_REFRESH']='1' if '--campaign-kano-kintaro-stomp-refresh' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_STOMP_MOMENTUM']='1' if '--campaign-kano-kintaro-stomp-momentum' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_VERTICAL_KICK']='1' if '--campaign-kano-kintaro-vertical-kick' in sys.argv else '0'

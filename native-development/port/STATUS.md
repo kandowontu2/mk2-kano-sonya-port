@@ -2,6 +2,14 @@
 
 ## Current authoritative summary
 
+The original-spacing13HP finishing-uppercut controller now earns one native
+Kintaro round: attempt31 round2, result153892, counters1-1. Its76842-row
+pre-change trace matches the original close attempt; the real grounded/duck
+uppercut at153692/gap95 removes the remaining8HP at153700 with player1HP.
+The deciding round was lost, so this is NOT a match or campaign clear.
+A separate bounded64-continue/300000-field endurance trial is active, with
+unchanged policy and no game-state edits. Latest unit checkpoint:457 cases.
+
 Latest unit checkpoint:452 cases pass. Recent vertical, recovery-only,
 recovery-approach and windup-reactive controller trials all completed without
 a native Kintaro round win; aborted48-field vertical timing and corrected

@@ -113,9 +113,13 @@ def main(name):
     overrides=[dict(frame=int(r['frame']),enemyHP=int(r['enemyHP'])) for r in requests
         if finishing and r['decision']!=next_move([int(v,16) for v in r['history'].split(':')])]
     prefix=None
-    if overrides:
+    change_frame=overrides[0]['frame'] if overrides else None
+    if '--campaign-kano-kintaro-varied-finish-uppercut' in receipt['testArguments']:
+        with (run/'kintaro_ready_counter.csv').open() as stream:first_counter=next(csv.DictReader(stream),None)
+        if first_counter:change_frame=int(first_counter['frame'])
+    if change_frame is not None:
         with (BASE/'stock_wolf_2219_kano_kintaro_varied/campaign.csv').open() as reference,(run/'campaign.csv').open() as current:
-            prefix=compare_prefix(csv.DictReader(reference),csv.DictReader(current),overrides[0]['frame'])
+            prefix=compare_prefix(csv.DictReader(reference),csv.DictReader(current),change_frame)
     report=dict(scope='Finite read-only six-hit queue decisions and sampled native activations; not attributed damage',
         requests=dict(Counter(r['decision'] for r in requests)),
         observedActivations=dict(Counter(r['requestedPlan'] for r in observed if r['sampledEntryFrame'] is not None)),

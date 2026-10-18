@@ -1,7 +1,7 @@
 # Native developer and test source snapshot
 
 [`native-development/`](../native-development/) contains the source-only native
-development tooling:708 files, approximately3MB, including its hash manifest.
+development tooling:710 files, approximately3MB, including its hash manifest.
 This is separate from the historical custom-driver tools elsewhere in this
 repository. It contains no complete ROMs, proprietary toolchain, runtime ROM
 archives, raw game assets, screenshots, recordings or bulk test-run dumps.
@@ -19,8 +19,8 @@ archives, raw game assets, screenshots, recordings or bulk test-run dumps.
   deliberately rejected cases and narrower scope limits.
 - [`FILES.json`](../native-development/FILES.json): exact snapshot hashes.
 
-The last complete local unittest run at this checkpoint passed455 test cases.
-That is not455 separately compiled builds or455 independent test suites.
+The last complete local unittest run at this checkpoint passed457 test cases.
+That is not457 separately compiled builds or457 independent test suites.
 Bundled standalone IPS-codec tests are a smaller five-case subset; see the
 native validation document. Runtime fixtures, source/build qualifications,
 unit tests and media comparisons establish different things. None alone is a
@@ -84,3 +84,8 @@ snapshot; no final player ZIP or final release is implied. Corresponding
 emulator source asset/redistribution review remains an explicit gate.
 An original-spacing mixed-input finishing-choice trial is also experimental,
 with a pre-change trace comparison; no new campaign win is claimed here.
+Its13HP duck-ready uppercut variant subsequently earned one Kintaro round at
+attempt31 round2 (counters1-1), after76842 sampled rows matched the original
+pre-change trace. The deciding round was lost: this is not a boss match or
+full campaign clear. Its bounded64-continue extension remains experimental;
+more attempts are not accepted as wins. Native gameplay/ROM bytes are unchanged.

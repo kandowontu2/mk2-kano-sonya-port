@@ -40,7 +40,7 @@ class VarietyPolicyTests(unittest.TestCase):
 
     def test_close_counter_requires_physical_duck_readiness(self):
         source=(Path(__file__).parent/'diagnostics/campaign_probe.lua').read_text()
-        branch=source.split('elseif subBallRecovery.kintaroVariedCounter and (distance<=104',1)[1].split('elseif (distance<175',1)[0]
+        branch=source.split('elseif (subBallRecovery.kintaroVariedCounter and (distance<=104',1)[1].split('elseif subBallRecovery.kintaroVariedFinish and',1)[0]
         for check in ('readyBody<=96','readyButton==subBallRecovery.readyDuck',
                       'n-subBallRecovery.uppercutAt>=6',"set('P1 Down',1)",
                       "set('P1 High Punch',1)","readyPhase='fire'"):

@@ -415,3 +415,61 @@ to the original first-variety run up to the first changed move-selection
 request. A mismatching prefix will be reported rather than assumed preserved.
 455 unit cases pass. This experiment's result, prefix equivalence and any
 finishing hit remain pending; it is not a campaign-clear claim.
+
+The finishing-choice trial completed at159581 fields, exit0/no timeout.
+The independent prefix comparison matches76842 sampled campaign rows before
+field153685 against the original first-variety run. Exactly one move-selection
+override occurs there, with Kintaro8HP; thus the earlier close opportunity
+was actually reproduced, not assumed from similar profiles. Mixed requests
+61/52/58 yield58/49/54 sampled native kick/punch/Knife entries. Minimum boss
+HP improves only to5, and all16 boss rounds still have zero native round
+wins. The changed final kick is not a successful finishing hit. No emulator
+remains. The source/test tooling up to launch was published at
+dbd7bb7481186c3ba4baf908b3c7abc135fdc5a9; this terminal outcome is local follow-up.
+
+The separate `stock_wolf_2219_kano_kintaro_varied_finish_uppercut` trial keeps
+the same original mixed spacing/selection above20 boss HP. Below that threshold
+it stops choosing new aerial plans and holds Down, requesting an uppercut
+only after actual eligible ground/duck dispatch/body<=96, grounded opponent,
+distance<=104 and minimum6-field spacing. Existing native moves/recovery and
+all boss behaviour remain unchanged. The kick override is disabled in this
+mode; readiness requests are logged in kintaro_ready_counter.csv. The prefix
+comparison boundary is the first low-health counter observation, not a later
+successful input. No request is counted as an activation or win without the
+separate native audit.456 unit cases pass. Runtime result/prefix remain pending.
+
+The finishing-uppercut trial completed at159849 fields, exit0/no timeout.
+Its prefix matches76779 sampled rows before153559, but this is an earlier
+takeover than the kick trial: the20HP rule triggers at19 boss HP, player1HP,
+gap162 and enemy38 pixels airborne. Thus it suppresses the original next
+aerial attack that would have produced the later8HP opportunity. There are
+193 duck fields, one ready fire request/native uppercut and zero linked
+damage windows. Minimum boss HP stays19; all16 boss rounds have zero native
+round wins. This does not test the same8HP decision point and must not be
+described as though it does. A tighter threshold would be a different finite
+experiment; no game damage/range/AI change is justified. No emulator remains.
+
+The separate `stock_wolf_2219_kano_kintaro_varied_finish_uppercut13` trial
+uses explicit --campaign-finish-uppercut-threshold=13. Default20 remains
+available for reproduction of the earlier failed experiment. The13HP rule
+preserves the original19HP aerial plan before considering duck/uppercut;
+actual prefix equivalence and whether the8HP opportunity is reached must
+still be audited. Readiness/range/input timing and native game bytes are
+unchanged.456 unit cases pass, including13/14 threshold boundaries. Runtime
+outcome remains pending; no finishing contact or campaign clear is inferred.
+
+The13HP trial completed at161302 fields, exit0/no timeout. It matches76842
+sampled campaign rows before153685 against the original first-variety trace,
+reproducing the actual8HP opportunity. At153692, player1HP/boss8HP/gap95,
+native grounded duck/body68 dispatch qualifies one uppercut request. One
+native107h entry and linked8HP depletion are observed at153700. Native mode5
+results prove a Kintaro round win at153892, attempt31 round2, counters1-1.
+This is one earned round, not a match: the deciding round was lost. The trial
+observes17 boss rounds and no completed Kintaro match or campaign clear.
+
+Because this precise finishing change now earns a native round win, the
+separate `_endurance` trial extends only the declared budget to64 paid
+continues/300000 fields. All input policy flags and threshold remain the same;
+no AI/difficulty/HP/damage/win state is changed. It is bounded, hidden and
+BelowNormal with one emulator.457 unit cases pass, including budget/profile
+preservation. Extended outcome remains pending; more attempts are not wins.

@@ -1,7 +1,15 @@
 import unittest
-from inspect_kintaro_ready_counter import ready_request, ready_recovery_request, valid_recovery_approach
+from inspect_kintaro_ready_counter import ready_request, ready_recovery_request, valid_recovery_approach, ready_finishing_request
 
 class KintaroReadyRequestTests(unittest.TestCase):
+    def test_finishing_uppercut_requires_low_boss_hp_and_native_readiness(self):
+        row=dict(phase='fire',hp='1',ownHP='1',enemyHP='8',ownHeight='0',enemyHeight='0',ownFlags='1',
+                 bodyHeight='90',distance='100',buttonTable='123',duckTable='123')
+        self.assertTrue(ready_finishing_request(row))
+        self.assertFalse(ready_finishing_request(dict(row,enemyHP='21')))
+        self.assertFalse(ready_finishing_request(dict(row,buttonTable='124')))
+        self.assertTrue(ready_finishing_request(dict(row,enemyHP='13'),13))
+        self.assertFalse(ready_finishing_request(dict(row,enemyHP='14'),13))
     def test_recovery_approach_is_gated_and_never_walks_with_block_or_down(self):
         row=dict(phase='approach',enemyRecovery='1',distance='140',ownHeight='0',enemyHeight='0',
                  ownFlags='1',ownHP='161',toward='1',down='0',block='0')

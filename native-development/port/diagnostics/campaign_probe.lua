@@ -87,6 +87,8 @@ local subBallRecovery={counter=os.getenv('KS_CAMPAIGN_KANO_SUB_RECOVERY_COUNTER'
  kintaroVariedAdaptive=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VARIED_ADAPTIVE')=='1',
  kintaroVariedReactive=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VARIED_REACTIVE')=='1',
  kintaroVariedFinish=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VARIED_FINISH')=='1',
+ kintaroVariedFinishUpper=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VARIED_FINISH_UPPERCUT')=='1',
+ finishUpperThreshold=tonumber(os.getenv('KS_CAMPAIGN_FINISH_UPPERCUT_THRESHOLD') or '20'),
  kintaroStompRefresh=os.getenv('KS_CAMPAIGN_KANO_KINTARO_STOMP_REFRESH')=='1',stompJumpRequested=false,
  kintaroStompMomentum=os.getenv('KS_CAMPAIGN_KANO_KINTARO_STOMP_MOMENTUM')=='1',
  kintaroVertical=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VERTICAL_KICK')=='1',
@@ -111,7 +113,8 @@ if subBallRecovery.normalThrow then
  subBallRecovery.throwLog=assert(io.open(subBallRecovery.neutralUppercut and 'sub_neutral_uppercut.csv' or 'sub_normal_throw.csv','w'))
  subBallRecovery.throwLog:write('frame,phase,ownAction,ownFlags,ownHeight,enemyAction,enemyFlags,enemyHeight,distance,projectile,toward,away,block,down,lp,hp,bodyHeight,buttonTable,duckTable,opponent,activeOpponent\n')
 end
-if subBallRecovery.kintaroReady or subBallRecovery.kintaroVariedCounter then
+if subBallRecovery.kintaroReady or subBallRecovery.kintaroVariedCounter or subBallRecovery.kintaroVariedFinishUpper then
+ assert(subBallRecovery.finishUpperThreshold==13 or subBallRecovery.finishUpperThreshold==20)
  assert(subBallRecovery.readyRange==84 or subBallRecovery.readyRange==104 or subBallRecovery.readyRange==115)
  subBallRecovery.readyLog=assert(io.open('kintaro_ready_counter.csv','w'))
  subBallRecovery.readyLog:write('frame,ownAction,ownFlags,ownHeight,bodyHeight,buttonTable,duckTable,distance,enemyAction,enemyHeight,phase,hp,ownHP,enemyHP\n')
@@ -1232,11 +1235,12 @@ emu.register_frame_done(function()
     end
     subBallRecovery.variedWanted=subBallRecovery.variedKicks<2 and 'mixkick' or
      (subBallRecovery.variedPunches<2 and 'mixpunch' or 'readyknife')
-    if subBallRecovery.kintaroVariedFinish and u16(0x01060ec0)<=13 then subBallRecovery.variedWanted='mixkick' end
+    if subBallRecovery.kintaroVariedFinish and not subBallRecovery.kintaroVariedFinishUpper and u16(0x01060ec0)<=13 then subBallRecovery.variedWanted='mixkick' end
     subBallRecovery.variedDecision='wait'
     if s16(proc1+0x200)==s16(a+0xb0) and (u16(proc1+0x210)&0x1c)==0 then
      if cpuProjectileActive() then set('P1 Down',1);set('P1 Block',1);subBallRecovery.variedDecision='guard'
-     elseif subBallRecovery.kintaroVariedCounter and (distance<=104 or n-subBallRecovery.uppercutAt<3) then
+     elseif (subBallRecovery.kintaroVariedCounter and (distance<=104 or n-subBallRecovery.uppercutAt<3)) or
+        (subBallRecovery.kintaroVariedFinishUpper and u16(0x01060ec0)<=subBallRecovery.finishUpperThreshold) then
       set('P1 Down',1);subBallRecovery.variedDecision='close_duck'
       subBallRecovery.readyBody=renderedHeight(a) or 999
       subBallRecovery.readyButton=u32(assert(tonumber(os.getenv('KS_CAMPAIGN_P1_BUTTONS'))))

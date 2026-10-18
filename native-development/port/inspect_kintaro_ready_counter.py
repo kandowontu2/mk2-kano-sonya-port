@@ -16,6 +16,10 @@ def ready_request(row,maximum_distance=115):
 def ready_recovery_request(row):
     return ready_request(row,104) and row['enemyRecovery']=='1'
 
+def ready_finishing_request(row,threshold=20):
+    assert threshold in (13,20)
+    return ready_request(row,104) and 0<int(row['enemyHP'])<=threshold
+
 def valid_recovery_approach(row):
     return (row['phase']=='approach' and row['enemyRecovery']=='1' and
         104<int(row['distance'])<=180 and row['ownHeight']==row['enemyHeight']=='0' and
@@ -28,9 +32,10 @@ def main(name):
     receipt=json.loads((run/'execution.json').read_text())
     hybrid='--campaign-kano-kintaro-varied-counter' in receipt['testArguments']
     recovery='--campaign-kano-kintaro-recovery-counter' in receipt['testArguments']
-    assert '--campaign-kano-kintaro-ready-counter' in receipt['testArguments'] or hybrid or recovery
+    finishing='--campaign-kano-kintaro-varied-finish-uppercut' in receipt['testArguments']
+    assert '--campaign-kano-kintaro-ready-counter' in receipt['testArguments'] or hybrid or recovery or finishing
     maximum=int(next((arg.split('=',1)[1] for arg in receipt['testArguments']
-        if arg.startswith('--campaign-kano-kintaro-ready-range=')),'104' if hybrid or recovery else '115'))
+        if arg.startswith('--campaign-kano-kintaro-ready-range=')),'104' if hybrid or recovery or finishing else '115'))
     subprocess.run([sys.executable,str(PORT/'audit_campaign_run.py'),name],check=True,
                    stdout=subprocess.DEVNULL,creationflags=FLAGS)
     log=(run/'mame.log').read_text();assert 'Fatal error:' not in log and '[LUA ERROR]' not in log
@@ -39,6 +44,9 @@ def main(name):
     fired=[r for r in requests if r['phase']=='fire']
     assert fired and all(ready_request(r,maximum) for r in fired)
     if recovery:assert all(ready_recovery_request(r) for r in fired)
+    threshold=int(next((arg.split('=',1)[1] for arg in receipt['testArguments'] if
+        arg.startswith('--campaign-finish-uppercut-threshold=')),'20'))
+    if finishing:assert all(ready_finishing_request(r,threshold) for r in fired)
     approaches=[r for r in requests if r['phase']=='approach']
     if approaches:
         assert recovery and '--campaign-kano-kintaro-recovery-approach' in receipt['testArguments']
