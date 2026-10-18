@@ -536,3 +536,52 @@ that failed audit; escape and streaming damage audits were subsequently run
 against the same saved terminal trace, without another emulator. This
 combination did not improve the earned-round policy and must not be repeated
 unchanged. No game/ROM edits or native full-match/campaign clear occurred.
+
+Knife-spacing follow-up on that retained trace: the66 requested Knife plans
+include starts at gaps202/235, above the controller's175 minimum. At130778
+the gap235 becomes211 at130786,187 at native Knife529 entry130794,163 at
+130802 and139 at130810; player HP remains146 across this sampled sequence.
+Thus a request-time minimum is not the clearance remaining during projectile
+recovery: the CPU can close96 pixels in32 fields. Native can_goro_slam permits
+distance<=120 and does not exclude airborne opponents (the exclusion is
+commented out in the supplied original). This sampled example is not itself
+a grab and must not be labeled one. It demonstrates why the controller's
+175 launch threshold cannot guarantee staying outside grab range throughout
+the input/launch/recovery interval. Any new spacing trial should retain the
+mixed attack policy, explicitly measure launch and recovery clearances, and
+bound retreat rather than rerun the rejected pure-Knife260 policy or create
+another endless follow/retreat loop. No gameplay patch is warranted yet.
+
+The fresh stock_wolf_2219_kano_finish13_knife260_bounded run now tests
+--campaign-knife-clearance=260 with the original mixed/13HP finishing policy,
+not pure Knife or stomp refresh. Default175 remains unchanged. Only Knife
+preparation requests a wider gap; extra retreat has a48-field elapsed cap,
+after which normal cooldown/readiness still applies and a launch may occur
+below260. Therefore260 is a target, NOT guaranteed safe clearance. Existing
+variety CSV records actual request gap/retreat decisions; campaign samples
+must establish launch/recovery clearance and native results after termination.
+The wrapper admits only explicit260 with varied-finishing and propagates it
+to the physical controller environment.466 current unit tests pass; they
+do not certify the new policy's effectiveness. One hidden BelowNormal emulator
+is running under the normal32-continue budget. No game/ROM bytes changed.
+
+inspect_knife_clearance.py now streams64-field post-request windows, preserving
+request gap separately from actual sampled action529 gaps and HP minima.
+Against the earlier terminal finish13_stomp_refresh trace it finds66 requests,
+56 windows with native Knife samples and9 with a Knife-tag gap<=120. These
+are not nine proved grabs; HP changes/action adjacency do not identify the
+active damage routine. New unit cases distinguish request/action distances,
+exclude samples beyond64 fields, and terminate windows on noncombat entry.
+468 full unit cases pass. The new wider-gap runtime is still active; no
+improvement or successful clearance is inferred before its terminal audit.
+
+The knife260 bounded trial has now finished at159137 fields, exit0/no timeout.
+Its16 Kintaro rounds yield zero native wins, minimum boss HP53. Retreat is
+actually bounded:2603 logged fields, longest contiguous interval48. Across
+71 Knife requests,59 windows contain native Knife samples and25 include a
+Knife-tag gap<=120. This is worse than9/56 in the earlier combination (the
+different policy/route means this is not a controlled causal comparison).
+The48-field fallback allows unsafe launches and wider request spacing alone
+does not solve the recovery exposure. Do not repeat this policy unchanged or
+claim260 guarantees clearance. No emulator remains, no gameplay/ROM change
+was made, and Kano's full boss match/campaign remains unearned.

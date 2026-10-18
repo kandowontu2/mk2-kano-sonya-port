@@ -55,10 +55,17 @@ def digest_stream(stream):
     return digest.hexdigest().upper()
 
 
+def isolated_launcher(data):
+    marker=b' mk3 -rompath '
+    assert data.count(marker)==1, 'Unexpected launcher shape'
+    assert b'-noreadconfig' not in data, 'Already transformed launcher'
+    return data.replace(marker,b' mk3 -noreadconfig -rompath ')
+
+
 def main():
     assert len(sys.argv)==1
     out=PORT/'development_patches'
-    destination=out/'MK2KS_NATIVE_PLAYTEST_WITH_STOCK_MAME.zip'
+    destination=out/'MK2KS_NATIVE_PLAYTEST_WITH_STOCK_MAME_V2.zip'
     partial=destination.with_suffix('.zip.partial')
     assert not destination.exists() and not partial.exists(),'Never overwrite a playtest or partial'
     assert shutil.disk_usage(out).free>1024**3,'Reserve1GiB working space'
@@ -77,6 +84,7 @@ def main():
             if player_member(name):files[name]=archive.read(entry)
     assert len(files)==21
     files['README_PATCHING.txt']=README.encode('ascii')
+    files['PLAY.cmd']=isolated_launcher(files['PLAY.cmd'])
     mame=PORT.parents[1].parent/'mame0289'
     for member in proof['verifiedMembers']:files[member['member']]=mame/member['member']
     assert len(files)==32 and file_digest(files['mame.exe'])==EMULATOR_SHA

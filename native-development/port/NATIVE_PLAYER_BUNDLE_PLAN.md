@@ -1,5 +1,16 @@
 # Minimal native player bundle preparation
 
+The current local player artifact is now
+development_patches/MK2KS_NATIVE_PLAYTEST_WITH_STOCK_MAME_V2.zip,
+98,257,174 bytes, SHA256
+7D3517D9882286AD2FFAB8C0E8CD83267DC4E4557457D936FA3ACA87C3EEF7C2.
+Its PLAY.cmd explicitly uses -noreadconfig, retaining isolated cfg/nvram/snap
+paths while ignoring unrelated default MAME INI settings. Stock MAME accepts
+the option in a hidden -showconfig check; no interactive game was launched.
+All33 member hashes and clean-folder exact-ROM patch reproduction pass;
+466 unit tests pass. The earlier ZIP below is superseded. This launcher-only
+player override does not alter native ROM bytes or final release approval.
+
 Local playtest checkpoint (2026-10-18): the minimal player bundle now exists
 as development_patches/MK2KS_NATIVE_PLAYTEST_WITH_STOCK_MAME.zip (98,257,167
 bytes), SHA256

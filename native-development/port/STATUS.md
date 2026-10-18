@@ -10,14 +10,23 @@ The deciding round was lost, so this is NOT a match or campaign clear.
 The bounded64-continue endurance trial completed at276392 fields. Across81
 observed Kintaro rounds it earned no additional round win and no full match;
 the only win is the already observed attempt31 round2. No emulator remains.
-Latest unit checkpoint:465 cases. A new finite32-continue controller trial,
+Latest unit checkpoint:468 cases. A finite32-continue controller trial,
 stock_wolf_2219_kano_finish13_stomp_refresh, completed at159868 fields,
 exit0/no timeout. Its16 boss rounds yielded no wins; closest boss HP29.
 It combined13HP finishing and corrected escape-Up, without game/ROM changes
 or extra budget. No finishing request occurred; that positive-request audit
 correctly rejects this trace. No emulator remains.
+The subsequent bounded Knife260 mixed-policy trial completed at159137 fields,
+exit0/no timeout,16 lost boss rounds, minimum boss HP53. Its maximum logged
+retreat is48 fields, but25/59 sampled Knife windows still reach gap<=120.
+It is rejected as an improvement; no emulator remains.
 The minimal local player ZIP passes independent33-member/hash checks and
 isolated exact-ROM patch reproduction; it is not a final/public release.
+Current V2 ignores external MAME INI settings; the superseded94MiB player ZIP
+was removed after replacement verification. See NATIVE_PLAYER_BUNDLE_PLAN.md.
+Sparse visual inspection now covers102 normal-chapter samples and144 denser
+punch/vertical-kick samples, with visible strike/recoil/recovery poses. This
+is not continuous motion/audio acceptance; see NORMAL_CHAPTER_VISUAL_REVIEW.md.
 The official corresponding MAME source
 asset is downloaded/hash-verified without extraction/execution for the eventual
 release; redistribution/final acceptance are still not approved.

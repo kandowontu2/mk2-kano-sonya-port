@@ -1,7 +1,7 @@
 # Native developer and test source snapshot
 
 [`native-development/`](../native-development/) contains the source-only native
-development tooling:718 files, approximately3MB, including its hash manifest.
+development tooling:724 files, approximately3MB, including its hash manifest.
 This is separate from the historical custom-driver tools elsewhere in this
 repository. It contains no complete ROMs, proprietary toolchain, runtime ROM
 archives, raw game assets, screenshots, recordings or bulk test-run dumps.
@@ -19,8 +19,8 @@ archives, raw game assets, screenshots, recordings or bulk test-run dumps.
   deliberately rejected cases and narrower scope limits.
 - [`FILES.json`](../native-development/FILES.json): exact snapshot hashes.
 
-The last complete local unittest run at this checkpoint passed465 test cases.
-That is not465 separately compiled builds or465 independent test suites.
+The last complete local unittest run at this checkpoint passed468 test cases.
+That is not468 separately compiled builds or468 independent test suites.
 Bundled standalone IPS-codec tests are a smaller five-case subset; see the
 native validation document. Runtime fixtures, source/build qualifications,
 unit tests and media comparisons establish different things. None alone is a

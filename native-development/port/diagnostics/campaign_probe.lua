@@ -89,6 +89,7 @@ local subBallRecovery={counter=os.getenv('KS_CAMPAIGN_KANO_SUB_RECOVERY_COUNTER'
  kintaroVariedFinish=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VARIED_FINISH')=='1',
  kintaroVariedFinishUpper=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VARIED_FINISH_UPPERCUT')=='1',
  finishUpperThreshold=tonumber(os.getenv('KS_CAMPAIGN_FINISH_UPPERCUT_THRESHOLD') or '20'),
+ knifeClearance=tonumber(os.getenv('KS_CAMPAIGN_KNIFE_CLEARANCE') or '175'),
  kintaroStompRefresh=os.getenv('KS_CAMPAIGN_KANO_KINTARO_STOMP_REFRESH')=='1',stompJumpRequested=false,
  kintaroStompMomentum=os.getenv('KS_CAMPAIGN_KANO_KINTARO_STOMP_MOMENTUM')=='1',
  kintaroVertical=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VERTICAL_KICK')=='1',
@@ -1257,7 +1258,10 @@ emu.register_frame_done(function()
        n,u16(proc1+0x1f0),u16(proc1+0x210),s16(proc1+0x200)-s16(a+0xb0),subBallRecovery.readyBody,
        subBallRecovery.readyButton,subBallRecovery.readyDuck,distance,u16(proc2+0x1f0),s16(proc2+0x200)-s16(b+0xb0),
        subBallRecovery.readyPhase,commands['P1 High Punch'] or 0,u16(0x010602f0),u16(0x01060ec0)));subBallRecovery.readyLog:flush()
-     elseif subBallRecovery.kintaroVariedFinish and subBallRecovery.variedWanted=='readyknife' and distance<175 then
+     elseif subBallRecovery.kintaroVariedFinish and subBallRecovery.variedWanted=='readyknife' and
+        distance<subBallRecovery.knifeClearance and (subBallRecovery.knifeClearance==175 or
+        not subBallRecovery.variedRetreatSince or n-subBallRecovery.variedRetreatSince<48) then
+      subBallRecovery.variedRetreatSince=subBallRecovery.variedRetreatSince or n
       set(away,1);subBallRecovery.variedDecision='retreat'
      elseif not subBallRecovery.kintaroVariedFinish and (distance<175 or (subBallRecovery.variedRetreating and distance<220)) and
         (not subBallRecovery.variedRetreatSince or n-subBallRecovery.variedRetreatSince<48) then

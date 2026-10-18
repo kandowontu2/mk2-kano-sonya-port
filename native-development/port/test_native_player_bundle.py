@@ -1,13 +1,21 @@
 """Independent checks of the actual minimal local player artifact."""
 import hashlib
 import json
+from pathlib import Path
 import unittest
 import zipfile
-from build_native_player_playtest import digest_stream
+from build_native_player_playtest import digest_stream, isolated_launcher
 from inspect_normal_runtime import PORT
 
 
 class PlayerBundleTests(unittest.TestCase):
+    def test_launcher_blocks_external_ini_without_changing_paths(self):
+        original=b'"%MK2KS_MAME%" mk3 -rompath "%~dp0roms" -cfg_directory "%~dp0config\\cfg"\r\n'
+        changed=isolated_launcher(original)
+        self.assertEqual(changed.replace(b' -noreadconfig',b''),original)
+        with self.assertRaises(AssertionError):isolated_launcher(changed)
+        with self.assertRaises(AssertionError):isolated_launcher(b'unknown')
+
     def test_stream_hash_uses_bounded_reads(self):
         class BoundedStream:
             remaining = 200000
@@ -24,7 +32,7 @@ class PlayerBundleTests(unittest.TestCase):
     def test_actual_bundle_manifest_and_payload(self):
         folder = PORT / 'development_patches'
         proof = json.loads((folder / 'PLAYER_PLAYTEST_QUALIFICATION.json').read_text())
-        path = folder / 'MK2KS_NATIVE_PLAYTEST_WITH_STOCK_MAME.zip'
+        path = Path(proof['file'])
         with path.open('rb') as stream:
             self.assertEqual(digest_stream(stream), proof['SHA256'])
         with zipfile.ZipFile(path) as archive:
@@ -41,6 +49,7 @@ class PlayerBundleTests(unittest.TestCase):
             readme = archive.read('README_PATCHING.txt').decode('ascii')
             self.assertIn('UNFINISHED NATIVE PLAYTEST', readme)
             self.assertIn('SEPARATE', readme)
+            self.assertIn(b' -noreadconfig ',archive.read('PLAY.cmd'))
         self.assertTrue(proof['isolatedPatcherReproducedExactTestedROM'])
         self.assertFalse(proof['releaseApproved'])
         self.assertFalse(proof['fullPortVerified'])
