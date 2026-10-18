@@ -7,11 +7,17 @@ the existing `mk3` Wolf-unit hardware/socket definition. This is MKII game code,
 not MK3 gameplay. No custom MAME driver, host samples, identity proxy or
 emulator-side gameplay injection is required by this implementation.
 
-**Development snapshot, not a finished release.** Finite current tests cover
+The [native release](https://github.com/kandowontu2/mk2-kano-sonya-port/releases/tag/native-v1.0.0)
+provides a minimal stock-MAME player bundle and a separate ASM/IPS bundle.
+Finite current tests cover
 both added identities, selection transitions, normal/special moves, finishers,
-morphs and fresh-match recovery. Sonya has an earned current-ROM campaign clear.
-Kano's earned boss clear/ending and final audiovisual/release acceptance remain
-open. Test counts and manifests are not a complete-playability certificate.
+morphs and fresh-match recovery. Both characters have verified continuous
+current-ROM campaign clears and complete recordings, including bosses and own
+endings/cast/credits. See the [release notes](native-development/port/NATIVE_RELEASE_NOTES.md)
+for downloads, verification scopes and limitations. The canonical `native-rom`
+directory retains development lifecycle metadata; the qualified release ZIPs
+have their own final manifests and evidence bindings. No exhaustive every-input
+or subjective every-frame audiovisual perfection claim is made.
 
 ## Current source and patch instructions
 

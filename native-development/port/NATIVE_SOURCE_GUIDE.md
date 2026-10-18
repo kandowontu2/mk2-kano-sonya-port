@@ -1,6 +1,6 @@
 # Native Kano/Sonya source guide
 
-This is a development snapshot, not a completed-game claim. The current
+This describes the native ROM port and its rebuild inputs. The current
 working program is 221919459A4129FFDB37C8A3E9EC7F9AA6210D99AED00A35BC3256842C5E1F5A.
 This adds own detached-leg grounding to the prior native ending build. Twelve
 current Cage/Scorpion/Sub-Zero cases verify the corrected opaque lower edge.
@@ -10,8 +10,12 @@ Native static-page ending presentation is included. Sonya's earned full
 route, both bosses, two story pages, added cast pair, sampled credits and
 attract return have now been verified on current2219 in
 `stock_wolf_2219_sonya_campaign`; see `SONYA_ENDING_2219_REVIEW.md`.
-That finite run is not all-frame audiovisual acceptance. Kano's boss match
-clear and earned ending remain unverified; complete acceptance is unfinished.
+Both characters now also have separately verified continuous full-game
+recordings, including both bosses, own endings/cast/credits and attract return.
+Kano's physical-input route replays from power-on without loading states or
+editing game memory. See KANO_CAMPAIGN_VIDEO_2219.md and
+SONYA_CAMPAIGN_VIDEO_2219.md in the public native-development source snapshot.
+Finite run and sparse visual checks are not all-frame audiovisual acceptance.
 The game logic executes on the emulated TMS34010. Stock MAME 0.289 supplies
 the existing `mk3` Wolf-unit hardware/socket definition; it does not supply
 Kano/Sonya gameplay, replace selected identities or draw their assets.

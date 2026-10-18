@@ -28,6 +28,7 @@ def main():
     assert updating or not destination.exists()
     inputs = []
     inputs += [(p, 'port/' + p.name) for p in PORT.iterdir() if p.is_file() and p.suffix.lower() in ('.py', '.md', '.ps1', '.cmd')]
+    inputs += [(PORT/'RELEASE_README.txt', 'port/RELEASE_README.txt')]
     route=PORT/'KINTARO_SHORT_ROUTE.json'
     if route.exists():
         data=json.loads(route.read_text())
