@@ -23,6 +23,7 @@ open. Test counts and manifests are not a complete-playability certificate.
   fatalities, stage finishers, Friendship/Babality and Shang's added morphs.
 - [Per-chip patch manifest](native-rom/PATCH_MANIFEST.json) and
   [snapshot file hashes](native-rom/FILES.json).
+- [Native validation and reproducible patcher checks](docs/NATIVE_VALIDATION.md).
 
 Supply your own exact matching MKII/MK3 ROM inputs to the patcher. Original
 game source, proprietary TI tools, complete ROMs and emulator binaries are not

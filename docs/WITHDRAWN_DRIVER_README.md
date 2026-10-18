@@ -13,15 +13,15 @@ payloads, release binaries, and gameplay recordings are **not included**.
 
 ## Start here
 
-- [Change guide](docs/CHANGES.md): what changed and where to read it.
-- [Build and asset boundaries](docs/BUILD.md): upstream revision, overlay,
+- [Change guide](CHANGES.md): what changed and where to read it.
+- [Build and asset boundaries](BUILD.md): upstream revision, overlay,
   compiler command, and limitations of the historical asset-building tools.
-- [Full movelist](docs/MK2_KANO_SONYA_MOVES.txt).
-- [Test methodology](docs/TESTING.md): what the checks establish and what they
+- [Full movelist](MK2_KANO_SONYA_MOVES.txt).
+- [Test methodology](TESTING.md): what the checks establish and what they
   do not establish.
-- [Source manifest](SOURCE_MANIFEST.json): every exported source file's hash,
+- [Source manifest](../SOURCE_MANIFEST.json): every exported source file's hash,
   upstream revision, and the matched release EXE/payload identifiers.
-- [Exact native integration diff](patches/native-integration.patch).
+- [Exact historical driver integration diff](../patches/native-integration.patch).
 
 ## Repository layout
 
@@ -45,9 +45,9 @@ run arbitrary historical scripts as a build recipe.
 
 Existing source-file license headers and copyright notices are retained.
 The custom MAME changes retain the licenses of the files they modify, generally
-BSD-3-Clause. MAME as a whole is GPL-2.0; see [MAME_COPYING](MAME_COPYING).
+BSD-3-Clause. MAME as a whole is GPL-2.0; see [MAME_COPYING](../MAME_COPYING).
 Original support scripts and documentation without another license notice are
-provided under [GPL-2.0-only](licenses/GPL-2.0).
+provided under [GPL-2.0-only](../licenses/GPL-2.0).
 
 These code licenses do not grant rights to Mortal Kombat ROMs, artwork, audio,
 characters, or trademarks. Supply your own game data separately; nothing in this
