@@ -585,3 +585,24 @@ The48-field fallback allows unsafe launches and wider request spacing alone
 does not solve the recovery exposure. Do not repeat this policy unchanged or
 claim260 guarantees clearance. No emulator remains, no gameplay/ROM change
 was made, and Kano's full boss match/campaign remains unearned.
+
+New finite timing trial stock_wolf_2219_kano_finish13_boss_continue_delay60
+keeps the original mixed/13HP finishing combat policy and32-continue budget.
+Only the buy-in controller changes: after a Kano boss loss (map>=15), hold
+coin/start released60 fields before replaying the existing120-field purchase
+input cadence. Human-ladder and initial boss inputs retain default timing;
+there is no explicit difficulty/RNG/AI/state write or guaranteed improvement.
+Default delay0 preserves prior input cadence. The wrapper admits only explicit
+60 with the Kano boss profile.470 current unit tests pass; the actual changed
+buy-in timing and native results still require retained-trace inspection.
+The new run is active, hidden/BelowNormal with one emulator; no completion
+or win follows from launch. No native game/ROM bytes changed.
+
+The delayed-buy-in trial is terminal at158748 fields, exit0/no timeout.
+Its16 Kintaro rounds have zero native wins; minimum boss HP68. The dedicated
+event-latency audit observes32 purchases: all human-map selection latencies
+remain141 fields and boss-map latencies are201, versus141 in the original
+finish13 trace. Thus the intended timing difference occurred, but did not
+improve the boss result. This checks native event latency, not raw per-field
+coin/start pin transitions. Do not extend/repeat this policy unchanged or
+claim a campaign clear. No emulator remains.471 full unit cases pass.

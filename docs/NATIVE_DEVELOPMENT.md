@@ -1,7 +1,7 @@
 # Native developer and test source snapshot
 
 [`native-development/`](../native-development/) contains the source-only native
-development tooling:724 files, approximately3MB, including its hash manifest.
+development tooling:729 files, approximately3MB, including its hash manifest.
 This is separate from the historical custom-driver tools elsewhere in this
 repository. It contains no complete ROMs, proprietary toolchain, runtime ROM
 archives, raw game assets, screenshots, recordings or bulk test-run dumps.
@@ -19,12 +19,23 @@ archives, raw game assets, screenshots, recordings or bulk test-run dumps.
   deliberately rejected cases and narrower scope limits.
 - [`FILES.json`](../native-development/FILES.json): exact snapshot hashes.
 
-The last complete local unittest run at this checkpoint passed468 test cases.
-That is not468 separately compiled builds or468 independent test suites.
+The last complete local unittest run at this checkpoint passed471 test cases.
+That is not471 separately compiled builds or471 independent test suites.
 Bundled standalone IPS-codec tests are a smaller five-case subset; see the
 native validation document. Runtime fixtures, source/build qualifications,
 unit tests and media comparisons establish different things. None alone is a
 full-port completion certificate.
+
+The local V3 minimal player ZIP now documents the native first-boot CMOS
+acknowledgment and ignores unrelated MAME INI settings. Clean-folder tests
+reconstruct the exact ROM and reach attract through physical High Punch.
+Two9000-field stock-MAME runs then select Kano/Sonya in opposite player-side
+arrangements, each proving4128 controlled human-combat fields, true IDs,
+damage to both players and no missing-animation markers. This is finite
+player-package evidence, not interactive renderer/audio or full-port approval.
+The source includes the headless qualifier, failed no-input startup scope,
+combat-gate negative tests and actual reproduction boundaries. No complete
+ROM, emulator or prefilled NVRAM is added to this source snapshot.
 
 The side-swapped normal-combat stress checks observed29054 controlled combat
 fields across12 fresh matches, requiring true character IDs and native active

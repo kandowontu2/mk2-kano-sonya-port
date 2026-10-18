@@ -1,5 +1,36 @@
 # Minimal native player bundle preparation
 
+Current player checkpoint: V3 adds the native first-boot CMOS acknowledgment
+instructions. development_patches/MK2KS_NATIVE_PLAYTEST_WITH_STOCK_MAME_V3.zip
+is98,257,403 bytes, SHA256
+7C6EDA1CB0662512F14012FE55F966D54BA1DF7144E1E1871E8B0E9BBB9D58DE.
+All33 member/hash checks, exact-ROM clean patch reproduction and468 unit tests
+pass. A fresh V3 configuration reaches native attract mode through physical
+High Punch acknowledgment and completes3600 fields, exit0/no Lua/fatal error.
+PLAYER_HEADLESS_ATTRACT_ACK.json now binds that test to V3. No emulator remains;
+all temporary files are removed. Verified superseded V2 was deleted to avoid
+another94MiB duplicate; source/history and rebuild inputs remain. Older
+version-specific receipts below are historical, not current artifact claims.
+
+Fresh V3 combat follow-up: two separate9000-field runs reconstruct the exact
+ROM in temporary player folders, use the hash-identical stock executable and
+-noreadconfig, and select both added characters using physical inputs only.
+PLAYER_HEADLESS_COMBAT.json and PLAYER_HEADLESS_COMBAT_MIRROR.json preserve
+their frozen controllers, state traces, package/executable hashes and logs.
+Both exit0 with no Lua/fatal errors. The acceptance gate requires600+ fields
+with both human states1, locked selection, actual object identities17/18 in
+the requested sides, damage to both sides, and no missing-animation marker.
+It rejects CPU/proxy/unlocked/no-damage/short cases in unit tests.470 complete
+unit cases pass. The first receipt's scope text predates the combat-specific
+wording and conservatively says startup-only; its preserved combat trace and
+explicit combat object establish the finite result, not a broad completion
+claim. The frozen controller itself contains its normal physical startup
+High Punch acknowledgment despite the older first receipt's false explicit
+acknowledgment-profile flag; that flag must not be read as absence of input.
+This is finite clean-player selection/combat evidence, not every move,
+interactive rendering/audio, campaign or final release acceptance. Temporary
+ROMs/executable links/settings are removed and no emulator remains.
+
 The current local player artifact is now
 development_patches/MK2KS_NATIVE_PLAYTEST_WITH_STOCK_MAME_V2.zip,
 98,257,174 bytes, SHA256
@@ -10,6 +41,34 @@ the option in a hidden -showconfig check; no interactive game was launched.
 All33 member hashes and clean-folder exact-ROM patch reproduction pass;
 466 unit tests pass. The earlier ZIP below is superseded. This launcher-only
 player override does not alter native ROM bytes or final release approval.
+
+Fresh-folder headless follow-up: qualify_player_headless_boot.py extracts the
+actual V2 patch/player inputs, verifies their ZIP member hashes, reproduces
+the exact tested ROM, and hard-links the hash-identical official executable
+instead of copying316MiB. With the same isolated launch paths and
+-noreadconfig plus explicit headless test options, stock MAME exits0 after
+600 observed fields with changing CPU PCs and no Lua/fatal error. The
+observer only reads native state; no input or game-memory forcing is used.
+Temporary patched ROM, executable link, settings and observer are removed.
+PLAYER_HEADLESS_BOOT.json preserves package/emulator binding, frozen observer,
+observations and log. This proves short startup, NOT interactive rendering,
+combat, audio output, campaign completion or final release acceptance.
+
+First-boot follow-up: an unattended3600-field fresh-config run stayed in
+native CMOS startup; PLAYER_HEADLESS_ATTRACT_NO_INPUT.json retains this failed
+attract gate. DIAGDTST.ASM powercmos/cmosret/ctmp1 explicitly waits for a
+button-state change after initializing invalid CMOS. A second fresh-config
+run uses only physical P1 High Punch pulses after field1000 until attract
+mode1 is observed. It reaches attract and completes3600 fields, exit0 with
+no Lua/fatal error; PLAYER_HEADLESS_ATTRACT_ACK.json retains the exact observer,
+state/PC samples, package/emulator hashes and log. No guest-memory writes,
+coins, starts, selected characters or forced game state are used.
+Player instructions must explain the native first-boot prompt: press an attack
+button (tested P1 High Punch) to acknowledge initialized CMOS, then insert
+coin/start normally. No prefilled NVRAM or bypass patch should be shipped.
+The initial failed invocation predated retained failure reporting and cleaned
+its temporary folder; its explicit repeat now preserves the failed observation
+in JSON. Neither fresh startup test certifies interactive rendering or combat.
 
 Local playtest checkpoint (2026-10-18): the minimal player bundle now exists
 as development_patches/MK2KS_NATIVE_PLAYTEST_WITH_STOCK_MAME.zip (98,257,167

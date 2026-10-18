@@ -49,6 +49,8 @@ class PlayerBundleTests(unittest.TestCase):
             readme = archive.read('README_PATCHING.txt').decode('ascii')
             self.assertIn('UNFINISHED NATIVE PLAYTEST', readme)
             self.assertIn('SEPARATE', readme)
+            self.assertIn('FIRST BOOT:', readme)
+            self.assertIn('P1 High Punch', readme)
             self.assertIn(b' -noreadconfig ',archive.read('PLAY.cmd'))
         self.assertTrue(proof['isolatedPatcherReproducedExactTestedROM'])
         self.assertFalse(proof['releaseApproved'])

@@ -31,6 +31,13 @@ NO complete game ROMs, custom driver, test controller, samples or recordings.
    For a basic Windows renderer fallback, from this folder run:
      mame.exe mk3 -rompath .\\roms -window -video gdi
 
+FIRST BOOT: A fresh configuration can stop at the native CMOS initialization
+message. Press an attack button (tested: P1 High Punch) to acknowledge it.
+The game then reaches its normal attract screens. Insert coin and press
+Start normally. Use MAME's Tab input menu to check your configured buttons.
+This prompt is not a selection softlock. No prefilled NVRAM or bypass is
+included; the game initializes and saves its own settings.
+
 MOVELIST_NATIVE.txt includes both characters, finishers and Shang morphs.
 Readable59-module ASM and40-file original-source diff are in the SEPARATE
 MK2KS_NATIVE_DEVELOPMENT_IPS.zip and public native-rom/source directory:
@@ -65,7 +72,7 @@ def isolated_launcher(data):
 def main():
     assert len(sys.argv)==1
     out=PORT/'development_patches'
-    destination=out/'MK2KS_NATIVE_PLAYTEST_WITH_STOCK_MAME_V2.zip'
+    destination=out/'MK2KS_NATIVE_PLAYTEST_WITH_STOCK_MAME_V3.zip'
     partial=destination.with_suffix('.zip.partial')
     assert not destination.exists() and not partial.exists(),'Never overwrite a playtest or partial'
     assert shutil.disk_usage(out).free>1024**3,'Reserve1GiB working space'

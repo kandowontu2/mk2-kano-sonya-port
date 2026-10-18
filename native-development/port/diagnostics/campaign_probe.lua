@@ -38,6 +38,8 @@ if os.getenv('KS_CAMPAIGN_BOSS_ENDURANCE')=='1' then assert(extraContinues and c
 else assert(continueLimit>=0 and continueLimit<=(extraContinues and 32 or 20)) end
 assert(continueLimit<=5 or fieldLimit>=90000)
 local continuesUsed,buyinAge=0,0
+local bossContinueDelay=tonumber(os.getenv('KS_CAMPAIGN_BOSS_CONTINUE_DELAY') or '0')
+assert(bossContinueDelay==0 or bossContinueDelay==60)
 local continuing=false
 local continueLog=assert(io.open('campaign_continues.csv','w'))
 continueLog:write('frame,attempt,map,phase\n')
@@ -372,8 +374,11 @@ emu.register_frame_done(function()
   end
   if continuing then
    buyinAge=buyinAge+1
-   set('Coin 1',buyinAge%120<4 and 1 or 0)
-   set('1 Player Start',buyinAge%120>=20 and buyinAge%120<24 and 1 or 0)
+   local inputAge=buyinAge-((target==17 and u16(0x01061b30)>=15) and bossContinueDelay or 0)
+   if inputAge>0 then
+    set('Coin 1',inputAge%120<4 and 1 or 0)
+    set('1 Player Start',inputAge%120>=20 and inputAge%120<24 and 1 or 0)
+   end
   end
  end
  if mode==4 and previousMode~=4 and continuing then
