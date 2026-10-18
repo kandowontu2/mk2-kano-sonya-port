@@ -3,12 +3,8 @@ from pathlib import Path
 import unittest
 from finisher_observation_end import verify_end
 
-CURRENT_REJOINS=('stock_wolf_6ae0_fatality_01','stock_wolf_6ae0_fatality_02',
-                 'stock_wolf_6ae0_fatality_03','stock_wolf_6ae0_nonlethal_pos_01',
-                 'stock_wolf_6ae0_nonlethal_pos_02',
-                 'stock_wolf_6ae0_morph_extract_rejoin_p1',
-                 'stock_wolf_6ae0_morph_kiss_rejoin_p1',
-                 'stock_wolf_6ae0_morph_laser_rejoin_p1')
+CURRENT_REJOINS=tuple('stock_wolf_2219_lethal_video_'+kind for kind in ('extract','laser','kiss','bubble'))+tuple(
+    'stock_wolf_2219_morphfatal_'+kind+'_rejoin_p1' for kind in ('extract','kiss','laser','bubble'))
 
 class ObservationEnd(unittest.TestCase):
     def test_ordinary_run_retains_full_9000_field_gate(self):

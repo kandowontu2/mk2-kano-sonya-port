@@ -1,7 +1,7 @@
 # Native developer and test source snapshot
 
 [`native-development/`](../native-development/) contains the source-only native
-development tooling:697 files, approximately3MB, including its hash manifest.
+development tooling:703 files, approximately3MB, including its hash manifest.
 This is separate from the historical custom-driver tools elsewhere in this
 repository. It contains no complete ROMs, proprietary toolchain, runtime ROM
 archives, raw game assets, screenshots, recordings or bulk test-run dumps.
@@ -19,8 +19,8 @@ archives, raw game assets, screenshots, recordings or bulk test-run dumps.
   deliberately rejected cases and narrower scope limits.
 - [`FILES.json`](../native-development/FILES.json): exact snapshot hashes.
 
-The last complete local unittest run at this checkpoint passed434 test cases.
-That is not434 separately compiled builds or434 independent test suites.
+The last complete local unittest run at this checkpoint passed443 test cases.
+That is not443 separately compiled builds or443 independent test suites.
 Bundled standalone IPS-codec tests are a smaller five-case subset; see the
 native validation document. Runtime fixtures, source/build qualifications,
 unit tests and media comparisons establish different things. None alone is a
@@ -59,5 +59,15 @@ runtime dumps are not part of this source snapshot. The newer Kano spacing
 controllers remain experimental: bounded spacing, close-counter and adaptive
 airborne timing trials all completed without a native Kintaro round win.
 Their retained provenance distinguishes requests, native entries and results.
-No canonical
-game ASM or ROM patch changed in this developer-tool refresh.
+The stomp escape refresh and momentum trials also completed without a native
+boss round win. The refresh's new physical jumps were observed, but that is
+not campaign completion.
+
+The earned lethal-victim expansion passed its eight-case Kung Lao pilot:
+all four added lethal finishers on both sides, plus600 fresh-match fields.
+The exact-coverage/hash-bound pilot acceptance passes. Its full112-case
+victim/side matrix is still in progress, not claimed complete. The tooling
+also corrects a Death Orb checker that previously assumed Liu's animation
+table for every original victim; it now reads the actual linked native table.
+See `LETHAL_ROSTER_PROGRESS_2219.md`. No canonical game ASM or ROM patch changed
+in this developer-tool refresh.

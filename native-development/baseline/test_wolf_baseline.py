@@ -133,7 +133,11 @@ def main():
     if '--campaign-kano-kintaro-varied' in sys.argv:
         assert '--campaign-kano-boss-guard' in sys.argv and '--campaign-subzero-rfp-duck' in sys.argv
         assert '--sonya' not in sys.argv
-        assert not any(arg.startswith('--campaign-kano-kintaro-') and arg not in ('--campaign-kano-kintaro-varied','--campaign-kano-kintaro-varied-counter','--campaign-kano-kintaro-varied-adaptive') for arg in sys.argv)
+        assert not any(arg.startswith('--campaign-kano-kintaro-') and arg not in ('--campaign-kano-kintaro-varied','--campaign-kano-kintaro-varied-counter','--campaign-kano-kintaro-varied-adaptive','--campaign-kano-kintaro-stomp-refresh','--campaign-kano-kintaro-stomp-momentum') for arg in sys.argv)
+    if '--campaign-kano-kintaro-stomp-refresh' in sys.argv:
+        assert '--campaign-kano-kintaro-varied' in sys.argv
+    if '--campaign-kano-kintaro-stomp-momentum' in sys.argv:
+        assert '--campaign-kano-kintaro-stomp-refresh' in sys.argv
     if '--campaign-kano-kintaro-varied-counter' in sys.argv:
         assert '--campaign-kano-kintaro-varied' in sys.argv
     if '--campaign-kano-kintaro-varied-adaptive' in sys.argv:
@@ -201,8 +205,14 @@ def main():
         assert len(data)==1048576
         replacements[f'l1_mortal_kombat_3_u{chip}_music_spch.u{chip}']=data
     environment=os.environ.copy()
+    finisher_victims=[arg.split('=',1)[1] for arg in sys.argv if arg.startswith('--finisher-victim=')]
+    assert len(finisher_victims)<=1
+    if finisher_victims:
+        assert game_candidate and sum(flag in sys.argv for flag in ('--extract','--laser','--kiss','--bubble'))==1
+        assert int(finisher_victims[0]) in (*range(12),17,18)
+        assert '--stock-victim' not in sys.argv and '--finisher-morph' not in sys.argv
     environment['KS_FINISHER_MORPH']='1' if '--finisher-morph' in sys.argv else '0'
-    if '--finisher-morph' in sys.argv:
+    if '--finisher-morph' in sys.argv or finisher_victims:
         nav=(HERE.parent/'port/asm/KSNAV.ASM').read_text()
         for direction in ('up','down','left','right'):
             match=re.search(r'(?m)^ks_'+direction+r'_change\s*\n\s*\.word\s+([^\n]+)',nav)
@@ -615,6 +625,9 @@ def main():
                 match=re.search(r'(?m)^ks_'+direction+r'_change\s*\n\s*\.word\s+([^\n]+)',nav)
                 assert match
                 environment['KS_SELECT_'+direction.upper()]=match[1].strip()
+        if finisher_victims:
+            environment['KS_EXTRACT_VICTIM']=finisher_victims[0]
+        environment['KS_FINISHER_VICTIM_OVERRIDE']='1' if finisher_victims else '0'
         symbols={name:int(address,16) for address,name in re.findall(r'\b([0-9a-fA-F]{8})\s+([A-Za-z_]\w*)',(BUILD/'srcp/MK2P.MAP').read_text())}
         if '--normal-soak' in sys.argv:
             environment['KS_NORMAL_P1_STATE']=str(symbols['p1_state'])
@@ -681,6 +694,8 @@ def main():
         environment['KS_CAMPAIGN_KANO_KINTARO_VARIED']='1' if '--campaign-kano-kintaro-varied' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_VARIED_COUNTER']='1' if '--campaign-kano-kintaro-varied-counter' in sys.argv else '0'
         environment['KS_CAMPAIGN_KANO_KINTARO_VARIED_ADAPTIVE']='1' if '--campaign-kano-kintaro-varied-adaptive' in sys.argv else '0'
+        environment['KS_CAMPAIGN_KANO_KINTARO_STOMP_REFRESH']='1' if '--campaign-kano-kintaro-stomp-refresh' in sys.argv else '0'
+        environment['KS_CAMPAIGN_KANO_KINTARO_STOMP_MOMENTUM']='1' if '--campaign-kano-kintaro-stomp-momentum' in sys.argv else '0'
         if '--campaign-kano-kintaro-varied' in sys.argv:
             environment['KS_CAMPAIGN_BOSS_HITQ']=str(symbols['p2_hitq'])
         environment['KS_CAMPAIGN_KANO_KINTARO_READY_RANGE']=ready_ranges[0] if ready_ranges else '115'

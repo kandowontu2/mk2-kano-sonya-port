@@ -199,3 +199,52 @@ but did not improve on the bounded fixed-timing trial's17HP minimum or earn
 a match. Current-ROM/frozen-input/clean-log checks pass; full clear remains
 unproved. Do not convert this failed controller experiment into a ROM timing
 or damage change without independent game-defect evidence.
+
+## Stomp escape phase-tracking defect in the test controller
+
+Read-only postmortem of the first variety trial shows the first stomp escape
+at130451 began with Kano already77 pixels airborne from an offensive jump.
+The old controller immediately set stompJumped=true from that old airborne
+state. Kano landed by130479 but received no new Up request. He then walked
+at2 pixels/field, reachingX466 versus the saved stompX374 at130529 (92px).
+The source psycho_fall_call checks horizontal separation<060h once below
+050h height; native stomp damage56 followed at130534. Jump height itself
+does not exempt a victim from that native horizontal-only check.
+
+The separate `stock_wolf_2219_kano_kintaro_varied_stomp_refresh` trial retains
+fixed28 mixed attacks and bounded retreat. Only its opt-in Kano escape path
+counts airborne state after a new Up request made during this stomp phase.
+An older offensive jump no longer suppresses a new jump after landing.
+The existing Sonya/controller paths and all native game code remain unchanged.
+435 local unit cases pass. Runtime escape behaviour and earned wins remain
+pending, not inferred from this source-level controller fix.
+
+The refresh trial completed at160388 fields, exit0/no timeout. Terminal
+current-ROM/frozen-input/clean-log audits pass. All12 contiguous logged
+old-air/ground/new-Up cases subsequently show new airtime, confirming this
+specific controller fix operated. There are11 HP-drop windows preceded by a
+stomp action tag; these are sampled tag associations, not complete causal
+stomp attribution. Across16 boss rounds, minimum boss HP was60 with zero
+native round wins. Mixed requests55/51/52 yielded49/45/45 sampled native
+kick/punch/Knife entries. The tracking fix is not a campaign-clear claim or
+evidence for weakening native attacks.438 local unit cases pass; no emulator
+remains from this run.
+
+The refresh trace at138186 requests Left fromX711 during a stomp; the boss
+subsequently repositions toX698. Kano crosses back through that target and is
+atX643 versus698 by138204, preceding a56HP drop at138210. This motivates the
+separate `stock_wolf_2219_kano_kintaro_varied_stomp_momentum` trial: at escape
+direction selection, preserve signed native own horizontal velocity when
+there are at least128 pixels to that edge, otherwise choose the roomier side.
+It retains the refresh fix, bounded retreat and fixed28 air attacks. It reads
+own velocity and sends directions/Up only; no movement or target RAM is written.
+439 unit cases pass. Trial result and any escape benefit remain pending.
+
+The momentum trial completed cleanly, exit0/no timeout. All12 observed
+old-air/new-Up cases reached fresh airtime. Six sampled HP-drop windows were
+preceded by stomp tags versus11 in refresh-only; these are neither complete
+causal stomp counts nor a seeded balance comparison. Across16 boss rounds,
+minimum boss HP was65 with zero native round wins. Mixed requests50/53/43
+yielded45/45/40 sampled native entries. It did not earn or improve a clear.
+Native ROM/gameplay remain unchanged. A separate earned-lethal victim pilot
+is now being run sequentially to close another actual acceptance-coverage gap.

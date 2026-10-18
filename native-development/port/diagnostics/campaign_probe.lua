@@ -85,6 +85,8 @@ local subBallRecovery={counter=os.getenv('KS_CAMPAIGN_KANO_SUB_RECOVERY_COUNTER'
  kintaroVaried=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VARIED')=='1',
  kintaroVariedCounter=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VARIED_COUNTER')=='1',
  kintaroVariedAdaptive=os.getenv('KS_CAMPAIGN_KANO_KINTARO_VARIED_ADAPTIVE')=='1',
+ kintaroStompRefresh=os.getenv('KS_CAMPAIGN_KANO_KINTARO_STOMP_REFRESH')=='1',stompJumpRequested=false,
+ kintaroStompMomentum=os.getenv('KS_CAMPAIGN_KANO_KINTARO_STOMP_MOMENTUM')=='1',
  readyRange=tonumber(os.getenv('KS_CAMPAIGN_KANO_KINTARO_READY_RANGE') or '115'),
  kintaroPrepare=os.getenv('KS_CAMPAIGN_KANO_KINTARO_PREPARE')=='1' or os.getenv('KS_CAMPAIGN_KANO_KINTARO_WIDE')=='1',
  kintaroWide=os.getenv('KS_CAMPAIGN_KANO_KINTARO_WIDE')=='1',
@@ -429,7 +431,7 @@ emu.register_frame_done(function()
    end
    if earlyStompEvade and (target==18 or (subBallRecovery.kanoBoss and target==17)) and c2==12 and u16(proc2+0x1f0)==0x407 then
     if not stompPhaseSeen or (not stompFlightActive and enemyGround-enemyY>0) then
-     stompFlightActive=true;stompSawAir=false;stompJumped=false;stompEscapeLast=-1000
+     stompFlightActive=true;stompSawAir=false;stompJumped=false;stompEscapeLast=-1000;subBallRecovery.stompJumpRequested=false
     end
     stompPhaseSeen=true
     if enemyGround-enemyY>0 then stompSawAir=true
@@ -478,13 +480,27 @@ emu.register_frame_done(function()
     local leftDistance,rightDistance=math.abs(x1-leftEdge),math.abs(rightEdge-x1)
     if n-stompEscapeLast>1 then
      stompEscapeDirection=leftDistance>=rightDistance and 'P1 Left' or 'P1 Right'
+     if subBallRecovery.kintaroStompMomentum and target==17 then
+      subBallRecovery.stompVelocity=u32(a+0x40)
+      if subBallRecovery.stompVelocity>=0x80000000 then subBallRecovery.stompVelocity=subBallRecovery.stompVelocity-0x100000000 end
+      if subBallRecovery.stompVelocity>0 and rightDistance>=128 then stompEscapeDirection='P1 Right'
+      elseif subBallRecovery.stompVelocity<0 and leftDistance>=128 then stompEscapeDirection='P1 Left' end
+     end
     end
     stompEscapeLast=n
     set(stompEscapeDirection,1)
     local ownHeight=s16(proc1+0x200)-s16(a+0xb0)
     if earlyStompEvade then
-     if ownHeight>0 then stompJumped=true end
-     if ownHeight==0 and not stompJumped then set('P1 Up',1) end
+     if subBallRecovery.kintaroStompRefresh and target==17 then
+      -- An older offensive jump is not an escape jump requested this phase.
+      if ownHeight>0 and subBallRecovery.stompJumpRequested then stompJumped=true end
+      if ownHeight==0 and not stompJumped then
+       set('P1 Up',1);subBallRecovery.stompJumpRequested=true
+      end
+     else
+      if ownHeight>0 then stompJumped=true end
+      if ownHeight==0 and not stompJumped then set('P1 Up',1) end
+     end
     end
     stompEscapeLog:write(string.format('%d,%d,%d,%d,%d,%d,%d,%d,%s,%d,%d,%d,%d\n',
      n,x1,x2,enemyGround-enemyY,leftEdge,rightEdge,leftDistance,rightDistance,

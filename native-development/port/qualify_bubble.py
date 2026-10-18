@@ -110,7 +110,9 @@ def qualify(name,side,victim,negative=False):
         expected_body=[g for g in performer for _ in range(3)]+[performer[-1]]*(retire-33)
         expected_body += [g for g in salute for _ in range(4)]
         assert [int(r[f'p{side}shape'],16) for r in running]==expected_body
-        root=symbols['ks_kano_anitab1' if victim==17 else 'lk_anitab1']
+        assert victim in (*range(12),17,18)
+        root=read(symbols['character_anitabs1']+victim*32)
+        assert 0xff800000<=root<=0xffffffff
         address=read(root+0x23*32);stumble=[]
         for i in range(64):
             value=read(address+i*32)

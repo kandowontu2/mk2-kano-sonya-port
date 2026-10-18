@@ -34,6 +34,10 @@ It is rejected as an improvement. Latest local unit checkpoint is433 cases.
 Adaptive airborne timing then completed cleanly with35 earlier-timed requests,
 best boss HP36 and no native round wins. It also failed to improve the result.
 Latest full local unit checkpoint is434 cases. No emulator remains.
+The opt-in stomp-refresh controller fixed an older-jump tracking error:12/12
+observed old-air/ground/new-Up cases reached fresh airtime. Its terminal trial
+still had no boss round wins, best boss HP60.438 local unit cases pass; no
+native gameplay/ROM change or campaign-clear claim follows from that fix.
 Do not infer a win from requests, damage windows, or individual HP minima.
 
 Public main was verified at e602369e41d91cc5d23df4aefabdf42c55af8267 with

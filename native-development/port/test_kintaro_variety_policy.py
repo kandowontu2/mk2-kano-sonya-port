@@ -45,5 +45,21 @@ class VarietyPolicyTests(unittest.TestCase):
         self.assertEqual([air_attack_age(d) for d in (0,116,160,192,260)],[10,10,20,28,28])
         with self.assertRaises(AssertionError):air_attack_age(-1)
 
+    def test_stomp_refresh_does_not_count_an_older_airborne_attack(self):
+        source=(Path(__file__).parent/'diagnostics/campaign_probe.lua').read_text()
+        branch=source.split('if subBallRecovery.kintaroStompRefresh and target==17 then',1)[1].split('else',1)[0]
+        self.assertIn('ownHeight>0 and subBallRecovery.stompJumpRequested',branch)
+        self.assertIn('ownHeight==0 and not stompJumped',branch)
+        self.assertIn("set('P1 Up',1);subBallRecovery.stompJumpRequested=true",branch)
+        self.assertIn('stompEscapeLast=-1000;subBallRecovery.stompJumpRequested=false',source)
+
+    def test_stomp_momentum_is_opt_in_and_edge_limited(self):
+        source=(Path(__file__).parent/'diagnostics/campaign_probe.lua').read_text()
+        branch=source.split('if subBallRecovery.kintaroStompMomentum and target==17 then',1)[1].split('stompEscapeLast=n',1)[0]
+        self.assertIn('u32(a+0x40)',branch)
+        self.assertIn('stompVelocity>0 and rightDistance>=128',branch)
+        self.assertIn('stompVelocity<0 and leftDistance>=128',branch)
+        self.assertNotIn(':write_u',branch)
+
 
 if __name__=='__main__':unittest.main()

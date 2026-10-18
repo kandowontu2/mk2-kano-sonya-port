@@ -283,7 +283,7 @@ emu.register_frame_done(function()
   if selection<120 then sys['Coin 1']:set_value(selection%30<5 and 1 or 0) end
   if selection>50 then
    -- Dedicated edge slots are not both reachable by wrapping the same way.
-   if morphFinisher or fan or superfreeze or arms or kitkiss or bodysuck or shangburst or raidenburst or laosplit then
+   if os.getenv('KS_FINISHER_VICTIM_OVERRIDE')=='1' or morphFinisher or fan or superfreeze or arms or kitkiss or bodysuck or shangburst or raidenburst or laosplit then
     for _,item in ipairs({{c1,target1,'P1 '},{c2,target2,'P2 '}}) do
      if item[1]~=item[2] then
       local direction=nextDirection(item[1],item[2])

@@ -50,6 +50,11 @@ for name in sys.argv[1:]:
         verify_morph(run,active,actor)
     assert any(row['death']=='65535' and int(row['frame'])<selection for row in rows)
     victim=(1 if '--stock-victim' in args or (kind=='baby' and '--own-victim' not in args) else 35-actor)
+    overrides=[int(arg.split('=',1)[1]) for arg in args if arg.startswith('--finisher-victim=')]
+    assert len(overrides)<=1
+    if overrides:
+        assert kind in ('extract','laser','kiss','bubble') and not morphed
+        victim=overrides[0];assert victim in (*range(12),17,18)
     fresh=[row for row in rows if int(row['frame'])>=start]
     assert len(fresh)==600
     assert [int(row['frame']) for row in fresh]==list(range(start,start+600))
